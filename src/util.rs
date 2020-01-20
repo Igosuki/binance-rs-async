@@ -1,4 +1,4 @@
-use errors::*;
+use crate::errors::*;
 use std::collections::BTreeMap;
 use std::time::{SystemTime, UNIX_EPOCH};
 use serde_json::Value;
@@ -35,12 +35,12 @@ pub fn build_signed_request(mut parameters: BTreeMap<String, String>, recv_windo
     }
 }
 
-pub fn to_i64(v: &Value) -> i64 { 
-    v.as_i64().unwrap() 
+pub fn to_i64(v: &Value) -> i64 {
+    v.as_i64().unwrap()
 }
 
-pub fn to_f64(v: &Value) -> f64 { 
-    v.as_str().unwrap().parse().unwrap() 
+pub fn to_f64(v: &Value) -> f64 {
+    v.as_str().unwrap().parse().unwrap()
 }
 
 fn get_timestamp() -> Result<u64> {

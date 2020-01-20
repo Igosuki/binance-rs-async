@@ -1,7 +1,7 @@
-use util::*;
-use model::*;
-use client::*;
-use errors::*;
+use crate::util::*;
+use crate::model::*;
+use crate::client::*;
+use crate::errors::*;
 use std::collections::BTreeMap;
 use serde_json::from_str;
 
@@ -35,24 +35,24 @@ struct OrderRequest {
 
 impl Account {
     // Account Information
-    pub fn get_account(&self) -> Result<AccountInformation> {
+    pub async fn get_account(&self) -> Result<AccountInformation> {
         let parameters: BTreeMap<String, String> = BTreeMap::new();
 
         let request = build_signed_request(parameters, self.recv_window)?;
-        let data = self.client.get_signed("/api/v3/account", &request)?;
+        let data = self.client.get_signed("/api/v3/account", &request).await?;
         let account_info: AccountInformation = from_str(data.as_str())?;
 
         Ok(account_info)
     }
 
     // Balance for ONE Asset
-    pub fn get_balance<S>(&self, asset: S) -> Result<Balance>
+    pub async fn get_balance<S>(&self, asset: S) -> Result<Balance>
         where S: Into<String>
     {
-        match self.get_account() {
+        match self.get_account().await {
             Ok(account) => {
                 let cmp_asset = asset.into();
-                for balance in account.balances {                    
+                for balance in account.balances {
                     if balance.asset == cmp_asset {
                         return Ok(balance);
                     }
@@ -64,32 +64,32 @@ impl Account {
     }
 
     // Current open orders for ONE symbol
-    pub fn get_open_orders<S>(&self, symbol: S) -> Result<Vec<Order>>
+    pub async fn get_open_orders<S>(&self, symbol: S) -> Result<Vec<Order>>
         where S: Into<String>
     {
         let mut parameters: BTreeMap<String, String> = BTreeMap::new();
         parameters.insert("symbol".into(), symbol.into());
 
         let request = build_signed_request(parameters, self.recv_window)?;
-        let data = self.client.get_signed("/api/v3/openOrders", &request)?;
+        let data = self.client.get_signed("/api/v3/openOrders", &request).await?;
         let order: Vec<Order> = from_str(data.as_str())?;
 
         Ok(order)
     }
 
     // All current open orders
-    pub fn get_all_open_orders(&self) -> Result<Vec<Order>> {
+    pub async fn get_all_open_orders(&self) -> Result<Vec<Order>> {
         let parameters: BTreeMap<String, String> = BTreeMap::new();
 
         let request = build_signed_request(parameters, self.recv_window)?;
-        let data = self.client.get_signed("/api/v3/openOrders", &request)?;
+        let data = self.client.get_signed("/api/v3/openOrders", &request).await?;
         let order: Vec<Order> = from_str(data.as_str())?;
 
         Ok(order)
     }
 
     // Check an order's status
-    pub fn order_status<S>(&self, symbol: S, order_id: u64) -> Result<Order>
+    pub async fn order_status<S>(&self, symbol: S, order_id: u64) -> Result<Order>
         where S: Into<String>
     {
         let mut parameters: BTreeMap<String, String> = BTreeMap::new();
@@ -97,7 +97,7 @@ impl Account {
         parameters.insert("orderId".into(), order_id.to_string());
 
         let request = build_signed_request(parameters, self.recv_window)?;
-        let data = self.client.get_signed(API_V3_ORDER, &request)?;
+        let data = self.client.get_signed(API_V3_ORDER, &request).await?;
         let order: Order = from_str(data.as_str())?;
 
         Ok(order)
@@ -106,7 +106,7 @@ impl Account {
     /// Place a test status order
     ///
     /// This order is sandboxed: it is validated, but not sent to the matching engine.
-    pub fn test_order_status<S>(&self, symbol: S, order_id: u64) -> Result<()>
+    pub async fn test_order_status<S>(&self, symbol: S, order_id: u64) -> Result<()>
         where S: Into<String>
     {
         let mut parameters: BTreeMap<String, String> = BTreeMap::new();
@@ -114,14 +114,14 @@ impl Account {
         parameters.insert("orderId".into(), order_id.to_string());
 
         let request = build_signed_request(parameters, self.recv_window)?;
-        let data = self.client.get_signed(API_V3_ORDER_TEST, &request)?;
+        let data = self.client.get_signed(API_V3_ORDER_TEST, &request).await?;
         let _: TestResponse = from_str(data.as_str())?;
 
         Ok(())
     }
 
     // Place a LIMIT order - BUY
-    pub fn limit_buy<S, F>(&self, symbol: S, qty: F, price: f64) -> Result<Transaction>
+    pub async fn limit_buy<S, F>(&self, symbol: S, qty: F, price: f64) -> Result<Transaction>
         where S: Into<String>, F: Into<f64>
     {
         let buy: OrderRequest = OrderRequest {
@@ -134,7 +134,7 @@ impl Account {
         };
         let order = self.build_order(buy);
         let request = build_signed_request(order, self.recv_window)?;
-        let data = self.client.post_signed(API_V3_ORDER, &request)?;
+        let data = self.client.post_signed(API_V3_ORDER, &request).await?;
         let transaction: Transaction = from_str(data.as_str())?;
 
         Ok(transaction)
@@ -143,7 +143,7 @@ impl Account {
     /// Place a test limit order - BUY
     ///
     /// This order is sandboxed: it is validated, but not sent to the matching engine.
-    pub fn test_limit_buy<S, F>(&self, symbol: S, qty: F, price: f64) -> Result<()>
+    pub async fn test_limit_buy<S, F>(&self, symbol: S, qty: F, price: f64) -> Result<()>
         where S: Into<String>, F: Into<f64>
     {
         let buy: OrderRequest = OrderRequest {
@@ -156,14 +156,14 @@ impl Account {
         };
         let order = self.build_order(buy);
         let request = build_signed_request(order, self.recv_window)?;
-        let data = self.client.post_signed(API_V3_ORDER_TEST, &request)?;
+        let data = self.client.post_signed(API_V3_ORDER_TEST, &request).await?;
         let _: TestResponse = from_str(data.as_str())?;
 
         Ok(())
     }
 
     // Place a LIMIT order - SELL
-    pub fn limit_sell<S, F>(&self, symbol: S, qty: F, price: f64) -> Result<Transaction>
+    pub async fn limit_sell<S, F>(&self, symbol: S, qty: F, price: f64) -> Result<Transaction>
         where S: Into<String>, F: Into<f64>
     {
         let sell: OrderRequest = OrderRequest {
@@ -176,7 +176,7 @@ impl Account {
         };
         let order = self.build_order(sell);
         let request = build_signed_request(order, self.recv_window)?;
-        let data = self.client.post_signed(API_V3_ORDER, &request)?;
+        let data = self.client.post_signed(API_V3_ORDER, &request).await?;
         let transaction: Transaction = from_str(data.as_str())?;
 
         Ok(transaction)
@@ -185,7 +185,7 @@ impl Account {
     /// Place a test LIMIT order - SELL
     ///
     /// This order is sandboxed: it is validated, but not sent to the matching engine.
-    pub fn test_limit_sell<S, F>(&self, symbol: S, qty: F, price: f64) -> Result<()>
+    pub async fn test_limit_sell<S, F>(&self, symbol: S, qty: F, price: f64) -> Result<()>
         where S: Into<String>, F: Into<f64>
     {
         let sell: OrderRequest = OrderRequest {
@@ -198,14 +198,14 @@ impl Account {
         };
         let order = self.build_order(sell);
         let request = build_signed_request(order, self.recv_window)?;
-        let data = self.client.post_signed(API_V3_ORDER_TEST, &request)?;
+        let data = self.client.post_signed(API_V3_ORDER_TEST, &request).await?;
         let _: TestResponse = from_str(data.as_str())?;
 
         Ok(())
     }
 
     // Place a MARKET order - BUY
-    pub fn market_buy<S, F>(&self, symbol: S, qty: F) -> Result<Transaction>
+    pub async fn market_buy<S, F>(&self, symbol: S, qty: F) -> Result<Transaction>
         where S: Into<String>, F: Into<f64>
     {
         let buy: OrderRequest = OrderRequest {
@@ -218,7 +218,7 @@ impl Account {
         };
         let order = self.build_order(buy);
         let request = build_signed_request(order, self.recv_window)?;
-        let data = self.client.post_signed(API_V3_ORDER, &request)?;
+        let data = self.client.post_signed(API_V3_ORDER, &request).await?;
         let transaction: Transaction = from_str(data.as_str())?;
 
         Ok(transaction)
@@ -227,7 +227,7 @@ impl Account {
     /// Place a test MARKET order - BUY
     ///
     /// This order is sandboxed: it is validated, but not sent to the matching engine.
-    pub fn test_market_buy<S, F>(&self, symbol: S, qty: F) -> Result<()>
+    pub async fn test_market_buy<S, F>(&self, symbol: S, qty: F) -> Result<()>
         where S: Into<String>, F: Into<f64>
     {
         let buy: OrderRequest = OrderRequest {
@@ -240,14 +240,14 @@ impl Account {
         };
         let order = self.build_order(buy);
         let request = build_signed_request(order, self.recv_window)?;
-        let data = self.client.post_signed(API_V3_ORDER_TEST, &request)?;
+        let data = self.client.post_signed(API_V3_ORDER_TEST, &request).await?;
         let _: TestResponse = from_str(data.as_str())?;
 
         Ok(())
     }
 
     // Place a MARKET order - SELL
-    pub fn market_sell<S, F>(&self, symbol: S, qty: F) -> Result<Transaction>
+    pub async fn market_sell<S, F>(&self, symbol: S, qty: F) -> Result<Transaction>
         where S: Into<String>, F: Into<f64>
     {
         let sell: OrderRequest = OrderRequest {
@@ -260,7 +260,7 @@ impl Account {
         };
         let order = self.build_order(sell);
         let request = build_signed_request(order, self.recv_window)?;
-        let data = self.client.post_signed(API_V3_ORDER, &request)?;
+        let data = self.client.post_signed(API_V3_ORDER, &request).await?;
         let transaction: Transaction = from_str(data.as_str())?;
 
         Ok(transaction)
@@ -269,7 +269,7 @@ impl Account {
     /// Place a test MARKET order - SELL
     ///
     /// This order is sandboxed: it is validated, but not sent to the matching engine.
-    pub fn test_market_sell<S, F>(&self, symbol: S, qty: F) -> Result<()>
+    pub async fn test_market_sell<S, F>(&self, symbol: S, qty: F) -> Result<()>
         where S: Into<String>, F: Into<f64>
     {
         let sell: OrderRequest = OrderRequest {
@@ -282,14 +282,14 @@ impl Account {
         };
         let order = self.build_order(sell);
         let request = build_signed_request(order, self.recv_window)?;
-        let data = self.client.post_signed(API_V3_ORDER_TEST, &request)?;
+        let data = self.client.post_signed(API_V3_ORDER_TEST, &request).await?;
         let _: TestResponse = from_str(data.as_str())?;
 
         Ok(())
     }
 
     // Check an order's status
-    pub fn cancel_order<S>(&self, symbol: S, order_id: u64) -> Result<OrderCanceled>
+    pub async fn cancel_order<S>(&self, symbol: S, order_id: u64) -> Result<OrderCanceled>
         where S: Into<String>
     {
         let mut parameters: BTreeMap<String, String> = BTreeMap::new();
@@ -297,7 +297,7 @@ impl Account {
         parameters.insert("orderId".into(), order_id.to_string());
 
         let request = build_signed_request(parameters, self.recv_window)?;
-        let data = self.client.delete_signed(API_V3_ORDER, &request)?;
+        let data = self.client.delete_signed(API_V3_ORDER, &request).await?;
         let order_canceled: OrderCanceled = from_str(data.as_str())?;
 
         Ok(order_canceled)
@@ -306,7 +306,7 @@ impl Account {
     /// Place a test cancel order
     ///
     /// This order is sandboxed: it is validated, but not sent to the matching engine.
-    pub fn test_cancel_order<S>(&self, symbol: S, order_id: u64) -> Result<()>
+    pub async fn test_cancel_order<S>(&self, symbol: S, order_id: u64) -> Result<()>
         where S: Into<String>
     {
         let mut parameters: BTreeMap<String, String> = BTreeMap::new();
@@ -314,21 +314,21 @@ impl Account {
         parameters.insert("orderId".into(), order_id.to_string());
 
         let request = build_signed_request(parameters, self.recv_window)?;
-        let data = self.client.delete_signed(API_V3_ORDER_TEST, &request)?;
+        let data = self.client.delete_signed(API_V3_ORDER_TEST, &request).await?;
         let _: TestResponse = from_str(data.as_str())?;
 
         Ok(())
     }
 
     // Trade history
-    pub fn trade_history<S>(&self, symbol: S) -> Result<Vec<TradeHistory>>
+    pub async fn trade_history<S>(&self, symbol: S) -> Result<Vec<TradeHistory>>
         where S: Into<String>
     {
         let mut parameters: BTreeMap<String, String> = BTreeMap::new();
         parameters.insert("symbol".into(), symbol.into());
 
         let request = build_signed_request(parameters, self.recv_window)?;
-        let data = self.client.get_signed("/api/v3/myTrades", &request)?;
+        let data = self.client.get_signed("/api/v3/myTrades", &request).await?;
         let trade_history: Vec<TradeHistory> = from_str(data.as_str())?;
 
         Ok(trade_history)

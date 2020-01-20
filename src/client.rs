@@ -1,10 +1,9 @@
 use hex::encode as hex_encode;
-use errors::*;
+use crate::errors::*;
 use reqwest;
 use reqwest::StatusCode;
-use reqwest::blocking::Response;
+use reqwest::Response;
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue, USER_AGENT, CONTENT_TYPE};
-use std::io::Read;
 use ring::hmac;
 
 static API1_HOST: &'static str = "https://www.binance.com";
@@ -23,88 +22,88 @@ impl Client {
         }
     }
 
-    pub fn get_signed(&self, endpoint: &str, request: &str) -> Result<String> {
+    pub async fn get_signed(&self, endpoint: &str, request: &str) -> Result<String> {
         let url = self.sign_request(endpoint, request);
-        let client = reqwest::blocking::Client::new();
+        let client = reqwest::Client::new();
         let response = client
             .get(url.as_str())
             .headers(self.build_headers(true)?)
-            .send()?;
+            .send().await?;
 
-        self.handler(response)
+        self.handler(response).await
     }
 
-    pub fn post_signed(&self, endpoint: &str, request: &str) -> Result<String> {
+    pub async fn post_signed(&self, endpoint: &str, request: &str) -> Result<String> {
         let url = self.sign_request(endpoint, request);
-        let client = reqwest::blocking::Client::new();
+        let client = reqwest::Client::new();
         let response = client
             .post(url.as_str())
             .headers(self.build_headers(true)?)
-            .send()?;
+            .send().await?;
 
-        self.handler(response)
+        self.handler(response).await
     }
 
-    pub fn delete_signed(&self, endpoint: &str, request: &str) -> Result<String> {
+    pub async fn delete_signed(&self, endpoint: &str, request: &str) -> Result<String> {
         let url = self.sign_request(endpoint, request);
-        let client = reqwest::blocking::Client::new();
+        let client = reqwest::Client::new();
         let response = client
             .delete(url.as_str())
             .headers(self.build_headers(true)?)
-            .send()?;
+            .send().await?;
 
-        self.handler(response)
+        self.handler(response).await
     }
 
-    pub fn get(&self, endpoint: &str, request: &str) -> Result<String> {
+    pub async fn get(&self, endpoint: &str, request: &str) -> Result<String> {
         let mut url: String = format!("{}{}", API1_HOST, endpoint);
         if !request.is_empty() {
             url.push_str(format!("?{}", request).as_str());
         }
 
-        let response = reqwest::blocking::get(url.as_str())?;
+        let response = reqwest::get(url.as_str()).await?;
 
-        self.handler(response)
+        self.handler(response).await
     }
 
-    pub fn post(&self, endpoint: &str) -> Result<String> {
+    pub async fn post(&self, endpoint: &str) -> Result<String> {
         let url: String = format!("{}{}", API1_HOST, endpoint);
 
-        let client = reqwest::blocking::Client::new();
+        let client = reqwest::Client::new();
         let response = client
             .post(url.as_str())
             .headers(self.build_headers(false)?)
-            .send()?;
+            .send().await?;
 
-        self.handler(response)
+        self.handler(response).await
     }
 
-    pub fn put(&self, endpoint: &str, listen_key: &str) -> Result<String> {
+    pub async fn put(&self, endpoint: &str, listen_key: &str) -> Result<String> {
         let url: String = format!("{}{}", API1_HOST, endpoint);
         let data: String = format!("listenKey={}", listen_key);
 
-        let client = reqwest::blocking::Client::new();
+        let client = reqwest::Client::new();
         let response = client
             .put(url.as_str())
             .headers(self.build_headers(false)?)
             .body(data)
-            .send()?;
+            .send().await?;
 
-        self.handler(response)
+        self.handler(response).await
     }
 
-    pub fn delete(&self, endpoint: &str, listen_key: &str) -> Result<String> {
+    pub async fn delete(&self, endpoint: &str, listen_key: &str) -> Result<String> {
         let url: String = format!("{}{}", API1_HOST, endpoint);
         let data: String = format!("listenKey={}", listen_key);
 
-        let client = reqwest::blocking::Client::new();
+        let client = reqwest::Client::new();
         let response = client
             .delete(url.as_str())
             .headers(self.build_headers(false)?)
             .body(data)
-            .send()?;
+            .send().await?;
 
-        self.handler(response)
+        self.handler(response).await
     }
 
     // Request must be signed
@@ -130,12 +129,12 @@ impl Client {
         Ok(custon_headers)
     }
 
-    fn handler(&self, mut response: Response) -> Result<String> {
+    async fn handler(&self, response: Response) -> Result<String> {
         match response.status() {
             StatusCode::OK => {
-                let mut body = String::new();
-                response.read_to_string(&mut body)?;
-                Ok(body)
+                let body = response.bytes().await?;
+                let result = std::str::from_utf8(&body);
+                Ok(result?.to_string())
             }
             StatusCode::INTERNAL_SERVER_ERROR => {
                 bail!("Internal Server Error");
@@ -147,7 +146,7 @@ impl Client {
                 bail!("Unauthorized");
             }
             StatusCode::BAD_REQUEST => {
-                let error: BinanceContentError = response.json()?;
+                let error: BinanceContentError = response.json().await?;
 
                 Err(ErrorKind::BinanceError(error).into())
             }

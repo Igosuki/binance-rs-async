@@ -12,7 +12,7 @@ pub struct BinanceContentError {
     pub msg: String,
 
     #[serde(flatten)]
-    extra: HashMap<String, Value>,    
+    extra: HashMap<String, Value>,
 }
 
 error_chain! {
@@ -29,5 +29,6 @@ error_chain! {
         Json(serde_json::Error);
         Tungstenite(tungstenite::Error);
         TimestampError(std::time::SystemTimeError);
+        UTF8Err(std::str::Utf8Error);
     }
 }
