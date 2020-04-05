@@ -1,9 +1,7 @@
 # binance-rs-async
 
 Unofficial Rust Library for the [Binance API](https://github.com/binance-exchange/binance-official-api-docs)
-This is a fork of binance-rs, with async std, with the latest Margin API implemented 
-
-[Documentation](https://docs.rs/crate/binance_async/)
+This is a fork of [binance-rs](https://github.com/wisespace-io/binance-rs), with async std, with the latest Margin API implemented 
 
 ## Risk Warning
 
