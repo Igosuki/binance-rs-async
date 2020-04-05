@@ -94,12 +94,12 @@ impl Margin {
         self.client.post_signed_p(SAPI_V1_MARGIN_REPAY, repays_query, self.recv_window).await
     }
 
-    // // Get margin account details
-    // pub async fn details(&self) -> Result<MarginAccountDetails>
-    // {
-    //     let q : Option<PairQuery> = None;
-    //     self.client.get_signed_p(SAPI_V1_MARGIN_ACCOUNT, q).await?
-    // }
+    // Get margin account details
+    pub async fn details(&self) -> Result<MarginAccountDetails>
+    {
+        let q : Option<PairQuery> = None;
+        self.client.get_signed_p(SAPI_V1_MARGIN_ACCOUNT, q).await
+    }
 
     // Get asset details
     pub async fn asset<S>(&self, asset: S) -> Result<AssetDetails>

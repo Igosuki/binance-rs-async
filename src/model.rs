@@ -699,6 +699,8 @@ pub struct UserAsset {
     pub netAsset: f64,
 }
 
+pub type UserAssets = Vec<UserAsset>;
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct MarginAccountDetails {
@@ -709,7 +711,7 @@ pub struct MarginAccountDetails {
     pub total_net_asset_of_btc: String,
     pub trade_enabled: bool,
     pub transfer_enabled: bool,
-    pub user_assets: Vec<UserAsset>,
+    pub user_assets: UserAssets,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
