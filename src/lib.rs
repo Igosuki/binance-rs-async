@@ -20,6 +20,8 @@ extern crate url;
 #[macro_use]
 extern crate serde_derive;
 
+extern crate serde_qs as qs;
+
 mod util;
 mod client;
 pub mod errors;
@@ -32,3 +34,4 @@ pub mod account;
 pub mod market;
 pub mod userstream;
 pub mod websockets;
+pub mod margin;

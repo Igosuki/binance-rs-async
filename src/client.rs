@@ -1,10 +1,14 @@
 use hex::encode as hex_encode;
-use crate::errors::*;
 use reqwest;
 use reqwest::StatusCode;
 use reqwest::Response;
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue, USER_AGENT, CONTENT_TYPE};
 use ring::hmac;
+use serde_json::from_str;
+
+use crate::errors::*;
+use crate::util::{build_signed_request_p, build_request_p};
+use serde::de;
 
 static API1_HOST: &'static str = "https://www.binance.com";
 
@@ -33,6 +37,19 @@ impl Client {
         self.handler(response).await
     }
 
+    pub async fn get_signed_p<T : de::DeserializeOwned, P: serde::Serialize>(&self, endpoint: &str, payload: Option<P>) -> Result<T>
+    {
+        let req = if let Some(p) = payload {
+            build_request_p(p)?
+        } else {
+            String::new()
+        };
+        let string = self.get_signed(endpoint, &req).await?;
+        let data: &str = string.as_str();
+        let t = from_str(data.clone())?;
+        Ok(t)
+    }
+
     pub async fn post_signed(&self, endpoint: &str, request: &str) -> Result<String> {
         let url = self.sign_request(endpoint, request);
         let client = reqwest::Client::new();
@@ -42,6 +59,24 @@ impl Client {
             .send().await?;
 
         self.handler(response).await
+    }
+
+    pub async fn post_signed_p<T : de::DeserializeOwned, P: serde::Serialize>(&self, endpoint: &str, payload: P, recv_window: u64) -> Result<T>
+    {
+        let request = build_signed_request_p(payload, recv_window)?;
+        let string = self.post_signed(endpoint, &request).await?;
+        let data: &str = string.as_str();
+        let t = from_str(data.clone())?;
+        Ok(t)
+    }
+
+    pub async fn delete_signed_p<T : de::DeserializeOwned, P: serde::Serialize>(&self, endpoint: &str, payload: P, recv_window: u64) -> Result<T>
+    {
+        let request = build_signed_request_p(payload, recv_window)?;
+        let string = self.delete_signed(endpoint, &request).await?;
+        let data: &str = string.as_str();
+        let t = from_str(data.clone())?;
+        Ok(t)
     }
 
     pub async fn delete_signed(&self, endpoint: &str, request: &str) -> Result<String> {

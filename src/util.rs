@@ -14,6 +14,11 @@ pub fn build_request(parameters: &BTreeMap<String, String>) -> String {
     request
 }
 
+pub fn build_request_p<S>(payload: S) -> Result<String>
+    where S: serde::Serialize {
+    Ok(qs::to_string(&payload)?)
+}
+
 pub fn build_signed_request(mut parameters: BTreeMap<String, String>, recv_window: u64) -> Result<String> {
     if recv_window > 0 {
         parameters.insert("recvWindow".into(), recv_window.to_string());
@@ -32,6 +37,31 @@ pub fn build_signed_request(mut parameters: BTreeMap<String, String>, recv_windo
         Ok(request)
     } else {
          bail!("Failed to get timestamp")
+    }
+}
+
+pub fn build_signed_request_p<S>(payload: S, recv_window: u64) -> Result<String>
+where S: serde::Serialize {
+    let query_string = qs::to_string(&payload)?;
+    let mut parameters: BTreeMap<String, String> = BTreeMap::new();
+
+    if recv_window > 0 {
+        parameters.insert("recvWindow".into(), recv_window.to_string());
+    }
+
+    if let Ok(timestamp) = get_timestamp() {
+        parameters.insert("timestamp".into(), timestamp.to_string());
+
+        let mut request = query_string.clone();
+        for (key, value) in &parameters {
+            let param = format!("&{}={}", key, value);
+            request.push_str(param.as_ref());
+        }
+        request.pop(); // remove last &
+
+        Ok(request)
+    } else {
+        bail!("Failed to get timestamp")
     }
 }
 

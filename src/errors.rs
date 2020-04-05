@@ -27,6 +27,7 @@ error_chain! {
         ParseFloatError(std::num::ParseFloatError);
         UrlParserError(url::ParseError);
         Json(serde_json::Error);
+        Qs(serde_qs::Error);
         Tungstenite(tungstenite::Error);
         TimestampError(std::time::SystemTimeError);
         UTF8Err(std::str::Utf8Error);
