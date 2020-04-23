@@ -14,20 +14,20 @@ fn main() {
     last_price();
 }
 
-fn user_stream() {
+async fn user_stream() {
     let api_key_user = Some("YOUR_API_KEY".into());
     let user_stream: UserStream = Binance::new(api_key_user.clone(), None);
 
-    if let Ok(answer) = user_stream.start() {
+    if let Ok(answer) = user_stream.start().await {
         println!("Data Stream Started ...");
         let listen_key = answer.listen_key;
 
-        match user_stream.keep_alive(&listen_key) {
+        match user_stream.keep_alive(&listen_key).await {
             Ok(msg) => println!("Keepalive user data stream: {:?}", msg),
             Err(e) => println!("Error: {}", e),
         }
 
-        match user_stream.close(&listen_key) {
+        match user_stream.close(&listen_key).await {
             Ok(msg) => println!("Close user data stream: {:?}", msg),
             Err(e) => println!("Error: {}", e),
         }
@@ -36,12 +36,12 @@ fn user_stream() {
     }
 }
 
-fn user_stream_websocket() {
+async fn user_stream_websocket() {
     let keep_running = AtomicBool::new(true); // Used to control the event loop
     let api_key_user = Some("YOUR_KEY".into());
     let user_stream: UserStream = Binance::new(api_key_user, None);
 
-    if let Ok(answer) = user_stream.start() {
+    if let Ok(answer) = user_stream.start().await {
         let listen_key = answer.listen_key;
 
         let mut web_socket: WebSockets = WebSockets::new(|event: WebsocketEvent| {
@@ -53,13 +53,13 @@ fn user_stream_websocket() {
                             balance.asset, balance.free, balance.locked
                         );
                     }
-                },
+                }
                 WebsocketEvent::OrderTrade(trade) => {
                     println!(
                         "Symbol: {}, Side: {}, Price: {}, Execution Type: {}",
                         trade.symbol, trade.side, trade.price, trade.execution_type
                     );
-                },
+                }
                 _ => (),
             };
 
@@ -74,7 +74,7 @@ fn user_stream_websocket() {
                 }
             }
         }
-        user_stream.close(&listen_key).unwrap();
+        user_stream.close(&listen_key).await.unwrap();
         web_socket.disconnect().unwrap();
         println!("Userstrem closed and disconnected");
     } else {
@@ -92,19 +92,19 @@ fn market_websocket() {
                     "Symbol: {}, price: {}, qty: {}",
                     trade.symbol, trade.price, trade.qty
                 );
-            },
+            }
             WebsocketEvent::DepthOrderBook(depth_order_book) => {
                 println!(
                     "Symbol: {}, Bids: {:?}, Ask: {:?}",
                     depth_order_book.symbol, depth_order_book.bids, depth_order_book.asks
                 );
-            },
+            }
             WebsocketEvent::OrderBook(order_book) => {
                 println!(
                     "last_update_id: {}, Bids: {:?}, Ask: {:?}",
                     order_book.last_update_id, order_book.bids, order_book.asks
                 );
-            },
+            }
             _ => (),
         };
 
@@ -114,8 +114,8 @@ fn market_websocket() {
     web_socket.connect(&agg_trade).unwrap(); // check error
     if let Err(e) = web_socket.event_loop(&keep_running) {
         match e {
-            err => { 
-               println!("Error: {}", err);
+            err => {
+                println!("Error: {}", err);
             }
         }
     }
@@ -135,7 +135,7 @@ fn all_trades_websocket() {
                         tick_event.symbol, tick_event.best_bid, tick_event.best_bid_qty
                     );
                 }
-            },
+            }
             _ => (),
         };
 
@@ -146,7 +146,7 @@ fn all_trades_websocket() {
     if let Err(e) = web_socket.event_loop(&keep_running) {
         match e {
             err => {
-               println!("Error: {}", err);
+                println!("Error: {}", err);
             }
         }
     }
@@ -164,7 +164,7 @@ fn kline_websocket() {
                     "Symbol: {}, high: {}, low: {}",
                     kline_event.kline.symbol, kline_event.kline.low, kline_event.kline.high
                 );
-            },
+            }
             _ => (),
         };
 
@@ -174,8 +174,8 @@ fn kline_websocket() {
     web_socket.connect(&kline).unwrap(); // check error
     if let Err(e) = web_socket.event_loop(&keep_running) {
         match e {
-            err => { 
-               println!("Error: {}", err);
+            err => {
+                println!("Error: {}", err);
             }
         }
     }
@@ -203,7 +203,7 @@ fn last_price() {
                         }
                     }
                 }
-            },
+            }
             _ => (),
         };
 
@@ -214,7 +214,7 @@ fn last_price() {
     if let Err(e) = web_socket.event_loop(&keep_running) {
         match e {
             err => {
-               println!("Error: {}", err);
+                println!("Error: {}", err);
             }
         }
     }
