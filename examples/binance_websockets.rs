@@ -127,28 +127,21 @@ fn all_trades_websocket() {
     let keep_running = AtomicBool::new(true); // Used to control the event loop
     let agg_trade: String = format!("!ticker@arr");
     let mut web_socket: WebSockets = WebSockets::new(|event: WebsocketEvent| {
-        match event {
-            WebsocketEvent::DayTicker(ticker_events) => {
-                for tick_event in ticker_events {
-                    println!(
-                        "Symbol: {}, price: {}, qty: {}",
-                        tick_event.symbol, tick_event.best_bid, tick_event.best_bid_qty
-                    );
-                }
+        if let WebsocketEvent::DayTicker(ticker_events) = event {
+            for tick_event in ticker_events {
+                println!(
+                    "Symbol: {}, price: {}, qty: {}",
+                    tick_event.symbol, tick_event.best_bid, tick_event.best_bid_qty
+                );
             }
-            _ => (),
-        };
+        }
 
         Ok(())
     });
 
     web_socket.connect(&agg_trade).unwrap(); // check error
     if let Err(e) = web_socket.event_loop(&keep_running) {
-        match e {
-            err => {
-                println!("Error: {}", err);
-            }
-        }
+        println!("Error: {}", e);
     }
     web_socket.disconnect().unwrap();
     println!("disconnected");
@@ -158,26 +151,19 @@ fn kline_websocket() {
     let keep_running = AtomicBool::new(true);
     let kline: String = format!("{}", "ethbtc@kline_1m");
     let mut web_socket: WebSockets = WebSockets::new(|event: WebsocketEvent| {
-        match event {
-            WebsocketEvent::Kline(kline_event) => {
-                println!(
-                    "Symbol: {}, high: {}, low: {}",
-                    kline_event.kline.symbol, kline_event.kline.low, kline_event.kline.high
-                );
-            }
-            _ => (),
-        };
+        if let WebsocketEvent::Kline(kline_event) = event {
+            println!(
+                "Symbol: {}, high: {}, low: {}",
+                kline_event.kline.symbol, kline_event.kline.low, kline_event.kline.high
+            );
+        }
 
         Ok(())
     });
 
     web_socket.connect(&kline).unwrap(); // check error
     if let Err(e) = web_socket.event_loop(&keep_running) {
-        match e {
-            err => {
-                println!("Error: {}", err);
-            }
-        }
+        println!("Error: {}", e);
     }
     web_socket.disconnect().unwrap();
     println!("disconnected");
@@ -185,7 +171,7 @@ fn kline_websocket() {
 
 fn last_price() {
     let keep_running = AtomicBool::new(true);
-    let agg_trade: String = format!("!ticker@arr");
+    let agg_trade: String = "!ticker@arr".to_string();
     let mut btcusdt: f32 = "0".parse().unwrap();
 
     let mut web_socket: WebSockets = WebSockets::new(|event: WebsocketEvent| {
@@ -212,11 +198,7 @@ fn last_price() {
 
     web_socket.connect(&agg_trade).unwrap(); // check error
     if let Err(e) = web_socket.event_loop(&keep_running) {
-        match e {
-            err => {
-                println!("Error: {}", err);
-            }
-        }
+        println!("Error: {}", e);
     }
     web_socket.disconnect().unwrap();
     println!("disconnected");

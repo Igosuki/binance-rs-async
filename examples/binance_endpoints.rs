@@ -43,6 +43,7 @@ async fn general() {
     }
 }
 
+#[allow(dead_code)]
 async fn account() {
     let api_key = Some("YOUR_API_KEY".into());
     let secret_key = Some("YOUR_SECRET_KEY".into());
@@ -101,6 +102,7 @@ async fn account() {
     }
 }
 
+#[allow(dead_code)]
 async fn market_data() {
     let market: Market = Binance::new(None, None);
 

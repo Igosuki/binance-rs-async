@@ -1,16 +1,15 @@
 use hex::encode as hex_encode;
-use reqwest;
-use reqwest::StatusCode;
+use reqwest::header::{HeaderMap, HeaderName, HeaderValue, CONTENT_TYPE, USER_AGENT};
 use reqwest::Response;
-use reqwest::header::{HeaderMap, HeaderName, HeaderValue, USER_AGENT, CONTENT_TYPE};
+use reqwest::StatusCode;
 use ring::hmac;
 use serde_json::from_str;
 
 use crate::errors::*;
-use crate::util::{build_signed_request_p, build_request_p};
+use crate::util::{build_request_p, build_signed_request_p};
 use serde::de;
 
-static API1_HOST: &'static str = "https://www.binance.com";
+static API1_HOST: &str = "https://www.binance.com";
 
 #[derive(Clone)]
 pub struct Client {
@@ -32,13 +31,17 @@ impl Client {
         let response = client
             .get(url.as_str())
             .headers(self.build_headers(true)?)
-            .send().await?;
+            .send()
+            .await?;
 
         self.handler(response).await
     }
 
-    pub async fn get_signed_p<T : de::DeserializeOwned, P: serde::Serialize>(&self, endpoint: &str, payload: Option<P>) -> Result<T>
-    {
+    pub async fn get_signed_p<T: de::DeserializeOwned, P: serde::Serialize>(
+        &self,
+        endpoint: &str,
+        payload: Option<P>,
+    ) -> Result<T> {
         let req = if let Some(p) = payload {
             build_request_p(p)?
         } else {
@@ -46,7 +49,7 @@ impl Client {
         };
         let string = self.get_signed(endpoint, &req).await?;
         let data: &str = string.as_str();
-        let t = from_str(data.clone())?;
+        let t = from_str(data)?;
         Ok(t)
     }
 
@@ -56,26 +59,35 @@ impl Client {
         let response = client
             .post(url.as_str())
             .headers(self.build_headers(true)?)
-            .send().await?;
+            .send()
+            .await?;
 
         self.handler(response).await
     }
 
-    pub async fn post_signed_p<T : de::DeserializeOwned, P: serde::Serialize>(&self, endpoint: &str, payload: P, recv_window: u64) -> Result<T>
-    {
+    pub async fn post_signed_p<T: de::DeserializeOwned, P: serde::Serialize>(
+        &self,
+        endpoint: &str,
+        payload: P,
+        recv_window: u64,
+    ) -> Result<T> {
         let request = build_signed_request_p(payload, recv_window)?;
         let string = self.post_signed(endpoint, &request).await?;
         let data: &str = string.as_str();
-        let t = from_str(data.clone())?;
+        let t = from_str(data)?;
         Ok(t)
     }
 
-    pub async fn delete_signed_p<T : de::DeserializeOwned, P: serde::Serialize>(&self, endpoint: &str, payload: P, recv_window: u64) -> Result<T>
-    {
+    pub async fn delete_signed_p<T: de::DeserializeOwned, P: serde::Serialize>(
+        &self,
+        endpoint: &str,
+        payload: P,
+        recv_window: u64,
+    ) -> Result<T> {
         let request = build_signed_request_p(payload, recv_window)?;
         let string = self.delete_signed(endpoint, &request).await?;
         let data: &str = string.as_str();
-        let t = from_str(data.clone())?;
+        let t = from_str(data)?;
         Ok(t)
     }
 
@@ -85,7 +97,8 @@ impl Client {
         let response = client
             .delete(url.as_str())
             .headers(self.build_headers(true)?)
-            .send().await?;
+            .send()
+            .await?;
 
         self.handler(response).await
     }
@@ -108,7 +121,8 @@ impl Client {
         let response = client
             .post(url.as_str())
             .headers(self.build_headers(false)?)
-            .send().await?;
+            .send()
+            .await?;
 
         self.handler(response).await
     }
@@ -122,7 +136,8 @@ impl Client {
             .put(url.as_str())
             .headers(self.build_headers(false)?)
             .body(data)
-            .send().await?;
+            .send()
+            .await?;
 
         self.handler(response).await
     }
@@ -136,7 +151,8 @@ impl Client {
             .delete(url.as_str())
             .headers(self.build_headers(false)?)
             .body(data)
-            .send().await?;
+            .send()
+            .await?;
 
         self.handler(response).await
     }
@@ -157,9 +173,15 @@ impl Client {
 
         custon_headers.insert(USER_AGENT, HeaderValue::from_static("binance-rs"));
         if content_type {
-            custon_headers.insert(CONTENT_TYPE, HeaderValue::from_static("application/x-www-form-urlencoded"));
+            custon_headers.insert(
+                CONTENT_TYPE,
+                HeaderValue::from_static("application/x-www-form-urlencoded"),
+            );
         }
-        custon_headers.insert(HeaderName::from_static("x-mbx-apikey"), HeaderValue::from_str(self.api_key.as_str())?);
+        custon_headers.insert(
+            HeaderName::from_static("x-mbx-apikey"),
+            HeaderValue::from_str(self.api_key.as_str())?,
+        );
 
         Ok(custon_headers)
     }
@@ -191,4 +213,3 @@ impl Client {
         }
     }
 }
-

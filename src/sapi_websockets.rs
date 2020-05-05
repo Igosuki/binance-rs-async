@@ -1,17 +1,17 @@
-use crate::model::*;
 use crate::errors::*;
-use url::Url;
+use crate::model::*;
 use serde_json::from_str;
+use url::Url;
 
 use std::sync::atomic::{AtomicBool, Ordering};
-use tungstenite::{connect, Message};
-use tungstenite::protocol::WebSocket;
 use tungstenite::client::AutoStream;
 use tungstenite::handshake::client::Response;
+use tungstenite::protocol::WebSocket;
+use tungstenite::{connect, Message};
 
-static WEBSOCKET_URL: &'static str = "wss://stream.binance.com:9443/ws/";
+static WEBSOCKET_URL: &str = "wss://stream.binance.com:9443/ws/";
 
-static KLINE: &'static str = "kline";
+static KLINE: &str = "kline";
 
 pub enum WebsocketEvent {
     SomeEvent(String),
@@ -24,8 +24,8 @@ pub struct WebSockets<'a> {
 
 impl<'a> WebSockets<'a> {
     pub fn new<Callback>(handler: Callback) -> WebSockets<'a>
-        where
-            Callback: FnMut(WebsocketEvent) -> Result<()> + 'a
+    where
+        Callback: FnMut(WebsocketEvent) -> Result<()> + 'a,
     {
         WebSockets {
             socket: None,
@@ -67,9 +67,7 @@ impl<'a> WebSockets<'a> {
                     Message::Text(msg) => {
                         self.handler(WebsocketEvent::SomeEvent(msg.clone()));
                     }
-                    Message::Ping(_) |
-                    Message::Pong(_) |
-                    Message::Binary(_) => {}
+                    Message::Ping(_) | Message::Pong(_) | Message::Binary(_) => {}
                     Message::Close(e) => {
                         bail!(format!("Disconnected {:?}", e));
                     }

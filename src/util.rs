@@ -1,7 +1,7 @@
 use crate::errors::*;
+use serde_json::Value;
 use std::collections::BTreeMap;
 use std::time::{SystemTime, UNIX_EPOCH};
-use serde_json::Value;
 
 pub fn build_request(parameters: &BTreeMap<String, String>) -> String {
     let mut request = String::new();
@@ -15,11 +15,16 @@ pub fn build_request(parameters: &BTreeMap<String, String>) -> String {
 }
 
 pub fn build_request_p<S>(payload: S) -> Result<String>
-    where S: serde::Serialize {
+where
+    S: serde::Serialize,
+{
     Ok(qs::to_string(&payload)?)
 }
 
-pub fn build_signed_request(mut parameters: BTreeMap<String, String>, recv_window: u64) -> Result<String> {
+pub fn build_signed_request(
+    mut parameters: BTreeMap<String, String>,
+    recv_window: u64,
+) -> Result<String> {
     if recv_window > 0 {
         parameters.insert("recvWindow".into(), recv_window.to_string());
     }
@@ -36,12 +41,14 @@ pub fn build_signed_request(mut parameters: BTreeMap<String, String>, recv_windo
 
         Ok(request)
     } else {
-         bail!("Failed to get timestamp")
+        bail!("Failed to get timestamp")
     }
 }
 
 pub fn build_signed_request_p<S>(payload: S, recv_window: u64) -> Result<String>
-where S: serde::Serialize {
+where
+    S: serde::Serialize,
+{
     let query_string = qs::to_string(&payload)?;
     let mut parameters: BTreeMap<String, String> = BTreeMap::new();
 
@@ -52,7 +59,7 @@ where S: serde::Serialize {
     if let Ok(timestamp) = get_timestamp() {
         parameters.insert("timestamp".into(), timestamp.to_string());
 
-        let mut request = query_string.clone();
+        let mut request = query_string;
         for (key, value) in &parameters {
             let param = format!("&{}={}", key, value);
             request.push_str(param.as_ref());

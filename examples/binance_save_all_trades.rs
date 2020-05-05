@@ -1,20 +1,19 @@
-extern crate csv;
 extern crate binance;
+extern crate csv;
 
+use csv::Writer;
 use std::error::Error;
 use std::fs::File;
-use csv::Writer;
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::atomic::AtomicBool;
 
+use binance::model::DayTickerEvent;
 use binance::websockets::*;
-use binance::model::{DayTickerEvent};
 
 fn main() {
     save_all_trades_websocket();
 }
 
-fn save_all_trades_websocket() { 
-
+fn save_all_trades_websocket() {
     struct WebSocketHandler {
         wrt: Writer<File>,
     };
@@ -47,7 +46,7 @@ fn save_all_trades_websocket() {
                 if let Err(error) = web_socket_handler.write_to_file(events) {
                     println!("{}", error);
                 }
-            },
+            }
             _ => (),
         }
 
@@ -58,7 +57,7 @@ fn save_all_trades_websocket() {
     if let Err(e) = web_socket.event_loop(&keep_running) {
         match e {
             err => {
-               println!("Error: {}", err);
+                println!("Error: {}", err);
             }
         }
     }

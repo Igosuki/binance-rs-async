@@ -1,9 +1,9 @@
 use crate::account::*;
-use crate::market::*;
-use crate::general::*;
-use crate::userstream::*;
 use crate::client::*;
-use crate::margin::*;
+use crate::general::*;
+use crate::margin::Margin;
+use crate::market::*;
+use crate::userstream::*;
 
 //#[derive(Clone)]
 pub trait Binance {

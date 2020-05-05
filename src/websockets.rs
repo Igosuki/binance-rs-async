@@ -1,35 +1,35 @@
-use crate::model::*;
 use crate::errors::*;
-use url::Url;
+use crate::model::*;
 use serde_json::from_str;
+use url::Url;
 
 use std::sync::atomic::{AtomicBool, Ordering};
-use tungstenite::{connect, Message};
-use tungstenite::protocol::WebSocket;
 use tungstenite::client::AutoStream;
 use tungstenite::handshake::client::Response;
+use tungstenite::protocol::WebSocket;
+use tungstenite::{connect, Message};
 
-static WEBSOCKET_URL: &'static str = "wss://stream.binance.com:9443/ws/";
+static WEBSOCKET_URL: &str = "wss://stream.binance.com:9443/ws/";
 
-static OUTBOUND_ACCOUNT_INFO: &'static str = "outboundAccountInfo";
-static EXECUTION_REPORT: &'static str = "executionReport";
+static OUTBOUND_ACCOUNT_INFO: &str = "outboundAccountInfo";
+static EXECUTION_REPORT: &str = "executionReport";
 
-static KLINE: &'static str = "kline";
-static AGGREGATED_TRADE: &'static str = "aggTrade";
-static DEPTH_ORDERBOOK : &'static str = "depthUpdate";
-static PARTIAL_ORDERBOOK : &'static str = "lastUpdateId";
+static KLINE: &str = "kline";
+static AGGREGATED_TRADE: &str = "aggTrade";
+static DEPTH_ORDERBOOK: &str = "depthUpdate";
+static PARTIAL_ORDERBOOK: &str = "lastUpdateId";
 
-static DAYTICKER: &'static str = "24hrTicker";
+static DAYTICKER: &str = "24hrTicker";
 
 pub enum WebsocketEvent {
-    AccountUpdate(AccountUpdateEvent),
-    OrderTrade(OrderTradeEvent),
-    Trade(TradesEvent),
-    OrderBook(OrderBook),
+    AccountUpdate(Box<AccountUpdateEvent>),
+    OrderTrade(Box<OrderTradeEvent>),
+    Trade(Box<TradesEvent>),
+    OrderBook(Box<OrderBook>),
     DayTicker(Vec<DayTickerEvent>),
-    Kline(KlineEvent),
-    DepthOrderBook(DepthOrderBookEvent),
-    BookTicker(BookTickerEvent)
+    Kline(Box<KlineEvent>),
+    DepthOrderBook(Box<DepthOrderBookEvent>),
+    BookTicker(Box<BookTickerEvent>),
 }
 
 pub struct WebSockets<'a> {
@@ -40,7 +40,7 @@ pub struct WebSockets<'a> {
 impl<'a> WebSockets<'a> {
     pub fn new<Callback>(handler: Callback) -> WebSockets<'a>
     where
-        Callback: FnMut(WebsocketEvent) -> Result<()> + 'a
+        Callback: FnMut(WebsocketEvent) -> Result<()> + 'a,
     {
         WebSockets {
             socket: None,
@@ -80,40 +80,43 @@ impl<'a> WebSockets<'a> {
 
                 match message {
                     Message::Text(msg) => {
-                        if value["u"] != serde_json::Value::Null && 
-                           value["s"] != serde_json::Value::Null && 
-                           value["b"] != serde_json::Value::Null && 
-                           value["B"] != serde_json::Value::Null &&
-                           value["a"] != serde_json::Value::Null &&
-                           value["A"] != serde_json::Value::Null {
+                        if value["u"] != serde_json::Value::Null
+                            && value["s"] != serde_json::Value::Null
+                            && value["b"] != serde_json::Value::Null
+                            && value["B"] != serde_json::Value::Null
+                            && value["a"] != serde_json::Value::Null
+                            && value["A"] != serde_json::Value::Null
+                        {
                             let book_ticker: BookTickerEvent = from_str(msg.as_str())?;
-                            (self.handler)(WebsocketEvent::BookTicker(book_ticker))?;
+                            (self.handler)(WebsocketEvent::BookTicker(Box::new(book_ticker)))?;
                         } else if msg.find(OUTBOUND_ACCOUNT_INFO) != None {
                             let account_update: AccountUpdateEvent = from_str(msg.as_str())?;
-                            (self.handler)(WebsocketEvent::AccountUpdate(account_update))?;
+                            (self.handler)(WebsocketEvent::AccountUpdate(Box::new(
+                                account_update,
+                            )))?;
                         } else if msg.find(EXECUTION_REPORT) != None {
                             let order_trade: OrderTradeEvent = from_str(msg.as_str())?;
-                            (self.handler)(WebsocketEvent::OrderTrade(order_trade))?;
+                            (self.handler)(WebsocketEvent::OrderTrade(Box::new(order_trade)))?;
                         } else if msg.find(AGGREGATED_TRADE) != None {
                             let trade: TradesEvent = from_str(msg.as_str())?;
-                            (self.handler)(WebsocketEvent::Trade(trade))?;
+                            (self.handler)(WebsocketEvent::Trade(Box::new(trade)))?;
                         } else if msg.find(DAYTICKER) != None {
                             let trades: Vec<DayTickerEvent> = from_str(msg.as_str())?;
                             (self.handler)(WebsocketEvent::DayTicker(trades))?;
                         } else if msg.find(KLINE) != None {
                             let kline: KlineEvent = from_str(msg.as_str())?;
-                            (self.handler)(WebsocketEvent::Kline(kline))?;
+                            (self.handler)(WebsocketEvent::Kline(Box::new(kline)))?;
                         } else if msg.find(PARTIAL_ORDERBOOK) != None {
                             let partial_orderbook: OrderBook = from_str(msg.as_str())?;
-                            (self.handler)(WebsocketEvent::OrderBook(partial_orderbook))?;
+                            (self.handler)(WebsocketEvent::OrderBook(Box::new(partial_orderbook)))?;
                         } else if msg.find(DEPTH_ORDERBOOK) != None {
                             let depth_orderbook: DepthOrderBookEvent = from_str(msg.as_str())?;
-                            (self.handler)(WebsocketEvent::DepthOrderBook(depth_orderbook))?;
+                            (self.handler)(WebsocketEvent::DepthOrderBook(Box::new(
+                                depth_orderbook,
+                            )))?;
                         }
                     }
-                    Message::Ping(_) |
-                    Message::Pong(_) |
-                    Message::Binary(_) => {}
+                    Message::Ping(_) | Message::Pong(_) | Message::Binary(_) => {}
                     Message::Close(e) => {
                         bail!(format!("Disconnected {:?}", e));
                     }
