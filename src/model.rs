@@ -174,7 +174,6 @@ pub struct Bids {
     #[serde(with = "string_or_float")]
     pub qty: f64,
 
-    // Never serialized.
     #[serde(skip)]
     ignore: Vec<String>,
 }
@@ -186,7 +185,6 @@ pub struct Asks {
     #[serde(with = "string_or_float")]
     pub qty: f64,
 
-    // Never serialized.
     #[serde(skip)]
     ignore: Vec<String>,
 }
@@ -692,7 +690,7 @@ pub struct Loan {
 }
 
 /// How long will an order stay alive
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Eq, PartialEq, Debug, Serialize, Deserialize, Clone)]
 pub enum TimeInForce {
     /// Good Till Canceled
     GTC,
@@ -724,6 +722,14 @@ impl Default for OrderSide {
     }
 }
 
+/// Order types, the following restrictions apply
+/// LIMIT_MAKER are LIMIT orders that will be rejected if they would immediately match and trade as a taker.
+/// STOP_LOSS and TAKE_PROFIT will execute a MARKET order when the stopPrice is reached.
+/// Any LIMIT or LIMIT_MAKER type order can be made an iceberg order by sending an icebergQty.
+/// Any order with an icebergQty MUST have timeInForce set to GTC.
+/// MARKET orders using quantity specifies how much a user wants to buy or sell based on the market price.
+/// MARKET orders using quoteOrderQty specifies the amount the user wants to spend (when buying) or receive (when selling) of the quote asset; the correct quantity will be determined based on the market liquidity and quoteOrderQty.
+/// MARKET orders using quoteOrderQty will not break LOT_SIZE filter rules; the order will execute a quantity that will have the notional value as close as possible to quoteOrderQty.
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum OrderType {

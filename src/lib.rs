@@ -3,7 +3,8 @@
     unused_must_use,
     unused_mut,
     unused_imports,
-    unused_import_braces)]
+    unused_import_braces
+)]
 
 #[macro_use]
 extern crate error_chain;
@@ -22,16 +23,16 @@ extern crate serde_derive;
 
 extern crate serde_qs as qs;
 
-mod util;
 mod client;
 pub mod errors;
+mod util;
 
 pub mod model;
 
+pub mod account;
 pub mod api;
 pub mod general;
-pub mod account;
+pub mod margin;
 pub mod market;
 pub mod userstream;
 pub mod websockets;
-pub mod margin;

@@ -46,7 +46,13 @@ pub struct OrderRequest {
 
 impl OrderRequest {
     fn valid(&self) -> Result<()> {
-        Err(ErrorKind::InvalidOrderError("".to_string()).into())
+        if self.iceberg_qty.is_some() && self.time_in_force != Some(TimeInForce::GTC) {
+            return Err(ErrorKind::InvalidOrderError(
+                "Time in force has to be GTC for iceberg orders".to_string(),
+            )
+            .into());
+        }
+        Ok(())
     }
 }
 
@@ -208,7 +214,7 @@ impl Account {
         Ok(tr)
     }
 
-    // Trade history
+    /// Trade history
     pub async fn trade_history<S>(&self, symbol: S) -> Result<Vec<TradeHistory>>
     where
         S: Into<String>,

@@ -29,7 +29,7 @@ pub struct Margin {
 }
 
 impl Margin {
-    // Execute transfer between spot account and margin account.
+    /// Execute transfer between spot account and margin account.
     pub async fn transfer<S, F>(
         &self,
         symbol: S,
@@ -50,7 +50,7 @@ impl Margin {
             .await
     }
 
-    // Apply for a loan.
+    /// Apply for a loan.
     pub async fn loan<S, F>(&self, symbol: S, qty: F) -> Result<TransactionId>
     where
         S: Into<String>,
@@ -65,7 +65,7 @@ impl Margin {
             .await
     }
 
-    // Repay loan for margin account.
+    /// Repay loan for margin account.
     pub async fn repay<S, F>(&self, symbol: S, qty: F) -> Result<TransactionId>
     where
         S: Into<String>,
@@ -80,14 +80,14 @@ impl Margin {
             .await
     }
 
-    // Post a new order for margin account.
+    /// Post a new order for margin account.
     pub async fn trade(&self, margin_order: MarginOrder) -> Result<TransactionId> {
         self.client
             .post_signed_p(SAPI_V1_MARGIN_ORDER, margin_order, self.recv_window)
             .await
     }
 
-    // Cancel an existing order
+    /// Cancel an existing order
     pub async fn cancel_trade<S, F>(
         &self,
         symbol: S,
@@ -114,14 +114,14 @@ impl Margin {
             .await
     }
 
-    // Get existing loan records
+    /// Get existing loan records
     pub async fn loans(&self, loan_query: RecordsQuery) -> Result<RecordsQueryResult<LoanState>> {
         self.client
             .post_signed_p(SAPI_V1_MARGIN_LOAN, loan_query, self.recv_window)
             .await
     }
 
-    // Get existing repay records history
+    /// Get existing repay records history
     pub async fn repays(
         &self,
         repays_query: RecordsQuery,
@@ -131,13 +131,13 @@ impl Margin {
             .await
     }
 
-    // Get margin account details
+    /// Get margin account details
     pub async fn details(&self) -> Result<MarginAccountDetails> {
         let q: Option<PairQuery> = None;
         self.client.get_signed_p(SAPI_V1_MARGIN_ACCOUNT, q).await
     }
 
-    // Get asset details
+    /// Get asset details
     pub async fn asset<S>(&self, asset: S) -> Result<AssetDetails>
     where
         S: Into<String>,
@@ -152,7 +152,7 @@ impl Margin {
             .await
     }
 
-    // Get margin pair market data
+    /// Get margin pair market data
     pub async fn pair<S>(&self, symbol: S) -> Result<PairDetails>
     where
         S: Into<String>,
@@ -167,19 +167,19 @@ impl Margin {
             .await
     }
 
-    // Get all assets details
+    /// Get all assets details
     pub async fn all_assets(&self) -> Result<AllAssets> {
         let q: Option<PairQuery> = None;
         self.client.get_signed_p(SAPI_V1_MARGIN_ALL_ASSETS, q).await
     }
 
-    // Get all pair details
+    /// Get all pair details
     pub async fn all_pairs(&self) -> Result<AllPairs> {
         let q: Option<PairQuery> = None;
         self.client.get_signed_p(SAPI_V1_MARGIN_ALL_PAIRS, q).await
     }
 
-    // Get price index
+    /// Get price index
     pub async fn price_index<S>(&self, symbol: S) -> Result<PriceIndex>
     where
         S: Into<String>,
@@ -194,7 +194,7 @@ impl Margin {
             .await
     }
 
-    // Get transfer history
+    /// Get transfer history
     pub async fn transfers(
         &self,
         transfers_query: RecordsQuery,
@@ -204,7 +204,7 @@ impl Margin {
             .await
     }
 
-    // Get interest history
+    /// Get interest history
     pub async fn interests(
         &self,
         interest_query: RecordsQuery,
@@ -214,7 +214,7 @@ impl Margin {
             .await
     }
 
-    // Get forced liquidation history
+    /// Get forced liquidation history
     pub async fn forced_liquidations(
         &self,
         forced_liquidations_query: RecordsQuery,
@@ -227,14 +227,14 @@ impl Margin {
             .await
     }
 
-    // Get an existing order state
+    /// Get an existing order state
     pub async fn order(&self, margin_order: MarginOrderQuery) -> Result<MarginOrderState> {
         self.client
             .get_signed_p(SAPI_V1_MARGIN_ORDER, Some(margin_order))
             .await
     }
 
-    // Get open orders
+    /// Get open orders
     pub async fn open_orders<S>(&self, symbol: S) -> Result<MarginOrderState>
     where
         S: Into<String>,
@@ -249,7 +249,7 @@ impl Margin {
             .await
     }
 
-    // Get all orders
+    /// Get all orders
     pub async fn orders(
         &self,
         all_orders_query: RecordsQuery,
@@ -259,7 +259,7 @@ impl Margin {
             .await
     }
 
-    // Get all trades
+    /// Get all trades
     pub async fn trades(
         &self,
         all_orders_query: RecordsQuery,
@@ -269,7 +269,7 @@ impl Margin {
             .await
     }
 
-    // Get max borrowable
+    /// Get max borrowable
     pub async fn max_borrowable<S>(&self, asset: S) -> Result<MaxAmount>
     where
         S: Into<String>,
@@ -284,7 +284,7 @@ impl Margin {
             .await
     }
 
-    // Get max transferable
+    /// Get max transferable
     pub async fn max_transferable<S>(&self, asset: S) -> Result<MaxAmount>
     where
         S: Into<String>,
@@ -299,7 +299,7 @@ impl Margin {
             .await
     }
 
-    // Start user data stream
+    /// Start user data stream
     pub async fn start(&self) -> Result<UserDataStream> {
         let data = self.client.post(SAPI_USER_DATA_STREAM).await?;
         let user_data_stream: UserDataStream = from_str(data.as_str())?;
@@ -307,7 +307,7 @@ impl Margin {
         Ok(user_data_stream)
     }
 
-    // Current open orders on a symbol
+    /// Current open orders on a symbol
     pub async fn keep_alive(&self, listen_key: &str) -> Result<Success> {
         let data = self.client.put(SAPI_USER_DATA_STREAM, listen_key).await?;
 

@@ -1,6 +1,6 @@
-use crate::model::*;
 use crate::client::*;
 use crate::errors::*;
+use crate::model::*;
 
 use serde_json::from_str;
 
@@ -10,14 +10,14 @@ pub struct General {
 }
 
 impl General {
-    // Test connectivity
+    /// Test connectivity
     pub async fn ping(&self) -> Result<String> {
         self.client.get("/api/v3/ping", "").await?;
 
         Ok("pong".into())
     }
 
-    // Check server time
+    /// Check server time
     pub async fn get_server_time(&self) -> Result<ServerTime> {
         let data: String = self.client.get("/api/v3/time", "").await?;
 
@@ -26,7 +26,7 @@ impl General {
         Ok(server_time)
     }
 
-    // Obtain exchange information (rate limits, symbol metadata etc)
+    /// Obtain exchange information (rate limits, symbol metadata etc)
     pub async fn exchange_info(&self) -> Result<ExchangeInformation> {
         let data: String = self.client.get("/api/v3/exchangeInfo", "").await?;
 
