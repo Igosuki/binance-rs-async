@@ -2,7 +2,6 @@ use crate::errors::*;
 use serde_json::from_str;
 use url::Url;
 
-use crate::ws_model::WebsocketEvent;
 use std::sync::atomic::{AtomicBool, Ordering};
 use tungstenite::client::AutoStream;
 use tungstenite::handshake::client::Response;
@@ -18,15 +17,15 @@ pub static DEPTH_ORDERBOOK: &str = "depthUpdate";
 pub static PARTIAL_ORDERBOOK: &str = "lastUpdateId";
 pub static DAYTICKER: &str = "24hrTicker";
 
-pub struct WebSockets<'a> {
+pub struct WebSockets<'a, WE> {
     pub socket: Option<(WebSocket<AutoStream>, Response)>,
-    handler: Box<dyn FnMut(WebsocketEvent) -> Result<()> + 'a>,
+    handler: Box<dyn FnMut(WE) -> Result<()> + 'a>,
 }
 
-impl<'a> WebSockets<'a> {
-    pub fn new<Callback>(handler: Callback) -> WebSockets<'a>
+impl<'a, WE: serde::de::DeserializeOwned> WebSockets<'a, WE> {
+    pub fn new<Callback>(handler: Callback) -> WebSockets<'a, WE>
     where
-        Callback: FnMut(WebsocketEvent) -> Result<()> + 'a,
+        Callback: FnMut(WE) -> Result<()> + 'a,
     {
         WebSockets {
             socket: None,
@@ -66,7 +65,10 @@ impl<'a> WebSockets<'a> {
                 let message = socket.0.read_message()?;
                 match message {
                     Message::Text(msg) => {
-                        let event: WebsocketEvent = from_str(msg.as_str())?;
+                        if msg.is_empty() {
+                            return Ok(());
+                        }
+                        let event: WE = from_str(msg.as_str())?;
                         (self.handler)(event)?;
                     }
                     Message::Ping(_) | Message::Pong(_) | Message::Binary(_) => {}

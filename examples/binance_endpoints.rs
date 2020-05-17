@@ -5,6 +5,7 @@ use binance::api::*;
 use binance::errors::ErrorKind as BinanceLibErrorKind;
 use binance::general::*;
 use binance::market::*;
+use binance::rest_model::{OrderSide, OrderType};
 
 fn main() {
     futures::executor::block_on(general());
@@ -60,33 +61,75 @@ async fn account() {
         Err(e) => println!("Error: {}", e),
     }
 
-    match account.limit_buy("WTCETH", 10, 0.014000).await {
+    let limit_buy = OrderRequest {
+        symbol: "WTCETH".to_string(),
+        quantity: Some(10.0),
+        price: Some(0.014000),
+        order_type: OrderType::Limit,
+        side: OrderSide::Buy,
+        ..OrderRequest::default()
+    };
+    match account.place_order(limit_buy).await {
         Ok(answer) => println!("{:?}", answer),
         Err(e) => println!("Error: {}", e),
     }
 
-    match account.market_buy("WTCETH", 5).await {
+    let market_buy = OrderRequest {
+        symbol: "WTCETH".to_string(),
+        quantity: Some(5.0),
+        order_type: OrderType::Market,
+        side: OrderSide::Buy,
+        ..OrderRequest::default()
+    };
+    match account.place_order(market_buy).await {
         Ok(answer) => println!("{:?}", answer),
         Err(e) => println!("Error: {}", e),
     }
 
-    match account.limit_sell("WTCETH", 10, 0.035000).await {
+    let limit_sell = OrderRequest {
+        symbol: "WTCETH".to_string(),
+        quantity: Some(10.0),
+        price: Some(0.035000),
+        order_type: OrderType::Limit,
+        side: OrderSide::Sell,
+        ..OrderRequest::default()
+    };
+    match account.place_order(limit_sell).await {
         Ok(answer) => println!("{:?}", answer),
         Err(e) => println!("Error: {}", e),
     }
 
-    match account.market_sell("WTCETH", 5).await {
+    let market_sell = OrderRequest {
+        symbol: "WTCETH".to_string(),
+        quantity: Some(5.0),
+        order_type: OrderType::Market,
+        side: OrderSide::Sell,
+        ..OrderRequest::default()
+    };
+    match account.place_order(market_sell).await {
         Ok(answer) => println!("{:?}", answer),
         Err(e) => println!("Error: {}", e),
     }
 
     let order_id = 1_957_528;
-    match account.order_status("WTCETH", order_id).await {
+    let order_status = OrderStatusRequest {
+        symbol: "WTCETH".to_string(),
+        order_id: Some(order_id),
+        ..OrderStatusRequest::default()
+    };
+
+    match account.order_status(order_status).await {
         Ok(answer) => println!("{:?}", answer),
         Err(e) => println!("Error: {}", e),
     }
 
-    match account.cancel_order("WTCETH", order_id).await {
+    let order_cancellation = OrderCancellation {
+        symbol: "WTCETH".to_string(),
+        order_id: Some(order_id),
+        ..OrderCancellation::default()
+    };
+
+    match account.cancel_order(order_cancellation).await {
         Ok(answer) => println!("{:?}", answer),
         Err(e) => println!("Error: {}", e),
     }

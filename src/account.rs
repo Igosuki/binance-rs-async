@@ -60,7 +60,7 @@ impl OrderRequest {
 /// perform an order cancellation for the account
 /// only works if the parameters match an active order
 /// either order_id (binance side id) or orig_client_order_id (id originally given by the client) must be set
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Default, Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct OrderCancellation {
     pub symbol: String,
@@ -142,7 +142,7 @@ impl Account {
     }
 
     /// Check an order's status
-    pub async fn order_status<S>(&self, osr: OrderStatusRequest) -> Result<Order> {
+    pub async fn order_status(&self, osr: OrderStatusRequest) -> Result<Order> {
         let recv_window = osr.recv_window.unwrap_or(self.recv_window);
         let request = build_signed_request_p(osr, recv_window)?;
         let data = self.client.get_signed(API_V3_ORDER, &request).await?;
@@ -154,7 +154,7 @@ impl Account {
     /// Place a test status order
     ///
     /// This order is sandboxed: it is validated, but not sent to the matching engine.
-    pub async fn test_order_status<S>(&self, osr: OrderStatusRequest) -> Result<TestResponse> {
+    pub async fn test_order_status(&self, osr: OrderStatusRequest) -> Result<TestResponse> {
         let recv_window = osr.recv_window.unwrap_or(self.recv_window);
         let request = build_signed_request_p(osr, recv_window)?;
         let data = self.client.get_signed(API_V3_ORDER_TEST, &request).await?;

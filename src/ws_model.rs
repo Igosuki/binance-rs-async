@@ -14,7 +14,7 @@ pub enum WebsocketEvent {
     #[serde(alias = "lastUpdateId")]
     OrderBook(Box<OrderBook>),
     #[serde(alias = "24hrTicker")]
-    DayTicker(Vec<DayTickerEvent>),
+    DayTicker(Box<DayTickerEvent>),
     #[serde(alias = "kline")]
     Kline(Box<KlineEvent>),
     #[serde(alias = "depthUpdate")]
