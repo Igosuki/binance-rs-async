@@ -394,3 +394,8 @@ pub struct BookTickerEvent {
     #[serde(rename = "A")]
     pub best_ask_qty: String,
 }
+
+pub struct StreamEvent {
+    stream: String,
+    pub data: WebsocketEvent,
+}
