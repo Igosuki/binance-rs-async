@@ -1,36 +1,22 @@
 use crate::errors::*;
-use crate::model::*;
 use serde_json::from_str;
 use url::Url;
 
+use crate::ws_model::WebsocketEvent;
 use std::sync::atomic::{AtomicBool, Ordering};
 use tungstenite::client::AutoStream;
 use tungstenite::handshake::client::Response;
 use tungstenite::protocol::WebSocket;
 use tungstenite::{connect, Message};
 
-static WEBSOCKET_URL: &str = "wss://stream.binance.com:9443/ws/";
-
-static OUTBOUND_ACCOUNT_INFO: &str = "outboundAccountInfo";
-static EXECUTION_REPORT: &str = "executionReport";
-
-static KLINE: &str = "kline";
-static AGGREGATED_TRADE: &str = "aggTrade";
-static DEPTH_ORDERBOOK: &str = "depthUpdate";
-static PARTIAL_ORDERBOOK: &str = "lastUpdateId";
-
-static DAYTICKER: &str = "24hrTicker";
-
-pub enum WebsocketEvent {
-    AccountUpdate(Box<AccountUpdateEvent>),
-    OrderTrade(Box<OrderTradeEvent>),
-    Trade(Box<TradesEvent>),
-    OrderBook(Box<OrderBook>),
-    DayTicker(Vec<DayTickerEvent>),
-    Kline(Box<KlineEvent>),
-    DepthOrderBook(Box<DepthOrderBookEvent>),
-    BookTicker(Box<BookTickerEvent>),
-}
+pub static WEBSOCKET_URL: &str = "wss://stream.binance.com:9443/ws/";
+pub static OUTBOUND_ACCOUNT_INFO: &str = "outboundAccountInfo";
+pub static EXECUTION_REPORT: &str = "executionReport";
+pub static KLINE: &str = "kline";
+pub static AGGREGATED_TRADE: &str = "aggTrade";
+pub static DEPTH_ORDERBOOK: &str = "depthUpdate";
+pub static PARTIAL_ORDERBOOK: &str = "lastUpdateId";
+pub static DAYTICKER: &str = "24hrTicker";
 
 pub struct WebSockets<'a> {
     pub socket: Option<(WebSocket<AutoStream>, Response)>,
@@ -48,6 +34,7 @@ impl<'a> WebSockets<'a> {
         }
     }
 
+    /// Connect to a websocket endpoint
     pub fn connect(&mut self, endpoint: &str) -> Result<()> {
         let wss: String = format!("{}{}", WEBSOCKET_URL, endpoint);
         let url = Url::parse(&wss)?;
@@ -63,6 +50,7 @@ impl<'a> WebSockets<'a> {
         }
     }
 
+    /// Disconnect from the endpoint
     pub fn disconnect(&mut self) -> Result<()> {
         if let Some(ref mut socket) = self.socket {
             socket.0.close(None)?;
@@ -76,45 +64,10 @@ impl<'a> WebSockets<'a> {
         while running.load(Ordering::Relaxed) {
             if let Some(ref mut socket) = self.socket {
                 let message = socket.0.read_message()?;
-                let value: serde_json::Value = serde_json::from_str(message.to_text()?)?;
-
                 match message {
                     Message::Text(msg) => {
-                        if value["u"] != serde_json::Value::Null
-                            && value["s"] != serde_json::Value::Null
-                            && value["b"] != serde_json::Value::Null
-                            && value["B"] != serde_json::Value::Null
-                            && value["a"] != serde_json::Value::Null
-                            && value["A"] != serde_json::Value::Null
-                        {
-                            let book_ticker: BookTickerEvent = from_str(msg.as_str())?;
-                            (self.handler)(WebsocketEvent::BookTicker(Box::new(book_ticker)))?;
-                        } else if msg.find(OUTBOUND_ACCOUNT_INFO) != None {
-                            let account_update: AccountUpdateEvent = from_str(msg.as_str())?;
-                            (self.handler)(WebsocketEvent::AccountUpdate(Box::new(
-                                account_update,
-                            )))?;
-                        } else if msg.find(EXECUTION_REPORT) != None {
-                            let order_trade: OrderTradeEvent = from_str(msg.as_str())?;
-                            (self.handler)(WebsocketEvent::OrderTrade(Box::new(order_trade)))?;
-                        } else if msg.find(AGGREGATED_TRADE) != None {
-                            let trade: TradesEvent = from_str(msg.as_str())?;
-                            (self.handler)(WebsocketEvent::Trade(Box::new(trade)))?;
-                        } else if msg.find(DAYTICKER) != None {
-                            let trades: Vec<DayTickerEvent> = from_str(msg.as_str())?;
-                            (self.handler)(WebsocketEvent::DayTicker(trades))?;
-                        } else if msg.find(KLINE) != None {
-                            let kline: KlineEvent = from_str(msg.as_str())?;
-                            (self.handler)(WebsocketEvent::Kline(Box::new(kline)))?;
-                        } else if msg.find(PARTIAL_ORDERBOOK) != None {
-                            let partial_orderbook: OrderBook = from_str(msg.as_str())?;
-                            (self.handler)(WebsocketEvent::OrderBook(Box::new(partial_orderbook)))?;
-                        } else if msg.find(DEPTH_ORDERBOOK) != None {
-                            let depth_orderbook: DepthOrderBookEvent = from_str(msg.as_str())?;
-                            (self.handler)(WebsocketEvent::DepthOrderBook(Box::new(
-                                depth_orderbook,
-                            )))?;
-                        }
+                        let event: WebsocketEvent = from_str(msg.as_str())?;
+                        (self.handler)(event)?;
                     }
                     Message::Ping(_) | Message::Pong(_) | Message::Binary(_) => {}
                     Message::Close(e) => {

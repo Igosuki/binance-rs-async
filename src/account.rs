@@ -1,6 +1,6 @@
 use crate::client::*;
 use crate::errors::*;
-use crate::model::*;
+use crate::rest_model::*;
 use crate::util::*;
 use serde_json::from_str;
 use std::collections::BTreeMap;

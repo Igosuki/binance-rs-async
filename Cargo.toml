@@ -1,18 +1,15 @@
 [package]
-name = "binance"
-version = "0.10.2"
+name = "binance-async"
+version = "0.1.0"
 license = "MIT OR Apache-2.0"
-authors = ["Flavio Oliveira <flavio@wisespace.io>"]
+authors = ["Guillaume Balaine igosuki.github@gmail.com"]
 edition = "2018"
 
-description = "Rust Library for the Binance API"
+description = "Async Rust Library for the Binance API"
 keywords = ["cryptocurrency", "trading", "binance"]
-documentation = "https://docs.rs/crate/binance/"
-repository = "https://github.com/wisespace-io/binance-rs"
+documentation = "https://docs.rs/crate/binance-rs-async/"
+repository = "https://github.com/Igosuki/binance-rs-async"
 readme = "README.md"
-
-[badges]
-travis-ci = { repository = "wisespace-io/binance-rs" }
 
 [lib]
 name = "binance"

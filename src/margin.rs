@@ -1,6 +1,6 @@
 use crate::client::*;
 use crate::errors::*;
-use crate::model::*;
+use crate::rest_model::*;
 use serde_json::from_str;
 
 static SAPI_V1_MARGIN_TRANSFER: &str = "/sapi/v1/margin/transfer";

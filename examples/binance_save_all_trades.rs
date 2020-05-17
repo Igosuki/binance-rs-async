@@ -6,7 +6,7 @@ use std::error::Error;
 use std::fs::File;
 use std::sync::atomic::AtomicBool;
 
-use binance::model::DayTickerEvent;
+use binance::rest_model::DayTickerEvent;
 use binance::websockets::*;
 
 fn main() {

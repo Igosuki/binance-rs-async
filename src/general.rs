@@ -1,6 +1,6 @@
 use crate::client::*;
 use crate::errors::*;
-use crate::model::*;
+use crate::rest_model::*;
 
 use serde_json::from_str;
 

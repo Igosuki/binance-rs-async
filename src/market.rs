@@ -1,6 +1,6 @@
 use crate::client::*;
 use crate::errors::*;
-use crate::model::*;
+use crate::rest_model::*;
 use crate::util::*;
 use serde_json::{from_str, Value};
 use std::collections::BTreeMap;
@@ -132,7 +132,7 @@ impl Market {
         parameters.insert("symbol".into(), symbol.into());
         parameters.insert("interval".into(), interval.into());
 
-        /// Add three optional parameters
+        // Add three optional parameters
         if let Some(lt) = limit.into() {
             parameters.insert("limit".into(), format!("{}", lt));
         }
