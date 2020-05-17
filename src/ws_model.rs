@@ -395,7 +395,7 @@ pub struct BookTickerEvent {
     pub best_ask_qty: String,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct StreamEvent {
     stream: String,
     pub data: WebsocketEvent,
