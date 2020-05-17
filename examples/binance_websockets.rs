@@ -14,6 +14,7 @@ fn main() {
     last_price();
 }
 
+#[allow(dead_code)]
 async fn user_stream() {
     let api_key_user = Some("YOUR_API_KEY".into());
     let user_stream: UserStream = Binance::new(api_key_user.clone(), None);
@@ -36,6 +37,7 @@ async fn user_stream() {
     }
 }
 
+#[allow(dead_code)]
 async fn user_stream_websocket() {
     let keep_running = AtomicBool::new(true); // Used to control the event loop
     let api_key_user = Some("YOUR_KEY".into());
@@ -68,11 +70,7 @@ async fn user_stream_websocket() {
 
         web_socket.connect(&listen_key).unwrap(); // check error
         if let Err(e) = web_socket.event_loop(&keep_running) {
-            match e {
-                err => {
-                    println!("Error: {}", err);
-                }
-            }
+            println!("Error: {}", e);
         }
         user_stream.close(&listen_key).await.unwrap();
         web_socket.disconnect().unwrap();
@@ -82,6 +80,7 @@ async fn user_stream_websocket() {
     }
 }
 
+#[allow(dead_code)]
 fn market_websocket() {
     let keep_running = AtomicBool::new(true); // Used to control the event loop
     let agg_trade: String = format!("{}@aggTrade", "ethbtc");
@@ -113,19 +112,16 @@ fn market_websocket() {
 
     web_socket.connect(&agg_trade).unwrap(); // check error
     if let Err(e) = web_socket.event_loop(&keep_running) {
-        match e {
-            err => {
-                println!("Error: {}", err);
-            }
-        }
+        println!("Error: {}", e);
     }
     web_socket.disconnect().unwrap();
     println!("disconnected");
 }
 
+#[allow(dead_code)]
 fn all_trades_websocket() {
     let keep_running = AtomicBool::new(true); // Used to control the event loop
-    let agg_trade: String = format!("!ticker@arr");
+    let agg_trade: String = "!ticker@arr".to_string();
     let mut web_socket: WebSockets = WebSockets::new(|event: WebsocketEvent| {
         if let WebsocketEvent::DayTicker(ticker_events) = event {
             for tick_event in ticker_events {
@@ -147,9 +143,10 @@ fn all_trades_websocket() {
     println!("disconnected");
 }
 
+#[allow(dead_code)]
 fn kline_websocket() {
     let keep_running = AtomicBool::new(true);
-    let kline: String = format!("{}", "ethbtc@kline_1m");
+    let kline: String = "ethbtc@kline_1m".to_string();
     let mut web_socket: WebSockets = WebSockets::new(|event: WebsocketEvent| {
         if let WebsocketEvent::Kline(kline_event) = event {
             println!(
@@ -175,23 +172,20 @@ fn last_price() {
     let mut btcusdt: f32 = "0".parse().unwrap();
 
     let mut web_socket: WebSockets = WebSockets::new(|event: WebsocketEvent| {
-        match event {
-            WebsocketEvent::DayTicker(ticker_events) => {
-                for tick_event in ticker_events {
-                    if tick_event.symbol == "BTCUSDT" {
-                        btcusdt = tick_event.average_price.parse().unwrap();
-                        let btcusdt_close: f32 = tick_event.current_close.parse().unwrap();
-                        println!("{} - {}", btcusdt, btcusdt_close);
+        if let WebsocketEvent::DayTicker(ticker_events) = event {
+            for tick_event in ticker_events {
+                if tick_event.symbol == "BTCUSDT" {
+                    btcusdt = tick_event.average_price.parse().unwrap();
+                    let btcusdt_close: f32 = tick_event.current_close.parse().unwrap();
+                    println!("{} - {}", btcusdt, btcusdt_close);
 
-                        if btcusdt_close as i32 == 7000 {
-                            // Break the event loop
-                            keep_running.store(false, Ordering::Relaxed);
-                        }
+                    if btcusdt_close as i32 == 7000 {
+                        // Break the event loop
+                        keep_running.store(false, Ordering::Relaxed);
                     }
                 }
             }
-            _ => (),
-        };
+        }
 
         Ok(())
     });

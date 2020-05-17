@@ -13,6 +13,7 @@ pub struct BinanceContentError {
 error_chain! {
     errors {
         BinanceError(response: BinanceContentError)
+        InvalidOrderError(msg: String)
      }
 
     foreign_links {

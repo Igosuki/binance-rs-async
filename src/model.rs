@@ -15,14 +15,6 @@ pub struct ExchangeInformation {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
-pub struct RateLimit {
-    pub rate_limit_type: String,
-    pub interval: String,
-    pub limit: u64,
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-#[serde(rename_all = "camelCase")]
 pub struct Symbol {
     pub symbol: String,
     pub status: String,
@@ -109,20 +101,30 @@ pub struct Balance {
 pub struct Order {
     pub symbol: String,
     pub order_id: u64,
+    pub order_list_id: i32,
     pub client_order_id: String,
     #[serde(with = "string_or_float")]
     pub price: f64,
-    pub orig_qty: String,
-    pub executed_qty: String,
-    pub status: String,
-    pub time_in_force: String,
+    #[serde(with = "string_or_float")]
+    pub orig_qty: f64,
+    #[serde(with = "string_or_float")]
+    pub executed_qty: f64,
+    #[serde(with = "string_or_float")]
+    pub cummulative_quote_qty: f64,
+    pub status: OrderStatus,
+    pub time_in_force: TimeInForce,
     #[serde(rename = "type")]
-    pub type_name: String,
-    pub side: String,
+    pub order_type: OrderType,
+    pub side: OrderSide,
     #[serde(with = "string_or_float")]
     pub stop_price: f64,
-    pub iceberg_qty: String,
+    #[serde(with = "string_or_float")]
+    pub iceberg_qty: f64,
     pub time: u64,
+    pub update_time: u64,
+    pub is_working: bool,
+    #[serde(with = "string_or_float")]
+    pub orig_order_qty: f64,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -689,30 +691,56 @@ pub struct Loan {
     pub amount: f64,
 }
 
+/// How long will an order stay alive
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum TimeInForce {
+    /// Good Till Canceled
     GTC,
+    /// Immediate Or Cancel
     IOC,
+    /// Fill or Kill
     FOK,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum OrderResponse {
-    ACK,
-    RESULT,
-    FULL,
+    Ack,
+    Result,
+    Full,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum OrderSide {
-    BUY,
-    SELL,
+    Buy,
+    Sell,
+}
+
+/// By default, buy
+impl Default for OrderSide {
+    fn default() -> Self {
+        Self::Buy
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum OrderType {
-    LIMIT,
-    MARKET,
+    Limit,
+    Market,
+    StopLoss,
+    StopLossLimit,
+    TakeProfit,
+    TakeProfitLimit,
+    LimitMaker,
+}
+
+/// By default, use market orders
+impl Default for OrderType {
+    fn default() -> Self {
+        Self::Market
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -827,7 +855,7 @@ pub struct ForcedLiquidationState {
     pub price: f64,
     pub qty: f64,
     pub symbol: String,
-    pub time_in_force: String,
+    pub time_in_force: TimeInForce,
     pub updated_time: u128,
 }
 
@@ -920,11 +948,6 @@ pub struct MarginOrderQuery {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub enum OrderStatus {
-    NEW,
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct MarginOrderState {
     pub client_order_id: String,
@@ -940,7 +963,7 @@ pub struct MarginOrderState {
     pub stop_price: f64,
     pub symbol: String,
     pub time: u128,
-    pub time_in_force: String,
+    pub time_in_force: TimeInForce,
     #[serde(rename(serialize = "type", deserialize = "type"))]
     pub order_type: OrderType,
     pub update_time: u128,
@@ -977,6 +1000,101 @@ pub struct OwnTradesState {
 #[serde(rename_all = "camelCase")]
 pub struct MaxAmount {
     pub amount: f64,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum SymbolStatus {
+    PreTrading,
+    Trading,
+    PostTrading,
+    EndOfDay,
+    Halt,
+    AuctionMatch,
+    Break,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum SymbolType {
+    Spot,
+}
+
+/// Status of an order, this can typically change over time
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum OrderStatus {
+    /// The order has been accepted by the engine.
+    New,
+    /// A part of the order has been filled.
+    PartialyFilled,
+    /// The order has been completely filled.
+    Filled,
+    /// The order has been canceled by the user.
+    Canceled,
+    /// (currently unused)
+    PendingCancel,
+    /// The order was not accepted by the engine and not processed.
+    Rejected,
+    /// The order was canceled according to the order type's rules (e.g. LIMIT FOK orders with no fill, LIMIT IOC or MARKET orders that partially fill) or by the exchange, (e.g. orders canceled during liquidation, orders canceled during maintenance)
+    Expired,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum OCOStatus {
+    Response,
+    ExecStarted,
+    AllDone,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum OCOOrderStatus {
+    Executing,
+    AllDone,
+    Reject,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum ContingencyType {
+    OCO,
+}
+
+/// API Rate Limit
+/// Example
+/// {
+///   "rateLimitType": "REQUEST_WEIGHT",
+///   "interval": "MINUTE",
+///   "intervalNum": 1,
+///   "limit": 1200
+/// }
+///
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum RateLimitType {
+    RequestWeight,
+    Orders,
+    RawRequests,
+}
+
+/// Rate Limit Interval, used by RateLimitType
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum RateLimitInterval {
+    Second,
+    Minute,
+    Day,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct RateLimit {
+    interval: RateLimitInterval,
+    rate_limit_type: RateLimitType,
+    interval_num: i32,
+    limit: i32,
 }
 
 mod string_or_float {
