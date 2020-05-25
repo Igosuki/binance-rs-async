@@ -58,7 +58,7 @@ async fn user_stream_websocket() {
                             );
                         }
                     }
-                    WebsocketEvent::OrderTrade(trade) => {
+                    WebsocketEvent::OrderUpdate(trade) => {
                         println!(
                             "Symbol: {}, Side: {}, Price: {}, Execution Type: {}",
                             trade.symbol, trade.side, trade.price, trade.execution_type

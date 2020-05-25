@@ -748,7 +748,7 @@ pub struct PropertyCmd {
     pub params: (String, bool),
 }
 
-mod string_or_float {
+pub mod string_or_float {
     use std::fmt;
 
     use serde::{de, Deserialize, Deserializer, Serializer};
