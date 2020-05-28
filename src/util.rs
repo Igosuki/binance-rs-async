@@ -1,7 +1,7 @@
 use crate::errors::*;
+use chrono::Utc;
 use serde_json::Value;
 use std::collections::BTreeMap;
-use std::time::{SystemTime, UNIX_EPOCH};
 
 pub fn build_request(parameters: &BTreeMap<String, String>) -> String {
     let mut request = String::new();
@@ -64,7 +64,9 @@ where
             let param = format!("&{}={}", key, value);
             request.push_str(param.as_ref());
         }
-        request.pop(); // remove last &
+        if let Some('&') = request.chars().last() {
+            request.pop(); // remove last &
+        }
 
         Ok(request)
     } else {
@@ -81,8 +83,5 @@ pub fn to_f64(v: &Value) -> f64 {
 }
 
 fn get_timestamp() -> Result<u64> {
-    let start = SystemTime::now();
-    let since_epoch = start.duration_since(UNIX_EPOCH)?;
-
-    Ok(since_epoch.as_secs() * 1000 + u64::from(since_epoch.subsec_nanos()) / 1_000_000)
+    Ok(Utc::now().timestamp_millis() as u64)
 }

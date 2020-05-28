@@ -26,6 +26,7 @@ pub struct Account {
 pub struct OrderRequest {
     pub symbol: String,
     pub side: OrderSide,
+    #[serde(rename = "type")]
     pub order_type: OrderType,
     pub time_in_force: Option<TimeInForce>,
     pub quantity: Option<f64>,
@@ -41,7 +42,6 @@ pub struct OrderRequest {
     pub new_order_resp_type: Option<OrderResponse>,
     /// Cannot be greater than 60000
     pub recv_window: Option<u64>,
-    pub timestamp: u64,
 }
 
 impl OrderRequest {

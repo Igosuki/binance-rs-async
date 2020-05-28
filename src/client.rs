@@ -8,27 +8,33 @@ use serde_json::from_str;
 use crate::errors::*;
 use crate::util::{build_request_p, build_signed_request_p};
 use serde::de;
+use std::time::Duration;
 
-static API1_HOST: &str = "https://www.binance.com";
+static API1_HOST: &str = "https://api.binance.com";
 
 #[derive(Clone)]
 pub struct Client {
     api_key: String,
     secret_key: String,
+    inner: reqwest::Client,
 }
 
 impl Client {
     pub fn new(api_key: Option<String>, secret_key: Option<String>) -> Self {
+        let builder: reqwest::ClientBuilder = reqwest::ClientBuilder::new();
+        let builder = builder.timeout(Duration::from_secs(2));
         Client {
             api_key: api_key.unwrap_or_else(|| "".into()),
             secret_key: secret_key.unwrap_or_else(|| "".into()),
+            inner: builder.build().unwrap(),
         }
     }
 
     pub async fn get_signed(&self, endpoint: &str, request: &str) -> Result<String> {
         let url = self.sign_request(endpoint, request);
-        let client = reqwest::Client::new();
-        let response = client
+        let response = self
+            .inner
+            .clone()
             .get(url.as_str())
             .headers(self.build_headers(true)?)
             .send()
@@ -55,8 +61,9 @@ impl Client {
 
     pub async fn post_signed(&self, endpoint: &str, request: &str) -> Result<String> {
         let url = self.sign_request(endpoint, request);
-        let client = reqwest::Client::new();
-        let response = client
+        let response = self
+            .inner
+            .clone()
             .post(url.as_str())
             .headers(self.build_headers(true)?)
             .send()
@@ -93,8 +100,9 @@ impl Client {
 
     pub async fn delete_signed(&self, endpoint: &str, request: &str) -> Result<String> {
         let url = self.sign_request(endpoint, request);
-        let client = reqwest::Client::new();
-        let response = client
+        let response = self
+            .inner
+            .clone()
             .delete(url.as_str())
             .headers(self.build_headers(true)?)
             .send()
@@ -117,8 +125,9 @@ impl Client {
     pub async fn post(&self, endpoint: &str) -> Result<String> {
         let url: String = format!("{}{}", API1_HOST, endpoint);
 
-        let client = reqwest::Client::new();
-        let response = client
+        let response = self
+            .inner
+            .clone()
             .post(url.as_str())
             .headers(self.build_headers(false)?)
             .send()
@@ -131,8 +140,9 @@ impl Client {
         let url: String = format!("{}{}", API1_HOST, endpoint);
         let data: String = format!("listenKey={}", listen_key);
 
-        let client = reqwest::Client::new();
-        let response = client
+        let response = self
+            .inner
+            .clone()
             .put(url.as_str())
             .headers(self.build_headers(false)?)
             .body(data)
@@ -146,8 +156,9 @@ impl Client {
         let url: String = format!("{}{}", API1_HOST, endpoint);
         let data: String = format!("listenKey={}", listen_key);
 
-        let client = reqwest::Client::new();
-        let response = client
+        let response = self
+            .inner
+            .clone()
             .delete(url.as_str())
             .headers(self.build_headers(false)?)
             .body(data)
