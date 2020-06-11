@@ -7,6 +7,7 @@ use std::collections::BTreeMap;
 
 static API_V3_ACCOUNT: &str = "/api/v3/account";
 static API_V3_OPEN_ORDERS: &str = "/api/v3/openOrders";
+static API_V3_ALL_ORDERS: &str = "/api/v3/allOrders";
 static API_V3_MYTRADES: &str = "/api/v3/myTrades";
 static API_V3_ORDER: &str = "/api/v3/order";
 /// Endpoint for test orders.
@@ -86,6 +87,21 @@ pub struct OrderStatusRequest {
     pub timestamp: u64,
 }
 
+/// Order Status Request
+/// perform a query on all orders for the account
+#[derive(Default, Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct OrdersQuery {
+    pub symbol: String,
+    pub order_id: Option<u64>,
+    pub start_time: Option<u64>,
+    pub end_time: Option<u64>,
+    /// Default 500 max 1000
+    pub limit: Option<u32>,
+    /// Cannot be greater than 60000
+    pub recv_window: Option<u64>,
+}
+
 impl Account {
     /// General account information
     pub async fn get_account(&self) -> Result<AccountInformation> {
@@ -127,6 +143,16 @@ impl Account {
 
         let request = build_signed_request(parameters, self.recv_window)?;
         let data = self.client.get_signed(API_V3_OPEN_ORDERS, &request).await?;
+        let order: Vec<Order> = from_str(data.as_str())?;
+
+        Ok(order)
+    }
+
+    /// All orders for the account
+    pub async fn get_all_orders(&self, query: OrdersQuery) -> Result<Vec<Order>> {
+        let recv_window = query.recv_window.unwrap_or(self.recv_window);
+        let request = build_signed_request_p(query, recv_window)?;
+        let data = self.client.get_signed(API_V3_ALL_ORDERS, &request).await?;
         let order: Vec<Order> = from_str(data.as_str())?;
 
         Ok(order)

@@ -108,67 +108,46 @@ pub struct TradeEvent {
 pub struct DayTickerEvent {
     #[serde(rename = "E")]
     pub event_time: u64,
-
     #[serde(rename = "s")]
     pub symbol: String,
-
     #[serde(rename = "p")]
     pub price_change: String,
-
     #[serde(rename = "P")]
     pub price_change_percent: String,
-
     #[serde(rename = "w")]
     pub average_price: String,
-
     #[serde(rename = "x")]
     pub prev_close: String,
-
     #[serde(rename = "c")]
     pub current_close: String,
-
     #[serde(rename = "Q")]
     pub current_close_qty: String,
-
     #[serde(rename = "b")]
     pub best_bid: String,
-
     #[serde(rename = "B")]
     pub best_bid_qty: String,
-
     #[serde(rename = "a")]
     pub best_ask: String,
-
     #[serde(rename = "A")]
     pub best_ask_qty: String,
-
     #[serde(rename = "o")]
     pub open: String,
-
     #[serde(rename = "h")]
     pub high: String,
-
     #[serde(rename = "l")]
     pub low: String,
-
     #[serde(rename = "v")]
     pub volume: String,
-
     #[serde(rename = "q")]
     pub quote_volume: String,
-
     #[serde(rename = "O")]
     pub open_time: u64,
-
     #[serde(rename = "C")]
     pub close_time: u64,
-
     #[serde(rename = "F")]
     pub first_trade_id: i64,
-
     #[serde(rename = "L")]
     pub last_trade_id: i64,
-
     #[serde(rename = "n")]
     pub num_trades: u64,
 }
@@ -178,10 +157,8 @@ pub struct DayTickerEvent {
 pub struct KlineEvent {
     #[serde(rename = "E")]
     pub event_time: u64,
-
     #[serde(rename = "s")]
     pub symbol: String,
-
     #[serde(rename = "k")]
     pub kline: Kline,
 }
@@ -191,52 +168,36 @@ pub struct KlineEvent {
 pub struct Kline {
     #[serde(rename = "t")]
     pub start_time: i64,
-
     #[serde(rename = "T")]
     pub end_time: i64,
-
     #[serde(rename = "s")]
     pub symbol: String,
-
     #[serde(rename = "i")]
     pub interval: String,
-
     #[serde(rename = "f")]
     pub first_trade_id: i64,
-
     #[serde(rename = "L")]
     pub last_trade_id: i64,
-
     #[serde(rename = "o")]
     pub open: String,
-
     #[serde(rename = "c")]
     pub close: String,
-
     #[serde(rename = "h")]
     pub high: String,
-
     #[serde(rename = "l")]
     pub low: String,
-
     #[serde(rename = "v")]
     pub volume: String,
-
     #[serde(rename = "n")]
     pub number_of_trades: i64,
-
     #[serde(rename = "x")]
     pub is_final_bar: bool,
-
     #[serde(rename = "q")]
     pub quote_volume: String,
-
     #[serde(rename = "V")]
     pub active_buy_volume: String,
-
     #[serde(rename = "Q")]
     pub active_volume_buy_quote: String,
-
     #[serde(skip, rename = "B")]
     pub ignore_me: String,
 }
@@ -246,19 +207,14 @@ pub struct Kline {
 pub struct DepthOrderBookEvent {
     #[serde(rename = "E")]
     pub event_time: u64,
-
     #[serde(rename = "s")]
     pub symbol: String,
-
     #[serde(rename = "U")]
     pub first_update_id: u64,
-
     #[serde(rename = "u")]
     pub final_update_id: u64,
-
     #[serde(rename = "b")]
     pub bids: Vec<Bids>,
-
     #[serde(rename = "a")]
     pub asks: Vec<Asks>,
 }
@@ -370,102 +326,78 @@ pub struct BalanceUpdate {
 pub struct OrderUpdate {
     #[serde(rename = "E")]
     pub event_time: u64,
-
     #[serde(rename = "s")]
     pub symbol: String,
-
     #[serde(rename = "c")]
     pub client_order_id: String,
-
     #[serde(rename = "S")]
     pub side: OrderSide,
-
     #[serde(rename = "o")]
     pub order_type: OrderType,
-
     #[serde(rename = "f")]
     pub time_in_force: TimeInForce,
-
     #[serde(rename = "q")]
     #[serde(with = "string_or_float")]
     pub qty: f64,
-
     #[serde(rename = "p")]
     #[serde(with = "string_or_float")]
     pub price: f64,
-
     #[serde(rename = "P")]
     #[serde(with = "string_or_float")]
     pub stop_price: f64,
-
     #[serde(rename = "F")]
     #[serde(with = "string_or_float")]
     pub iceberg_qty: f64,
-
     #[serde(rename = "g")]
     pub order_list_id: i64,
-
     #[serde(rename = "C")]
     pub origin_client_id: Option<String>,
-
     #[serde(rename = "x")]
     pub execution_type: OrderStatus,
-
     #[serde(rename = "X")]
     pub current_order_status: OrderStatus,
-
     #[serde(rename = "r")]
     pub order_reject_reason: String,
-
     #[serde(rename = "i")]
     pub order_id: u64,
-
     #[serde(rename = "l")]
-    pub qty_last_executed: String,
-
+    #[serde(with = "string_or_float")]
+    pub qty_last_executed: f64,
     #[serde(rename = "z")]
-    pub cumulative_filled_qty: String,
-
+    #[serde(with = "string_or_float")]
+    pub cumulative_filled_qty: f64,
     #[serde(rename = "L")]
-    pub last_executed_price: String,
-
+    #[serde(with = "string_or_float")]
+    pub last_executed_price: f64,
     #[serde(rename = "n")]
     #[serde(with = "string_or_float")]
     pub commission: f64,
-
     #[serde(rename = "N")]
     pub commission_asset: Option<String>,
-
     #[serde(rename = "T")]
     pub trade_order_time: u64,
-
     #[serde(rename = "t")]
     pub trade_id: i64,
-
     #[serde(skip, rename = "I")]
     pub i_ignore: u64,
-
     #[serde(rename = "w")]
     pub is_order_on_the_book: bool,
-
     #[serde(rename = "m")]
     pub is_buyer_maker: bool,
-
     #[serde(skip, rename = "M")]
     pub m_ignore: bool,
-
     #[serde(rename = "O")]
     pub order_creation_time: u64,
-
     #[serde(rename = "Z")]
-    pub cumulative_quote_asset_transacted_qty: u64,
-
+    #[serde(with = "string_or_float")]
+    pub cumulative_quote_asset_transacted_qty: f64,
     /// (i.e. lastPrice * lastQty)
     #[serde(rename = "Y")]
-    pub last_quote_asset_transacted_qty: u64,
-
+    #[serde(with = "string_or_float")]
+    pub last_quote_asset_transacted_qty: f64,
     #[serde(rename = "Q")]
-    pub quote_order_qty: u64,
+    #[serde(with = "string_or_float")]
+    pub quote_order_qty: f64,
 }
 
 /// For OCO Events
@@ -474,31 +406,22 @@ pub struct OrderUpdate {
 pub struct OrderListUpdate {
     #[serde(rename = "E")]
     pub event_time: u64,
-
     #[serde(rename = "S")]
     pub symbol: String,
-
     #[serde(rename = "g")]
     order_list_id: i64,
-
     #[serde(rename = "c")]
     contingency_type: String,
-
     #[serde(rename = "l")]
     list_status_type: String,
-
     #[serde(rename = "L")]
     list_order_status: String,
-
     #[serde(rename = "r")]
     list_reject_reason: String,
-
     #[serde(rename = "C")]
     list_client_order_id: String,
-
     #[serde(rename = "T")]
     pub transaction_time: u64,
-
     #[serde(rename = "O")]
     pub objects: Vec<OrderListTransaction>,
 }
@@ -508,10 +431,8 @@ pub struct OrderListUpdate {
 pub struct OrderListTransaction {
     #[serde(rename = "S")]
     pub symbol: String,
-
     #[serde(rename = "i")]
     pub order_id: i64,
-
     #[serde(rename = "c")]
     pub client_order_id: i64,
 }

@@ -51,7 +51,7 @@ async fn user_stream_websocket() {
             WebSockets::new(|event: WebsocketEvent| {
                 match event {
                     WebsocketEvent::AccountUpdate(account_update) => {
-                        for balance in &account_update.balance {
+                        for balance in &account_update.balances {
                             println!(
                                 "Asset: {}, free: {}, locked: {}",
                                 balance.asset, balance.free, balance.locked
@@ -60,7 +60,7 @@ async fn user_stream_websocket() {
                     }
                     WebsocketEvent::OrderUpdate(trade) => {
                         println!(
-                            "Symbol: {}, Side: {}, Price: {}, Execution Type: {}",
+                            "Symbol: {}, Side: {:?}, Price: {}, Execution Type: {:?}",
                             trade.symbol, trade.side, trade.price, trade.execution_type
                         );
                     }
