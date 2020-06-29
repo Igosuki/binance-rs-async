@@ -22,11 +22,29 @@ pub struct Symbol {
     pub base_asset_precision: u64,
     pub quote_asset: String,
     pub quote_precision: u64,
+    pub quote_asset_precision: u64,
+    pub base_commission_precision: u64,
+    pub quote_commission_precision: u64,
     pub order_types: Vec<String>,
     pub iceberg_allowed: bool,
+    pub oco_allowed: bool,
+    pub quote_order_qty_market_allowed: bool,
     pub is_spot_trading_allowed: bool,
     pub is_margin_trading_allowed: bool,
     pub filters: Vec<Filters>,
+    pub permissions: Vec<String>,
+}
+
+impl Symbol {
+    pub fn lot_size(&self) -> Option<Filters> {
+        self.filters
+            .clone()
+            .into_iter()
+            .find(|filter| match filter {
+                Filters::LotSize { .. } => true,
+                _ => false,
+            })
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -44,7 +62,7 @@ pub enum Filters {
     PercentPrice {
         multiplier_up: String,
         multiplier_down: String,
-        avg_price_mins: f64,
+        avg_price_mins: u64,
     },
     #[serde(rename = "LOT_SIZE")]
     #[serde(rename_all = "camelCase")]
@@ -58,7 +76,7 @@ pub enum Filters {
     MinNotional {
         min_notional: String,
         apply_to_market: bool,
-        avg_price_mins: f64,
+        avg_price_mins: u64,
     },
     #[serde(rename = "ICEBERG_PARTS")]
     #[serde(rename_all = "camelCase")]
@@ -73,6 +91,9 @@ pub enum Filters {
         max_qty: String,
         step_size: String,
     },
+    #[serde(rename = "MAX_NUM_ORDERS")]
+    #[serde(rename_all = "camelCase")]
+    MaxNumOrders { max_num_orders: u16 },
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -778,5 +799,20 @@ pub mod string_or_float {
             StringOrFloat::String(s) => s.parse().map_err(de::Error::custom),
             StringOrFloat::Float(i) => Ok(i),
         }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use crate::rest_model::ExchangeInformation;
+    use std::path::PathBuf;
+
+    #[test]
+    fn exchange_info_serde() {
+        let mut d = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+        d.push("test_data/exchangeInfo.json");
+        let fc = std::fs::read_to_string(d).unwrap();
+        let result = serde_json::from_str::<ExchangeInformation>(&fc);
+        assert!(result.is_ok(), result);
     }
 }
