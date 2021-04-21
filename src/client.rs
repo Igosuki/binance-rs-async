@@ -17,16 +17,26 @@ pub struct Client {
     api_key: String,
     secret_key: String,
     inner: reqwest::Client,
+    host: String,
 }
 
 impl Client {
     pub fn new(api_key: Option<String>, secret_key: Option<String>) -> Self {
+        Self::new_with_host(api_key, secret_key, None)
+    }
+
+    pub fn new_with_host(
+        api_key: Option<String>,
+        secret_key: Option<String>,
+        host: Option<String>,
+    ) -> Self {
         let builder: reqwest::ClientBuilder = reqwest::ClientBuilder::new();
         let builder = builder.timeout(Duration::from_secs(2));
         Client {
             api_key: api_key.unwrap_or_else(|| "".into()),
             secret_key: secret_key.unwrap_or_else(|| "".into()),
             inner: builder.build().unwrap(),
+            host: host.unwrap_or(API1_HOST.to_string()),
         }
     }
 
