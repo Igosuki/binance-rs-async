@@ -7,7 +7,7 @@ use std::fs::File;
 use std::sync::atomic::AtomicBool;
 
 use binance::websockets::*;
-use binance::ws_model::{DayTickerEvent, WebsocketEvent};
+use binance::ws_model::WebsocketEvent;
 
 fn main() {
     save_all_trades_websocket();
@@ -16,7 +16,7 @@ fn main() {
 fn save_all_trades_websocket() {
     struct WebSocketHandler {
         wrt: Writer<File>,
-    };
+    }
 
     impl WebSocketHandler {
         pub fn new(local_wrt: Writer<File>) -> Self {

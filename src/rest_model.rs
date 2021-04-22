@@ -813,6 +813,6 @@ mod test {
         d.push("test_data/exchangeInfo.json");
         let fc = std::fs::read_to_string(d).unwrap();
         let result = serde_json::from_str::<ExchangeInformation>(&fc);
-        assert!(result.is_ok(), result);
+        assert!(result.is_ok(), "{:?}", result);
     }
 }

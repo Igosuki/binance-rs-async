@@ -25,6 +25,9 @@ impl Client {
         Self::new_with_host(api_key, secret_key, None)
     }
 
+    /// Returns a client based on the specified host and credentials
+    /// Credentials do not need to be specified when using public endpoints
+    /// If host is unspecified, defaults to Binance's public api host
     pub fn new_with_host(
         api_key: Option<String>,
         secret_key: Option<String>,
@@ -122,7 +125,7 @@ impl Client {
     }
 
     pub async fn get(&self, endpoint: &str, request: &str) -> Result<String> {
-        let mut url: String = format!("{}{}", API1_HOST, endpoint);
+        let mut url: String = format!("{}{}", self.host, endpoint);
         if !request.is_empty() {
             url.push_str(format!("?{}", request).as_str());
         }
@@ -133,7 +136,7 @@ impl Client {
     }
 
     pub async fn post(&self, endpoint: &str) -> Result<String> {
-        let url: String = format!("{}{}", API1_HOST, endpoint);
+        let url: String = format!("{}{}", self.host, endpoint);
 
         let response = self
             .inner
@@ -147,7 +150,7 @@ impl Client {
     }
 
     pub async fn put(&self, endpoint: &str, listen_key: &str) -> Result<String> {
-        let url: String = format!("{}{}", API1_HOST, endpoint);
+        let url: String = format!("{}{}", self.host, endpoint);
         let data: String = format!("listenKey={}", listen_key);
 
         let response = self
@@ -163,7 +166,7 @@ impl Client {
     }
 
     pub async fn delete(&self, endpoint: &str, listen_key: &str) -> Result<String> {
-        let url: String = format!("{}{}", API1_HOST, endpoint);
+        let url: String = format!("{}{}", self.host, endpoint);
         let data: String = format!("listenKey={}", listen_key);
 
         let response = self
@@ -184,7 +187,7 @@ impl Client {
         let signature = hex_encode(hmac::sign(&signed_key, request.as_bytes()).as_ref());
 
         let request_body: String = format!("{}&signature={}", request, signature);
-        let url: String = format!("{}{}?{}", API1_HOST, endpoint, request_body);
+        let url: String = format!("{}{}?{}", self.host, endpoint, request_body);
 
         url
     }
