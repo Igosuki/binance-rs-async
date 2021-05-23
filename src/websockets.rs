@@ -44,7 +44,7 @@ impl<'a, WE: serde::de::DeserializeOwned> WebSockets<'a, WE> {
                 Ok(())
             }
             Err(e) => {
-                bail!(format!("Error during handshake {}", e));
+                Err(Error::Msg(format!("Error during handshake {}", e)))
             }
         }
     }
@@ -55,7 +55,7 @@ impl<'a, WE: serde::de::DeserializeOwned> WebSockets<'a, WE> {
             socket.0.close(None)?;
             Ok(())
         } else {
-            bail!("Not able to close the connection");
+            Err(Error::Msg("Not able to close the connection".to_string()))
         }
     }
 
@@ -73,7 +73,7 @@ impl<'a, WE: serde::de::DeserializeOwned> WebSockets<'a, WE> {
                     }
                     Message::Ping(_) | Message::Pong(_) | Message::Binary(_) => {}
                     Message::Close(e) => {
-                        bail!(format!("Disconnected {:?}", e));
+                        return Err(Error::Msg(format!("Disconnected {:?}", e)));
                     }
                 }
             }

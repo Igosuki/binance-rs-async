@@ -1,7 +1,9 @@
 use serde_json::Value;
 use std::collections::HashMap;
+use thiserror::Error;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Error)]
+#[error("code: {code}, msg: {msg}")]
 pub struct BinanceContentError {
     pub code: i16,
     pub msg: String,
@@ -10,27 +12,40 @@ pub struct BinanceContentError {
     extra: HashMap<String, Value>,
 }
 
-error_chain! {
-    errors {
-        BinanceError(response: BinanceContentError)
-        InvalidOrderError(msg: String)
-        InvalidPrice
-     }
-
-    foreign_links {
-        ReqError(reqwest::Error);
-        InvalidHeaderError(reqwest::header::InvalidHeaderValue);
-        IoError(std::io::Error);
-        ParseFloatError(std::num::ParseFloatError);
-        UrlParserError(url::ParseError);
-        Json(serde_json::Error);
-        Qs(serde_qs::Error);
-        Tungstenite(tungstenite::Error);
-        TimestampError(std::time::SystemTimeError);
-        UTF8Err(std::str::Utf8Error);
-    }
+#[derive(Error, Debug)]
+pub enum Error {
+    #[error(transparent)]
+    ReqError(#[from] reqwest::Error),
+    #[error(transparent)]
+    InvalidHeaderError(#[from] reqwest::header::InvalidHeaderValue),
+    #[error(transparent)]
+    IoError(#[from] std::io::Error),
+    #[error(transparent)]
+    ParseFloatError(#[from] std::num::ParseFloatError),
+    #[error(transparent)]
+    UrlParserError(#[from] url::ParseError),
+    #[error(transparent)]
+    Json(#[from] serde_json::Error),
+    #[error(transparent)]
+    Qs(#[from] serde_qs::Error),
+    #[error(transparent)]
+    Tungstenite(#[from] tungstenite::Error),
+    #[error(transparent)]
+    TimestampError(#[from] std::time::SystemTimeError),
+    #[error(transparent)]
+    UTF8Err(#[from] std::str::Utf8Error),
+    #[error("{response}")]
+    BinanceError { #[from] response: BinanceContentError },
+    #[error("{msg}")]
+    InvalidOrderError { msg: String },
+    #[error("invalid price")]
+    InvalidPrice,
+    #[error("{0}")]
+    Msg(String),
 }
 
 pub mod error_messages {
     pub const INVALID_PRICE: &str = "Invalid price.";
 }
+
+pub type Result<T> = core::result::Result<T, Error>;

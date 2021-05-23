@@ -48,10 +48,9 @@ pub struct OrderRequest {
 impl OrderRequest {
     fn valid(&self) -> Result<()> {
         if self.iceberg_qty.is_some() && self.time_in_force != Some(TimeInForce::GTC) {
-            return Err(ErrorKind::InvalidOrderError(
-                "Time in force has to be GTC for iceberg orders".to_string(),
-            )
-            .into());
+            return Err(Error::InvalidOrderError {
+                msg: "Time in force has to be GTC for iceberg orders".to_string(),
+            });
         }
         Ok(())
     }
@@ -116,8 +115,8 @@ impl Account {
 
     /// Account balance for a single asset
     pub async fn get_balance<S>(&self, asset: S) -> Result<Balance>
-    where
-        S: Into<String>,
+        where
+            S: Into<String>,
     {
         match self.get_account().await {
             Ok(account) => {
@@ -127,7 +126,7 @@ impl Account {
                         return Ok(balance);
                     }
                 }
-                bail!("Asset not found");
+                Err(Error::Msg("Asset not found".to_string()))
             }
             Err(e) => Err(e),
         }
@@ -135,8 +134,8 @@ impl Account {
 
     /// All currently open orders for a single symbol
     pub async fn get_open_orders<S>(&self, symbol: S) -> Result<Vec<Order>>
-    where
-        S: Into<String>,
+        where
+            S: Into<String>,
     {
         let mut parameters: BTreeMap<String, String> = BTreeMap::new();
         parameters.insert("symbol".into(), symbol.into());
@@ -242,8 +241,8 @@ impl Account {
 
     /// Trade history
     pub async fn trade_history<S>(&self, symbol: S) -> Result<Vec<TradeHistory>>
-    where
-        S: Into<String>,
+        where
+            S: Into<String>,
     {
         let mut parameters: BTreeMap<String, String> = BTreeMap::new();
         parameters.insert("symbol".into(), symbol.into());
