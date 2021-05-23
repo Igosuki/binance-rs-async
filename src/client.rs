@@ -4,11 +4,12 @@ use reqwest::Response;
 use reqwest::StatusCode;
 use ring::hmac;
 use serde_json::from_str;
+use serde::de;
+use std::time::Duration;
 
 use crate::errors::*;
 use crate::util::{build_request_p, build_signed_request_p};
-use serde::de;
-use std::time::Duration;
+use crate::errors::error_messages;
 
 static API1_HOST: &str = "https://api.binance.com";
 
@@ -228,12 +229,18 @@ impl Client {
             }
             StatusCode::BAD_REQUEST => {
                 let error: BinanceContentError = response.json().await?;
-
-                Err(ErrorKind::BinanceError(error).into())
+                Err(handle_content_error(error).into())
             }
             s => {
                 bail!(format!("Received response: {:?}", s));
             }
         }
+    }
+}
+
+fn handle_content_error(error: BinanceContentError) -> crate::errors::ErrorKind {
+    match (error.code, error.msg.as_ref()) {
+        (-1013, error_messages::INVALID_PRICE) => ErrorKind::InvalidPrice,
+        _ => ErrorKind::BinanceError(error)
     }
 }

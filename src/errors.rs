@@ -14,6 +14,7 @@ error_chain! {
     errors {
         BinanceError(response: BinanceContentError)
         InvalidOrderError(msg: String)
+        InvalidPrice
      }
 
     foreign_links {
@@ -28,4 +29,8 @@ error_chain! {
         TimestampError(std::time::SystemTimeError);
         UTF8Err(std::str::Utf8Error);
     }
+}
+
+pub mod error_messages {
+    pub const INVALID_PRICE: &str = "Invalid price.";
 }
