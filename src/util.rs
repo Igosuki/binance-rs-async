@@ -41,7 +41,7 @@ pub fn build_signed_request(
 
         Ok(request)
     } else {
-        bail!("Failed to get timestamp")
+        Err(Error::Msg("Failed to get timestamp".to_string()))
     }
 }
 
@@ -70,7 +70,7 @@ where
 
         Ok(request)
     } else {
-        bail!("Failed to get timestamp")
+        Err(Error::Msg("Failed to get timestamp".to_string()))
     }
 }
 

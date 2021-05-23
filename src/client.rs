@@ -219,28 +219,28 @@ impl Client {
                 Ok(result?.to_string())
             }
             StatusCode::INTERNAL_SERVER_ERROR => {
-                bail!("Internal Server Error");
+                Err(Error::Msg("Internal Server Error".to_string()))
             }
             StatusCode::SERVICE_UNAVAILABLE => {
-                bail!("Service Unavailable");
+                Err(Error::Msg("Service Unavailable".to_string()))
             }
             StatusCode::UNAUTHORIZED => {
-                bail!("Unauthorized");
+                Err(Error::Msg("Unauthorized".to_string()))
             }
             StatusCode::BAD_REQUEST => {
                 let error: BinanceContentError = response.json().await?;
                 Err(handle_content_error(error).into())
             }
             s => {
-                bail!(format!("Received response: {:?}", s));
+                Err(Error::Msg(format!("Received response: {:?}", s)))
             }
         }
     }
 }
 
-fn handle_content_error(error: BinanceContentError) -> crate::errors::ErrorKind {
+fn handle_content_error(error: BinanceContentError) -> crate::errors::Error {
     match (error.code, error.msg.as_ref()) {
-        (-1013, error_messages::INVALID_PRICE) => ErrorKind::InvalidPrice,
-        _ => ErrorKind::BinanceError(error)
+        (-1013, error_messages::INVALID_PRICE) => Error::InvalidPrice,
+        _ => Error::BinanceError { response: error }
     }
 }
