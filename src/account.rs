@@ -115,8 +115,8 @@ impl Account {
 
     /// Account balance for a single asset
     pub async fn get_balance<S>(&self, asset: S) -> Result<Balance>
-        where
-            S: Into<String>,
+    where
+        S: Into<String>,
     {
         match self.get_account().await {
             Ok(account) => {
@@ -134,8 +134,8 @@ impl Account {
 
     /// All currently open orders for a single symbol
     pub async fn get_open_orders<S>(&self, symbol: S) -> Result<Vec<Order>>
-        where
-            S: Into<String>,
+    where
+        S: Into<String>,
     {
         let mut parameters: BTreeMap<String, String> = BTreeMap::new();
         parameters.insert("symbol".into(), symbol.into());
@@ -230,10 +230,7 @@ impl Account {
     pub async fn test_cancel_order<S>(&self, o: OrderCancellation) -> Result<TestResponse> {
         let recv_window = o.recv_window.unwrap_or(self.recv_window);
         let request = build_signed_request_p(o, recv_window)?;
-        let data = self
-            .client
-            .delete_signed(API_V3_ORDER_TEST, &request)
-            .await?;
+        let data = self.client.delete_signed(API_V3_ORDER_TEST, &request).await?;
         let tr: TestResponse = from_str(data.as_str())?;
 
         Ok(tr)
@@ -241,8 +238,8 @@ impl Account {
 
     /// Trade history
     pub async fn trade_history<S>(&self, symbol: S) -> Result<Vec<TradeHistory>>
-        where
-            S: Into<String>,
+    where
+        S: Into<String>,
     {
         let mut parameters: BTreeMap<String, String> = BTreeMap::new();
         parameters.insert("symbol".into(), symbol.into());

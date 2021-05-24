@@ -21,7 +21,7 @@ pub static DAYTICKER: &str = "24hrTicker";
 pub struct WebSockets<'a, WE> {
     pub socket: Option<(WebSocket<AutoStream>, Response)>,
     handler: Box<dyn FnMut(WE) -> Result<()> + 'a>,
-    url: String
+    url: String,
 }
 
 impl<'a, WE: serde::de::DeserializeOwned> WebSockets<'a, WE> {
@@ -32,7 +32,7 @@ impl<'a, WE: serde::de::DeserializeOwned> WebSockets<'a, WE> {
         WebSockets {
             socket: None,
             handler: Box::new(handler),
-            url: url.unwrap_or_else(|| WEBSOCKET_URL).to_string()
+            url: url.unwrap_or_else(|| WEBSOCKET_URL).to_string(),
         }
     }
 
@@ -46,9 +46,7 @@ impl<'a, WE: serde::de::DeserializeOwned> WebSockets<'a, WE> {
                 self.socket = Some(answer);
                 Ok(())
             }
-            Err(e) => {
-                Err(Error::Msg(format!("Error during handshake {}", e)))
-            }
+            Err(e) => Err(Error::Msg(format!("Error during handshake {}", e))),
         }
     }
 

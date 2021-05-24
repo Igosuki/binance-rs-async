@@ -30,12 +30,7 @@ pub struct Margin {
 
 impl Margin {
     /// Execute transfer between spot account and margin account.
-    pub async fn transfer<S, F>(
-        &self,
-        symbol: S,
-        qty: F,
-        transfer_type: MarginTransferType,
-    ) -> Result<TransactionId>
+    pub async fn transfer<S, F>(&self, symbol: S, qty: F, transfer_type: MarginTransferType) -> Result<TransactionId>
     where
         S: Into<String>,
         F: Into<f64>,
@@ -106,11 +101,7 @@ impl Margin {
             new_client_order_id,
         };
         self.client
-            .delete_signed_p(
-                SAPI_V1_MARGIN_REPAY,
-                margin_order_cancellation,
-                self.recv_window,
-            )
+            .delete_signed_p(SAPI_V1_MARGIN_REPAY, margin_order_cancellation, self.recv_window)
             .await
     }
 
@@ -122,10 +113,7 @@ impl Margin {
     }
 
     /// Get existing repay records history
-    pub async fn repays(
-        &self,
-        repays_query: RecordsQuery,
-    ) -> Result<RecordsQueryResult<RepayState>> {
+    pub async fn repays(&self, repays_query: RecordsQuery) -> Result<RecordsQueryResult<RepayState>> {
         self.client
             .post_signed_p(SAPI_V1_MARGIN_REPAY, repays_query, self.recv_window)
             .await
@@ -143,12 +131,7 @@ impl Margin {
         S: Into<String>,
     {
         self.client
-            .get_signed_p(
-                SAPI_V1_MARGIN_ASSET,
-                Some(AssetQuery {
-                    asset: asset.into(),
-                }),
-            )
+            .get_signed_p(SAPI_V1_MARGIN_ASSET, Some(AssetQuery { asset: asset.into() }))
             .await
     }
 
@@ -158,12 +141,7 @@ impl Margin {
         S: Into<String>,
     {
         self.client
-            .get_signed_p(
-                SAPI_V1_MARGIN_PAIR,
-                Some(PairQuery {
-                    symbol: symbol.into(),
-                }),
-            )
+            .get_signed_p(SAPI_V1_MARGIN_PAIR, Some(PairQuery { symbol: symbol.into() }))
             .await
     }
 
@@ -185,30 +163,19 @@ impl Margin {
         S: Into<String>,
     {
         self.client
-            .get_signed_p(
-                SAPI_V1_MARGIN_PRICE_INDEX,
-                Some(PairQuery {
-                    symbol: symbol.into(),
-                }),
-            )
+            .get_signed_p(SAPI_V1_MARGIN_PRICE_INDEX, Some(PairQuery { symbol: symbol.into() }))
             .await
     }
 
     /// Get transfer history
-    pub async fn transfers(
-        &self,
-        transfers_query: RecordsQuery,
-    ) -> Result<RecordsQueryResult<OrderState>> {
+    pub async fn transfers(&self, transfers_query: RecordsQuery) -> Result<RecordsQueryResult<OrderState>> {
         self.client
             .get_signed_p(SAPI_V1_MARGIN_TRANSFER, Some(transfers_query))
             .await
     }
 
     /// Get interest history
-    pub async fn interests(
-        &self,
-        interest_query: RecordsQuery,
-    ) -> Result<RecordsQueryResult<InterestState>> {
+    pub async fn interests(&self, interest_query: RecordsQuery) -> Result<RecordsQueryResult<InterestState>> {
         self.client
             .get_signed_p(SAPI_V1_MARGIN_INTEREST_HISTORY, Some(interest_query))
             .await
@@ -229,9 +196,7 @@ impl Margin {
 
     /// Get an existing order state
     pub async fn order(&self, margin_order: MarginOrderQuery) -> Result<MarginOrderState> {
-        self.client
-            .get_signed_p(SAPI_V1_MARGIN_ORDER, Some(margin_order))
-            .await
+        self.client.get_signed_p(SAPI_V1_MARGIN_ORDER, Some(margin_order)).await
     }
 
     /// Get open orders
@@ -240,30 +205,19 @@ impl Margin {
         S: Into<String>,
     {
         self.client
-            .get_signed_p(
-                SAPI_V1_MARGIN_OPEN_ORDERS,
-                Some(PairQuery {
-                    symbol: symbol.into(),
-                }),
-            )
+            .get_signed_p(SAPI_V1_MARGIN_OPEN_ORDERS, Some(PairQuery { symbol: symbol.into() }))
             .await
     }
 
     /// Get all orders
-    pub async fn orders(
-        &self,
-        all_orders_query: RecordsQuery,
-    ) -> Result<RecordsQueryResult<OrderSumaryState>> {
+    pub async fn orders(&self, all_orders_query: RecordsQuery) -> Result<RecordsQueryResult<OrderSumaryState>> {
         self.client
             .get_signed_p(SAPI_V1_MARGIN_ALL_ORDERS, Some(all_orders_query))
             .await
     }
 
     /// Get all trades
-    pub async fn trades(
-        &self,
-        all_orders_query: RecordsQuery,
-    ) -> Result<RecordsQueryResult<OwnTradesState>> {
+    pub async fn trades(&self, all_orders_query: RecordsQuery) -> Result<RecordsQueryResult<OwnTradesState>> {
         self.client
             .get_signed_p(SAPI_V1_MARGIN_MY_TRADES, Some(all_orders_query))
             .await
@@ -275,12 +229,7 @@ impl Margin {
         S: Into<String>,
     {
         self.client
-            .get_signed_p(
-                SAPI_V1_MARGIN_MAX_BORROWABLE,
-                Some(AssetQuery {
-                    asset: asset.into(),
-                }),
-            )
+            .get_signed_p(SAPI_V1_MARGIN_MAX_BORROWABLE, Some(AssetQuery { asset: asset.into() }))
             .await
     }
 
@@ -292,9 +241,7 @@ impl Margin {
         self.client
             .get_signed_p(
                 SAPI_V1_MARGIN_MAX_TRANSFERABLE,
-                Some(AssetQuery {
-                    asset: asset.into(),
-                }),
+                Some(AssetQuery { asset: asset.into() }),
             )
             .await
     }
@@ -317,10 +264,7 @@ impl Margin {
     }
 
     pub async fn close(&self, listen_key: &str) -> Result<Success> {
-        let data = self
-            .client
-            .delete(SAPI_USER_DATA_STREAM, listen_key)
-            .await?;
+        let data = self.client.delete(SAPI_USER_DATA_STREAM, listen_key).await?;
 
         let success: Success = from_str(data.as_str())?;
 

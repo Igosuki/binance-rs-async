@@ -37,13 +37,10 @@ pub struct Symbol {
 
 impl Symbol {
     pub fn lot_size(&self) -> Option<Filters> {
-        self.filters
-            .clone()
-            .into_iter()
-            .find(|filter| match filter {
-                Filters::LotSize { .. } => true,
-                _ => false,
-            })
+        self.filters.clone().into_iter().find(|filter| match filter {
+            Filters::LotSize { .. } => true,
+            _ => false,
+        })
     }
 }
 
@@ -361,9 +358,7 @@ pub enum OrderSide {
 
 /// By default, buy
 impl Default for OrderSide {
-    fn default() -> Self {
-        Self::Buy
-    }
+    fn default() -> Self { Self::Buy }
 }
 
 /// Order types, the following restrictions apply
@@ -388,9 +383,7 @@ pub enum OrderType {
 
 /// By default, use market orders
 impl Default for OrderType {
-    fn default() -> Self {
-        Self::Market
-    }
+    fn default() -> Self { Self::Market }
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

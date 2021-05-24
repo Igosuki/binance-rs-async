@@ -47,28 +47,27 @@ async fn user_stream_websocket() {
     if let Ok(answer) = user_stream.start().await {
         let listen_key = answer.listen_key;
 
-        let mut web_socket: WebSockets<WebsocketEvent> =
-            WebSockets::new(|event: WebsocketEvent| {
-                match event {
-                    WebsocketEvent::AccountUpdate(account_update) => {
-                        for balance in &account_update.balances {
-                            println!(
-                                "Asset: {}, free: {}, locked: {}",
-                                balance.asset, balance.free, balance.locked
-                            );
-                        }
-                    }
-                    WebsocketEvent::OrderUpdate(trade) => {
+        let mut web_socket: WebSockets<WebsocketEvent> = WebSockets::new(|event: WebsocketEvent| {
+            match event {
+                WebsocketEvent::AccountUpdate(account_update) => {
+                    for balance in &account_update.balances {
                         println!(
-                            "Symbol: {}, Side: {:?}, Price: {}, Execution Type: {:?}",
-                            trade.symbol, trade.side, trade.price, trade.execution_type
+                            "Asset: {}, free: {}, locked: {}",
+                            balance.asset, balance.free, balance.locked
                         );
                     }
-                    _ => (),
-                };
+                }
+                WebsocketEvent::OrderUpdate(trade) => {
+                    println!(
+                        "Symbol: {}, Side: {:?}, Price: {}, Execution Type: {:?}",
+                        trade.symbol, trade.side, trade.price, trade.execution_type
+                    );
+                }
+                _ => (),
+            };
 
-                Ok(())
-            });
+            Ok(())
+        });
 
         web_socket.connect(&listen_key).unwrap(); // check error
         if let Err(e) = web_socket.event_loop(&keep_running) {
@@ -89,10 +88,7 @@ fn market_websocket() {
     let mut web_socket: WebSockets<WebsocketEvent> = WebSockets::new(|event: WebsocketEvent| {
         match event {
             WebsocketEvent::Trade(trade) => {
-                println!(
-                    "Symbol: {}, price: {}, qty: {}",
-                    trade.symbol, trade.price, trade.qty
-                );
+                println!("Symbol: {}, price: {}, qty: {}", trade.symbol, trade.price, trade.qty);
             }
             WebsocketEvent::DepthOrderBook(depth_order_book) => {
                 println!(
@@ -126,19 +122,18 @@ fn all_trades_websocket() {
     let agg_trade: String = "!ticker@arr".to_string();
     // NB: you may not ask for both arrays type streams and object type streams at the same time, this holds true in binance connections anyways
     // You cannot connect to multiple things for a single socket
-    let mut web_socket: WebSockets<Vec<WebsocketEvent>> =
-        WebSockets::new(|events: Vec<WebsocketEvent>| {
-            for tick_events in events {
-                if let WebsocketEvent::DayTicker(tick_event) = tick_events {
-                    println!(
-                        "Symbol: {}, price: {}, qty: {}",
-                        tick_event.symbol, tick_event.best_bid, tick_event.best_bid_qty
-                    );
-                }
+    let mut web_socket: WebSockets<Vec<WebsocketEvent>> = WebSockets::new(|events: Vec<WebsocketEvent>| {
+        for tick_events in events {
+            if let WebsocketEvent::DayTicker(tick_event) = tick_events {
+                println!(
+                    "Symbol: {}, price: {}, qty: {}",
+                    tick_event.symbol, tick_event.best_bid, tick_event.best_bid_qty
+                );
             }
+        }
 
-            Ok(())
-        });
+        Ok(())
+    });
 
     web_socket.connect(&agg_trade).unwrap(); // check error
     if let Err(e) = web_socket.event_loop(&keep_running) {
@@ -176,25 +171,24 @@ fn last_price() {
     let agg_trade: String = "!ticker@arr".to_string();
     let mut btcusdt: f32 = "0".parse().unwrap();
 
-    let mut web_socket: WebSockets<Vec<WebsocketEvent>> =
-        WebSockets::new(|events: Vec<WebsocketEvent>| {
-            for tick_events in events {
-                if let WebsocketEvent::DayTicker(tick_event) = tick_events {
-                    if tick_event.symbol == "BTCUSDT" {
-                        btcusdt = tick_event.average_price.parse().unwrap();
-                        let btcusdt_close: f32 = tick_event.current_close.parse().unwrap();
-                        println!("{} - {}", btcusdt, btcusdt_close);
+    let mut web_socket: WebSockets<Vec<WebsocketEvent>> = WebSockets::new(|events: Vec<WebsocketEvent>| {
+        for tick_events in events {
+            if let WebsocketEvent::DayTicker(tick_event) = tick_events {
+                if tick_event.symbol == "BTCUSDT" {
+                    btcusdt = tick_event.average_price.parse().unwrap();
+                    let btcusdt_close: f32 = tick_event.current_close.parse().unwrap();
+                    println!("{} - {}", btcusdt, btcusdt_close);
 
-                        if btcusdt_close as i32 == 7000 {
-                            // Break the event loop
-                            keep_running.store(false, Ordering::Relaxed);
-                        }
+                    if btcusdt_close as i32 == 7000 {
+                        // Break the event loop
+                        keep_running.store(false, Ordering::Relaxed);
                     }
                 }
             }
+        }
 
-            Ok(())
-        });
+        Ok(())
+    });
 
     web_socket.connect(&agg_trade).unwrap(); // check error
     if let Err(e) = web_socket.event_loop(&keep_running) {

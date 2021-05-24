@@ -35,7 +35,10 @@ pub enum Error {
     #[error(transparent)]
     UTF8Err(#[from] std::str::Utf8Error),
     #[error("{response}")]
-    BinanceError { #[from] response: BinanceContentError },
+    BinanceError {
+        #[from]
+        response: BinanceContentError,
+    },
     #[error("{msg}")]
     InvalidOrderError { msg: String },
     #[error("invalid price")]

@@ -3,13 +3,13 @@ use reqwest::header::{HeaderMap, HeaderName, HeaderValue, CONTENT_TYPE, USER_AGE
 use reqwest::Response;
 use reqwest::StatusCode;
 use ring::hmac;
-use serde_json::from_str;
 use serde::de;
+use serde_json::from_str;
 use std::time::Duration;
 
+use crate::errors::error_messages;
 use crate::errors::*;
 use crate::util::{build_request_p, build_signed_request_p};
-use crate::errors::error_messages;
 
 static API1_HOST: &str = "https://api.binance.com";
 pub static TEST_SPOT_API1_HOST: &str = "https://testnet.binance.vision";
@@ -30,11 +30,7 @@ impl Client {
     /// Returns a client based on the specified host and credentials
     /// Credentials do not need to be specified when using public endpoints
     /// If host is unspecified, defaults to Binance's public api host
-    pub fn new_with_host(
-        api_key: Option<String>,
-        secret_key: Option<String>,
-        host: Option<String>,
-    ) -> Self {
+    pub fn new_with_host(api_key: Option<String>, secret_key: Option<String>, host: Option<String>) -> Self {
         let builder: reqwest::ClientBuilder = reqwest::ClientBuilder::new();
         let builder = builder.timeout(Duration::from_secs(2));
         Client {
@@ -219,22 +215,14 @@ impl Client {
                 let result = std::str::from_utf8(&body);
                 Ok(result?.to_string())
             }
-            StatusCode::INTERNAL_SERVER_ERROR => {
-                Err(Error::Msg("Internal Server Error".to_string()))
-            }
-            StatusCode::SERVICE_UNAVAILABLE => {
-                Err(Error::Msg("Service Unavailable".to_string()))
-            }
-            StatusCode::UNAUTHORIZED => {
-                Err(Error::Msg("Unauthorized".to_string()))
-            }
+            StatusCode::INTERNAL_SERVER_ERROR => Err(Error::Msg("Internal Server Error".to_string())),
+            StatusCode::SERVICE_UNAVAILABLE => Err(Error::Msg("Service Unavailable".to_string())),
+            StatusCode::UNAUTHORIZED => Err(Error::Msg("Unauthorized".to_string())),
             StatusCode::BAD_REQUEST => {
                 let error: BinanceContentError = response.json().await?;
                 Err(handle_content_error(error).into())
             }
-            s => {
-                Err(Error::Msg(format!("Received response: {:?}", s)))
-            }
+            s => Err(Error::Msg(format!("Received response: {:?}", s))),
         }
     }
 }
@@ -242,6 +230,6 @@ impl Client {
 fn handle_content_error(error: BinanceContentError) -> crate::errors::Error {
     match (error.code, error.msg.as_ref()) {
         (-1013, error_messages::INVALID_PRICE) => Error::InvalidPrice,
-        _ => Error::BinanceError { response: error }
+        _ => Error::BinanceError { response: error },
     }
 }
