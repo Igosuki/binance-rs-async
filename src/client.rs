@@ -12,6 +12,7 @@ use crate::util::{build_request_p, build_signed_request_p};
 use crate::errors::error_messages;
 
 static API1_HOST: &str = "https://api.binance.com";
+pub static TEST_SPOT_API1_HOST: &str = "https://testnet.binance.vision";
 
 #[derive(Clone)]
 pub struct Client {

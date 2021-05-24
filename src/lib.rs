@@ -30,3 +30,5 @@ pub mod rest_model;
 pub mod userstream;
 pub mod websockets;
 pub mod ws_model;
+
+pub use client::TEST_SPOT_API1_HOST;

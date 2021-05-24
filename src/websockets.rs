@@ -9,6 +9,7 @@ use tungstenite::protocol::WebSocket;
 use tungstenite::{connect, Message};
 
 pub static WEBSOCKET_URL: &str = "wss://stream.binance.com:9443/ws/";
+pub static WEBSOCKET_TEST_URL: &str = "wss://testnet.binance.vision/ws";
 pub static OUTBOUND_ACCOUNT_INFO: &str = "outboundAccountInfo";
 pub static EXECUTION_REPORT: &str = "executionReport";
 pub static KLINE: &str = "kline";
@@ -20,22 +21,24 @@ pub static DAYTICKER: &str = "24hrTicker";
 pub struct WebSockets<'a, WE> {
     pub socket: Option<(WebSocket<AutoStream>, Response)>,
     handler: Box<dyn FnMut(WE) -> Result<()> + 'a>,
+    url: String
 }
 
 impl<'a, WE: serde::de::DeserializeOwned> WebSockets<'a, WE> {
-    pub fn new<Callback>(handler: Callback) -> WebSockets<'a, WE>
+    pub fn new<Callback>(handler: Callback, url: Option<&str>) -> WebSockets<'a, WE>
     where
         Callback: FnMut(WE) -> Result<()> + 'a,
     {
         WebSockets {
             socket: None,
             handler: Box::new(handler),
+            url: url.unwrap_or_else(|| WEBSOCKET_URL).to_string()
         }
     }
 
     /// Connect to a websocket endpoint
     pub fn connect(&mut self, endpoint: &str) -> Result<()> {
-        let wss: String = format!("{}{}", WEBSOCKET_URL, endpoint);
+        let wss: String = format!("{}{}", self.url, endpoint);
         let url = Url::parse(&wss)?;
 
         match connect(url) {
