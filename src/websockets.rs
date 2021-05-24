@@ -25,7 +25,14 @@ pub struct WebSockets<'a, WE> {
 }
 
 impl<'a, WE: serde::de::DeserializeOwned> WebSockets<'a, WE> {
-    pub fn new<Callback>(handler: Callback, url: Option<&str>) -> WebSockets<'a, WE>
+    pub fn new<Callback>(handler: Callback) -> WebSockets<'a, WE>
+    where
+        Callback: FnMut(WE) -> Result<()> + 'a,
+    {
+        Self::new_with_options(handler, None)
+    }
+
+    pub fn new_with_options<Callback>(handler: Callback, url: Option<&str>) -> WebSockets<'a, WE>
     where
         Callback: FnMut(WE) -> Result<()> + 'a,
     {
