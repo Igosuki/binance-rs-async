@@ -7,6 +7,7 @@ use serde_json::Value;
 
 //TODO : Validate intervals and start/end times in history queries
 //TODO : find out the repartition of kline/candlestick columns in the future kline rows
+//TODO : make limit optional where applicable
 
 #[derive(Clone)]
 pub struct FuturesMarket {
@@ -277,7 +278,6 @@ impl FuturesMarket {
 
     /// Returns up to 'limit' klines for given symbol and interval ("1m", "5m", ...)
     /// https://github.com/binance-exchange/binance-official-api-docs/blob/master/rest-api.md#klinecandlestick-data
-    // TODO : validate intervals
     pub async fn get_klines<S1, S2, S3, S4, S5>(
         &self,
         symbol: S1,
