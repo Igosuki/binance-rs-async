@@ -11,7 +11,7 @@ pub struct BinanceContentError {
     #[serde(flatten)]
     extra: HashMap<String, Value>,
 }
-
+///
 #[derive(Error, Debug)]
 pub enum Error {
     #[error(transparent)]
@@ -39,10 +39,14 @@ pub enum Error {
         #[from]
         response: BinanceContentError,
     },
+    #[error("unknown symbol {0}")]
+    UnknownSymbol(String),
     #[error("{msg}")]
     InvalidOrderError { msg: String },
     #[error("invalid price")]
     InvalidPrice,
+    #[error("invalid period {0}")]
+    InvalidPeriod(String),
     #[error("{0}")]
     Msg(String),
 }

@@ -565,6 +565,13 @@ pub struct PairQuery {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
+pub struct PairAndWindowQuery {
+    pub symbol: String,
+    pub recv_window: u64,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct PairDetails {
     pub id: u128,
     pub symbol: String,
@@ -800,6 +807,67 @@ pub mod string_or_float {
     }
 }
 
+pub(crate) mod string_or_float_opt {
+    use std::fmt;
+
+    use serde::{Deserialize, Deserializer, Serializer};
+
+    pub fn serialize<T, S>(value: &Option<T>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        T: fmt::Display,
+        S: Serializer,
+    {
+        match value {
+            Some(v) => crate::rest_model::string_or_float::serialize(v, serializer),
+            None => serializer.serialize_none(),
+        }
+    }
+
+    pub fn deserialize<'de, D>(deserializer: D) -> Result<Option<f64>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        #[derive(Deserialize)]
+        #[serde(untagged)]
+        enum StringOrFloat {
+            String(String),
+            Float(f64),
+        }
+
+        Ok(Some(crate::rest_model::string_or_float::deserialize(deserializer)?))
+    }
+}
+
+pub(crate) mod string_or_bool {
+    use std::fmt;
+
+    use serde::{de, Deserialize, Deserializer, Serializer};
+
+    pub fn serialize<T, S>(value: &T, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        T: fmt::Display,
+        S: Serializer,
+    {
+        serializer.collect_str(value)
+    }
+
+    pub fn deserialize<'de, D>(deserializer: D) -> Result<bool, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        #[derive(Deserialize)]
+        #[serde(untagged)]
+        enum StringOrFloat {
+            String(String),
+            Bool(bool),
+        }
+
+        match StringOrFloat::deserialize(deserializer)? {
+            StringOrFloat::String(s) => s.parse().map_err(de::Error::custom),
+            StringOrFloat::Bool(i) => Ok(i),
+        }
+    }
+}
 #[cfg(test)]
 mod test {
     use crate::rest_model::ExchangeInformation;
