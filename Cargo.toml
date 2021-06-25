@@ -1,5 +1,5 @@
 [package]
-name = "binance-async"
+name = "binance-rs-async"
 version = "0.1.1"
 license = "MIT OR Apache-2.0"
 authors = ["Guillaume Balaine igosuki.github@gmail.com"]
@@ -30,3 +30,6 @@ thiserror = "1.0"
 
 [dev-dependencies]
 csv = "1.0"
+tokio = { version = "1", features = ["full"] }
+log = "0.4"
+env_logger = "0.8"

@@ -2,14 +2,15 @@ use crate::errors::*;
 use serde_json::from_str;
 use url::Url;
 
+use crate::config::Config;
 use std::sync::atomic::{AtomicBool, Ordering};
 use tungstenite::client::AutoStream;
 use tungstenite::handshake::client::Response;
 use tungstenite::protocol::WebSocket;
 use tungstenite::{connect, Message};
 
-pub static WEBSOCKET_URL: &str = "wss://stream.binance.com:9443/ws/";
-pub static WEBSOCKET_TEST_URL: &str = "wss://testnet.binance.vision/ws";
+pub static STREAM_ENDPOINT: &str = "stream";
+pub static WS_ENDPOINT: &str = "ws";
 pub static OUTBOUND_ACCOUNT_INFO: &str = "outboundAccountInfo";
 pub static EXECUTION_REPORT: &str = "executionReport";
 pub static KLINE: &str = "kline";
@@ -21,7 +22,7 @@ pub static DAYTICKER: &str = "24hrTicker";
 pub struct WebSockets<'a, WE> {
     pub socket: Option<(WebSocket<AutoStream>, Response)>,
     handler: Box<dyn FnMut(WE) -> Result<()> + 'a>,
-    url: String,
+    conf: Config,
 }
 
 impl<'a, WE: serde::de::DeserializeOwned> WebSockets<'a, WE> {
@@ -29,23 +30,23 @@ impl<'a, WE: serde::de::DeserializeOwned> WebSockets<'a, WE> {
     where
         Callback: FnMut(WE) -> Result<()> + 'a,
     {
-        Self::new_with_options(handler, None)
+        Self::new_with_options(handler, Config::default())
     }
 
-    pub fn new_with_options<Callback>(handler: Callback, url: Option<&str>) -> WebSockets<'a, WE>
+    pub fn new_with_options<Callback>(handler: Callback, conf: Config) -> WebSockets<'a, WE>
     where
         Callback: FnMut(WE) -> Result<()> + 'a,
     {
         WebSockets {
             socket: None,
             handler: Box::new(handler),
-            url: url.unwrap_or_else(|| WEBSOCKET_URL).to_string(),
+            conf,
         }
     }
 
     /// Connect to a websocket endpoint
     pub fn connect(&mut self, endpoint: &str) -> Result<()> {
-        let wss: String = format!("{}{}", self.url, endpoint);
+        let wss: String = format!("{}/{}/{}", self.conf.ws_endpoint, WS_ENDPOINT, endpoint);
         let url = Url::parse(&wss)?;
 
         match connect(url) {

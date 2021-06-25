@@ -10,9 +10,7 @@ use std::time::Duration;
 use crate::errors::error_messages;
 use crate::errors::*;
 use crate::util::{build_request_p, build_signed_request_p};
-
-static API1_HOST: &str = "https://api.binance.com";
-pub static TEST_SPOT_API1_HOST: &str = "https://testnet.binance.vision";
+use serde::de::DeserializeOwned;
 
 #[derive(Clone)]
 pub struct Client {
@@ -23,21 +21,17 @@ pub struct Client {
 }
 
 impl Client {
-    pub fn new(api_key: Option<String>, secret_key: Option<String>) -> Self {
-        Self::new_with_host(api_key, secret_key, None)
-    }
-
     /// Returns a client based on the specified host and credentials
     /// Credentials do not need to be specified when using public endpoints
-    /// If host is unspecified, defaults to Binance's public api host
-    pub fn new_with_host(api_key: Option<String>, secret_key: Option<String>, host: Option<String>) -> Self {
+    /// Host is mandatory
+    pub fn new(api_key: Option<String>, secret_key: Option<String>, host: String) -> Self {
         let builder: reqwest::ClientBuilder = reqwest::ClientBuilder::new();
         let builder = builder.timeout(Duration::from_secs(2));
         Client {
             api_key: api_key.unwrap_or_else(|| "".into()),
             secret_key: secret_key.unwrap_or_else(|| "".into()),
             inner: builder.build().unwrap(),
-            host: host.unwrap_or(API1_HOST.to_string()),
+            host,
         }
     }
 
@@ -52,6 +46,12 @@ impl Client {
             .await?;
 
         self.handler(response).await
+    }
+
+    pub async fn get_signed_d<T: de::DeserializeOwned>(&self, endpoint: &str, request: &str) -> Result<T> {
+        let r = self.get_signed(endpoint, request).await?;
+        let t = from_str(r.as_str())?;
+        Ok(t)
     }
 
     pub async fn get_signed_p<T: de::DeserializeOwned, P: serde::Serialize>(
@@ -81,6 +81,12 @@ impl Client {
             .await?;
 
         self.handler(response).await
+    }
+
+    pub async fn post_signed_d<T: de::DeserializeOwned>(&self, endpoint: &str, request: &str) -> Result<T> {
+        let r = self.post_signed(endpoint, request).await?;
+        let t = from_str(r.as_str())?;
+        Ok(t)
     }
 
     pub async fn post_signed_p<T: de::DeserializeOwned, P: serde::Serialize>(
@@ -131,6 +137,25 @@ impl Client {
         let response = reqwest::get(url.as_str()).await?;
 
         self.handler(response).await
+    }
+
+    pub async fn get_p<T: DeserializeOwned>(&self, endpoint: &str, request: &str) -> Result<T> {
+        let r = self.get(endpoint, request).await?;
+        let t = from_str(r.as_str())?;
+        Ok(t)
+    }
+
+    pub async fn get_d<T: DeserializeOwned, S: serde::Serialize>(
+        &self,
+        endpoint: &str,
+        payload: Option<S>,
+    ) -> Result<T> {
+        let req = if let Some(p) = payload {
+            build_request_p(p)?
+        } else {
+            String::new()
+        };
+        self.get_p(endpoint, req.as_str()).await
     }
 
     pub async fn post(&self, endpoint: &str) -> Result<String> {
