@@ -1,6 +1,6 @@
 use std::collections::BTreeMap;
 
-use super::model::{AccountBalance, CanceledOrder, ChangeLeverageResponse, Position, Transaction};
+use super::rest_model::{AccountBalance, CanceledOrder, ChangeLeverageResponse, OrderType, Position, Transaction};
 use crate::account::OrderCancellation;
 use crate::client::Client;
 use crate::errors::*;
@@ -18,32 +18,10 @@ pub struct FuturesAccount {
 
 #[derive(Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub enum ContractType {
-    Perpetual,
-    CurrentMonth,
-    NextMonth,
-    CurrentQuarter,
-    NextQuarter,
-}
-
-#[derive(Deserialize, Serialize)]
-#[serde(rename_all = "camelCase")]
 pub enum PositionSide {
     Both,
     Long,
     Short,
-}
-
-#[derive(Deserialize, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub enum OrderType {
-    Limit,
-    Market,
-    Stop,
-    StopMarket,
-    TakeProfit,
-    TakeProfitMarket,
-    TrailingStopMarket,
 }
 
 #[derive(Deserialize, Serialize)]

@@ -11,6 +11,7 @@ pub struct ExchangeInformation {
     pub server_time: u64,
     pub rate_limits: Vec<RateLimit>,
     pub symbols: Vec<Symbol>,
+    pub exchange_filters: Vec<Filters>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -25,14 +26,14 @@ pub struct Symbol {
     pub quote_asset_precision: u64,
     pub base_commission_precision: u64,
     pub quote_commission_precision: u64,
-    pub order_types: Vec<String>,
+    pub order_types: Vec<OrderType>,
     pub iceberg_allowed: bool,
     pub oco_allowed: bool,
     pub quote_order_qty_market_allowed: bool,
     pub is_spot_trading_allowed: bool,
     pub is_margin_trading_allowed: bool,
     pub filters: Vec<Filters>,
-    pub permissions: Vec<String>,
+    pub permissions: Vec<SymbolPermission>,
 }
 
 impl Symbol {
@@ -50,37 +51,43 @@ pub enum Filters {
     #[serde(rename = "PRICE_FILTER")]
     #[serde(rename_all = "camelCase")]
     PriceFilter {
-        min_price: String,
-        max_price: String,
-        tick_size: String,
+        #[serde(with = "string_or_float")]
+        min_price: f64,
+        #[serde(with = "string_or_float")]
+        max_price: f64,
+        #[serde(with = "string_or_float")]
+        tick_size: f64,
     },
     #[serde(rename = "PERCENT_PRICE")]
     #[serde(rename_all = "camelCase")]
     PercentPrice {
-        multiplier_up: String,
-        multiplier_down: String,
+        #[serde(with = "string_or_float")]
+        multiplier_up: f64,
+        #[serde(with = "string_or_float")]
+        multiplier_down: f64,
         avg_price_mins: u64,
     },
     #[serde(rename = "LOT_SIZE")]
     #[serde(rename_all = "camelCase")]
     LotSize {
-        min_qty: String,
-        max_qty: String,
-        step_size: String,
+        #[serde(with = "string_or_float")]
+        min_qty: f64,
+        #[serde(with = "string_or_float")]
+        max_qty: f64,
+        #[serde(with = "string_or_float")]
+        step_size: f64,
     },
     #[serde(rename = "MIN_NOTIONAL")]
     #[serde(rename_all = "camelCase")]
     MinNotional {
-        min_notional: String,
+        #[serde(with = "string_or_float")]
+        min_notional: f64,
         apply_to_market: bool,
         avg_price_mins: u64,
     },
     #[serde(rename = "ICEBERG_PARTS")]
     #[serde(rename_all = "camelCase")]
     IcebergParts { limit: u16 },
-    #[serde(rename = "MAX_NUM_ALGO_ORDERS")]
-    #[serde(rename_all = "camelCase")]
-    MaxNumAlgoOrders { max_num_algo_orders: u16 },
     #[serde(rename = "MARKET_LOT_SIZE")]
     #[serde(rename_all = "camelCase")]
     MarketLotSize {
@@ -91,9 +98,24 @@ pub enum Filters {
     #[serde(rename = "MAX_NUM_ORDERS")]
     #[serde(rename_all = "camelCase")]
     MaxNumOrders { max_num_orders: u16 },
+    #[serde(rename = "MAX_NUM_ALGO_ORDERS")]
+    #[serde(rename_all = "camelCase")]
+    MaxNumAlgoOrders { max_num_algo_orders: u16 },
+    #[serde(rename = "MAX_NUM_ICEBERG_ORDERS")]
+    #[serde(rename_all = "camelCase")]
+    MaxNumIcebergOrders { max_num_iceberg_orders: u16 },
     #[serde(rename = "MAX_POSITION")]
     #[serde(rename_all = "camelCase")]
-    MaxPosition { max_position: String },
+    MaxPosition {
+        #[serde(with = "string_or_float")]
+        max_position: f64,
+    },
+    #[serde(rename = "EXCHANGE_MAX_NUM_ORDERS")]
+    #[serde(rename_all = "camelCase")]
+    ExchangeMaxNumOrders { max_num_orders: u16 },
+    #[serde(rename = "EXCHANGE_MAX_ALGO_ORDERS")]
+    #[serde(rename_all = "camelCase")]
+    ExchangeMaxNumAlgoOrders { max_num_algo_orders: u16 },
     #[serde(other)]
     Others,
 }
@@ -344,6 +366,8 @@ pub enum TimeInForce {
     IOC,
     /// Fill or Kill
     FOK,
+    /// Good till expired
+    GTX,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -667,12 +691,16 @@ pub enum SymbolStatus {
     Halt,
     AuctionMatch,
     Break,
+    PendingTrading,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
-pub enum SymbolType {
+pub enum SymbolPermission {
     Spot,
+    Margin,
+    #[serde(other)]
+    Other,
 }
 
 /// Status of an order, this can typically change over time

@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 
-use crate::rest_model::{string_or_bool, string_or_float, string_or_float_opt, Asks, Bids, Filters, RateLimit};
+use crate::rest_model::{string_or_bool, string_or_float, string_or_float_opt, Asks, Bids, RateLimit, SymbolStatus,
+                        TimeInForce};
 pub use crate::rest_model::{BookTickers, KlineSummaries, KlineSummary, ServerTime, SymbolPrice, Tickers};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -8,27 +9,129 @@ pub use crate::rest_model::{BookTickers, KlineSummaries, KlineSummary, ServerTim
 pub struct ExchangeInformation {
     pub timezone: String,
     pub server_time: u64,
+    pub futures_type: String,
     pub rate_limits: Vec<RateLimit>,
-    pub exchange_filters: Vec<String>,
+    pub exchange_filters: Vec<Filters>,
+    pub assets: Vec<AssetDetail>,
     pub symbols: Vec<Symbol>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct AssetDetail {
+    pub asset: String,
+    pub margin_available: bool,
+    #[serde(with = "string_or_float")]
+    pub auto_asset_exchange: f64,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Symbol {
     pub symbol: String,
-    pub status: String,
-    pub maint_margin_percent: String,
-    pub required_margin_percent: String,
+    pub pair: String,
+    pub contract_type: ContractType,
+    pub delivery_date: u64,
+    pub onboard_date: u64,
+    pub status: SymbolStatus,
+    #[serde(with = "string_or_float")]
+    pub maint_margin_percent: f64,
+    #[serde(with = "string_or_float")]
+    pub required_margin_percent: f64,
     pub base_asset: String,
     pub quote_asset: String,
     pub price_precision: u16,
     pub quantity_precision: u16,
     pub base_asset_precision: u64,
     pub quote_precision: u64,
+    pub underlying_type: String,
+    pub underlying_sub_type: Vec<String>,
+    pub settle_plan: u16,
+    #[serde(with = "string_or_float")]
+    pub trigger_protect: f64,
     pub filters: Vec<Filters>,
-    pub order_types: Vec<String>,
-    pub time_in_force: Vec<String>,
+    pub order_types: Vec<OrderType>,
+    pub time_in_force: Vec<TimeInForce>,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum ContractType {
+    Perpetual,
+    CurrentMonth,
+    NextMonth,
+    CurrentQuarter,
+    NextQuarter,
+    #[serde(rename = "")]
+    Empty,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum OrderType {
+    Limit,
+    Market,
+    Stop,
+    StopMarket,
+    TakeProfit,
+    TakeProfitMarket,
+    TrailingStopMarket,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(tag = "filterType")]
+pub enum Filters {
+    #[serde(rename = "PRICE_FILTER")]
+    #[serde(rename_all = "camelCase")]
+    PriceFilter {
+        #[serde(with = "string_or_float")]
+        min_price: f64,
+        #[serde(with = "string_or_float")]
+        max_price: f64,
+        #[serde(with = "string_or_float")]
+        tick_size: f64,
+    },
+    #[serde(rename = "LOT_SIZE")]
+    #[serde(rename_all = "camelCase")]
+    LotSize {
+        #[serde(with = "string_or_float")]
+        min_qty: f64,
+        #[serde(with = "string_or_float")]
+        max_qty: f64,
+        #[serde(with = "string_or_float")]
+        step_size: f64,
+    },
+    #[serde(rename = "MARKET_LOT_SIZE")]
+    #[serde(rename_all = "camelCase")]
+    MarketLotSize {
+        min_qty: String,
+        max_qty: String,
+        step_size: String,
+    },
+    #[serde(rename = "MAX_NUM_ORDERS")]
+    #[serde(rename_all = "camelCase")]
+    MaxNumOrders { limit: u16 },
+    #[serde(rename = "MAX_NUM_ALGO_ORDERS")]
+    #[serde(rename_all = "camelCase")]
+    MaxNumAlgoOrders { limit: u16 },
+    #[serde(rename = "MIN_NOTIONAL")]
+    #[serde(rename_all = "camelCase")]
+    MinNotional {
+        #[serde(with = "string_or_float")]
+        notional: f64,
+    },
+    #[serde(rename = "PERCENT_PRICE")]
+    #[serde(rename_all = "camelCase")]
+    PercentPrice {
+        #[serde(with = "string_or_float")]
+        multiplier_up: f64,
+        #[serde(with = "string_or_float")]
+        multiplier_down: f64,
+        #[serde(with = "string_or_float")]
+        multiplier_decimal: f64,
+    },
+    #[serde(other)]
+    Others,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
