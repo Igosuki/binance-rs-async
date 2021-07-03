@@ -42,6 +42,23 @@ impl Market {
         Ok(order_book)
     }
 
+    /// Order book with a custom depth limit
+    /// Supported limits are: 5, 10, 20, 50, 100, 500, 1000, 5000
+    pub async fn get_custom_depth<S>(&self, symbol: S, limit: u16) -> Result<OrderBook>
+    where
+        S: Into<String>,
+    {
+        let mut parameters: BTreeMap<String, String> = BTreeMap::new();
+        parameters.insert("symbol".into(), symbol.into());
+        parameters.insert("limit".into(), limit.to_string());
+
+        let request = build_request(&parameters);
+        let data = self.client.get(API_V3_DEPTH, &request).await?;
+        let order_book: OrderBook = from_str(data.as_str())?;
+
+        Ok(order_book)
+    }
+
     /// Latest price for ALL symbols.
     pub async fn get_all_prices(&self) -> Result<Prices> {
         let data = self.client.get(API_V3_TICKER_PRICE, "").await?;
