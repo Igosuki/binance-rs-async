@@ -18,7 +18,7 @@ Add this to your Cargo.toml
 
 ```toml
 [dependencies]
-binance-rs-async = "1.0.0-beta.0"
+binance-rs-async = "1.0.0-beta.1"
 ```
 
 ## Rust >= 1.37
@@ -26,3 +26,8 @@ binance-rs-async = "1.0.0-beta.0"
 ```rust
 rustup install stable
 ```
+
+## Contribution
+
+Simply create a pull request. 
+Properly documented code and tests (using binance testnet) are a must.
