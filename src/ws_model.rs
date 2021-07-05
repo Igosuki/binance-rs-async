@@ -3,8 +3,18 @@ use crate::rest_model::{string_or_float, Asks, Bids, OrderBook, OrderSide, Order
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(tag = "e")]
 pub enum WebsocketEvent {
-    #[serde(alias = "outboundAccountInfo")]
-    AccountUpdate(Box<AccountUpdate>),
+    #[serde(alias = "aggTrade")]
+    AggTrade(Box<TradesEvent>),
+    #[serde(alias = "trade")]
+    Trade(Box<TradeEvent>),
+    #[serde(alias = "kline")]
+    Kline(Box<KlineEvent>),
+    #[serde(alias = "24hrMiniTicker")]
+    DayMiniTicker(Box<MiniDayTickerEvent>),
+    #[serde(alias = "24hrTicker")]
+    DayTicker(Box<DayTickerEvent>),
+    #[serde(alias = "depthUpdate")]
+    DepthOrderBook(Box<DepthOrderBookEvent>),
     #[serde(alias = "outboundAccountPosition")]
     AccountPositionUpdate(Box<AccountPositionUpdate>),
     #[serde(alias = "balanceUpdate")]
@@ -13,18 +23,6 @@ pub enum WebsocketEvent {
     OrderUpdate(Box<OrderUpdate>),
     #[serde(alias = "listStatus")]
     ListOrderUpdate(Box<OrderListUpdate>),
-    #[serde(alias = "aggTrade")]
-    AggTrade(Box<TradesEvent>),
-    #[serde(alias = "trade")]
-    Trade(Box<TradeEvent>),
-    #[serde(alias = "lastUpdateId")]
-    OrderBook(Box<OrderBook>),
-    #[serde(alias = "24hrTicker")]
-    DayTicker(Box<DayTickerEvent>),
-    #[serde(alias = "kline")]
-    Kline(Box<KlineEvent>),
-    #[serde(alias = "depthUpdate")]
-    DepthOrderBook(Box<DepthOrderBookEvent>),
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -152,6 +150,27 @@ pub struct DayTickerEvent {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
+pub struct MiniDayTickerEvent {
+    #[serde(rename = "E")]
+    pub event_time: u64,
+    #[serde(rename = "s")]
+    pub symbol: String,
+    #[serde(rename = "c")]
+    pub current_close: String,
+    #[serde(rename = "o")]
+    pub open: String,
+    #[serde(rename = "h")]
+    pub high: String,
+    #[serde(rename = "l")]
+    pub low: String,
+    #[serde(rename = "v")]
+    pub volume: String,
+    #[serde(rename = "q")]
+    pub quote_volume: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct KlineEvent {
     #[serde(rename = "E")]
     pub event_time: u64,
@@ -242,7 +261,14 @@ pub struct BookTickerEvent {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct StreamEvent {
     stream: String,
-    pub data: WebsocketEvent,
+    pub data: WebsocketEventAlt,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum WebsocketEventAlt {
+    WebsocketEvent(WebsocketEvent),
+    Orderbook(Box<OrderBook>),
 }
 
 impl StreamEvent {

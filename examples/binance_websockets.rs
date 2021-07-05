@@ -49,14 +49,6 @@ async fn user_stream_websocket() {
 
         let mut web_socket: WebSockets<WebsocketEvent> = WebSockets::new(|event: WebsocketEvent| {
             match event {
-                WebsocketEvent::AccountUpdate(account_update) => {
-                    for balance in &account_update.balances {
-                        println!(
-                            "Asset: {}, free: {}, locked: {}",
-                            balance.asset, balance.free, balance.locked
-                        );
-                    }
-                }
                 WebsocketEvent::OrderUpdate(trade) => {
                     println!(
                         "Symbol: {}, Side: {:?}, Price: {}, Execution Type: {:?}",
@@ -94,12 +86,6 @@ fn market_websocket() {
                 println!(
                     "Symbol: {}, Bids: {:?}, Ask: {:?}",
                     depth_order_book.symbol, depth_order_book.bids, depth_order_book.asks
-                );
-            }
-            WebsocketEvent::OrderBook(order_book) => {
-                println!(
-                    "last_update_id: {}, Bids: {:?}, Ask: {:?}",
-                    order_book.last_update_id, order_book.bids, order_book.asks
                 );
             }
             _ => (),
