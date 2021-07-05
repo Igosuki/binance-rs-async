@@ -91,6 +91,13 @@ pub struct Savings {
 
 impl Savings {
     /// Get all coins available for deposit and withdrawal
+    /// # Examples
+    /// ```rust,no_run
+    /// use binance::{api::*, savings::*, config::*};
+    /// let savings: Savings = Binance::new_with_env(&Config::testnet());
+    /// let coins = tokio_test::block_on(savings.get_all_coins());
+    /// assert!(coins.is_ok(), "{:?}", coins)
+    /// ```
     pub async fn get_all_coins(&self) -> Result<Vec<CoinInfo>> {
         let request = build_signed_request(BTreeMap::new(), self.recv_window)?;
         self.client
@@ -99,6 +106,13 @@ impl Savings {
     }
 
     /// Fetch details of assets supported on Binance.
+    /// # Examples
+    /// ```rust,no_run
+    /// use binance::{api::*, savings::*, config::*};
+    /// let savings: Savings = Binance::new_with_env(&Config::testnet());
+    /// let coins = tokio_test::block_on(savings.asset_detail(Some("CTR".to_string())));
+    /// assert!(coins.is_ok(), "{:?}", coins)
+    /// ```
     pub async fn asset_detail(&self, asset: Option<String>) -> Result<BTreeMap<String, AssetDetail>> {
         let mut parameters = BTreeMap::new();
         if let Some(asset) = asset {
@@ -114,6 +128,13 @@ impl Savings {
     ///
     /// You can get the available networks using `get_all_coins`.
     /// If no network is specified, the address for the default network is returned.
+    /// # Examples
+    /// ```rust,no_run
+    /// use binance::{api::*, savings::*, config::*};
+    /// let savings: Savings = Binance::new_with_env(&Config::testnet());
+    /// let coins = tokio_test::block_on(savings.deposit_address("CTR", None));
+    /// assert!(coins.is_ok(), "{:?}", coins)
+    /// ```
     pub async fn deposit_address<S>(&self, coin: S, network: Option<String>) -> Result<DepositAddress>
     where
         S: Into<String>,

@@ -27,6 +27,7 @@
 //! use binance::api::Binance;
 //! use binance::errors::Error as BinanceLibError;
 //!
+//! #[tokio::main]
 //! async fn main() -> std::io::Result<()> {
 //!     let general: General = Binance::new(None, None);
 //!     let ping = general.ping().await;

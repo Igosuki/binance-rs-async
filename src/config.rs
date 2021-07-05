@@ -10,6 +10,12 @@ pub struct Config {
 }
 
 impl Config {
+    /// Configure binance with default production endpoints
+    /// # Examples
+    /// ```
+    /// use binance::config::Config;
+    /// let config = Config::default();
+    /// ```
     pub fn default() -> Config {
         Config {
             rest_api_endpoint: "https://api.binance.com".into(),
@@ -22,6 +28,12 @@ impl Config {
         }
     }
 
+    /// Configure binance with all testnet endpoints
+    /// # Examples
+    /// ```
+    /// use binance::config::Config;
+    /// let config = Config::testnet();
+    /// ```
     pub fn testnet() -> Config {
         Config::default()
             .set_rest_api_endpoint("https://testnet.binance.vision")

@@ -26,6 +26,9 @@ pub struct WebSockets<'a, WE> {
 }
 
 impl<'a, WE: serde::de::DeserializeOwned> WebSockets<'a, WE> {
+    /// New websocket holder with default configuration
+    /// # Examples
+    /// see examples/binance_websockets.rs
     pub fn new<Callback>(handler: Callback) -> WebSockets<'a, WE>
     where
         Callback: FnMut(WE) -> Result<()> + 'a,
@@ -33,6 +36,9 @@ impl<'a, WE: serde::de::DeserializeOwned> WebSockets<'a, WE> {
         Self::new_with_options(handler, Config::default())
     }
 
+    /// New websocket holder with provided configuration
+    /// # Examples
+    /// see examples/binance_websockets.rs
     pub fn new_with_options<Callback>(handler: Callback, conf: Config) -> WebSockets<'a, WE>
     where
         Callback: FnMut(WE) -> Result<()> + 'a,

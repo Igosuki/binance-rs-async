@@ -11,7 +11,11 @@ pub struct BinanceContentError {
     #[serde(flatten)]
     extra: HashMap<String, Value>,
 }
-///
+
+/// First errors are technical errors
+/// All unhandled binance content errors are BinanceError
+/// The rest are binance content errors that are properly handled
+/// Unhandled binance errors are Msg
 #[derive(Error, Debug)]
 pub enum Error {
     #[error(transparent)]
@@ -51,6 +55,7 @@ pub enum Error {
     Msg(String),
 }
 
+/// Custom error messages
 pub mod error_messages {
     pub const INVALID_PRICE: &str = "Invalid price.";
 }
