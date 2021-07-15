@@ -32,7 +32,7 @@ pub enum WorkingType {
 }
 
 /// Serialize bool as str
-fn serialize_as_str<'a, S, T>(t: &T, serializer: S) -> std::result::Result<S::Ok, S::Error>
+fn serialize_as_str<S, T>(t: &T, serializer: S) -> std::result::Result<S::Ok, S::Error>
 where
     S: Serializer,
     T: fmt::Display,

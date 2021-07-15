@@ -245,7 +245,7 @@ impl Client {
             StatusCode::UNAUTHORIZED => Err(Error::Msg("Unauthorized".to_string())),
             StatusCode::BAD_REQUEST => {
                 let error: BinanceContentError = response.json().await?;
-                Err(handle_content_error(error).into())
+                Err(handle_content_error(error))
             }
             s => Err(Error::Msg(format!("Received response: {:?}", s))),
         }

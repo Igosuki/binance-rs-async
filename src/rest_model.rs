@@ -38,10 +38,10 @@ pub struct Symbol {
 
 impl Symbol {
     pub fn lot_size(&self) -> Option<Filters> {
-        self.filters.clone().into_iter().find(|filter| match filter {
-            Filters::LotSize { .. } => true,
-            _ => false,
-        })
+        self.filters
+            .clone()
+            .into_iter()
+            .find(|filter| matches!(filter, Filters::LotSize { .. }))
     }
 }
 

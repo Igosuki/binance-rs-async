@@ -275,7 +275,7 @@ impl StreamEvent {
     /// Returns (stream_name, channel)
     pub fn parse_stream(&self) -> (String, String) {
         let mut parsed = self.stream.clone();
-        if let Some(0) = parsed.find("!") {
+        if let Some(0) = parsed.find('!') {
             parsed.remove(0);
         }
         let split = parsed.split_once("@").unwrap_or((&parsed, ""));

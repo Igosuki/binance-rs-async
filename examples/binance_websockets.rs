@@ -48,14 +48,11 @@ async fn user_stream_websocket() {
         let listen_key = answer.listen_key;
 
         let mut web_socket: WebSockets<WebsocketEvent> = WebSockets::new(|event: WebsocketEvent| {
-            match event {
-                WebsocketEvent::OrderUpdate(trade) => {
-                    println!(
-                        "Symbol: {}, Side: {:?}, Price: {}, Execution Type: {:?}",
-                        trade.symbol, trade.side, trade.price, trade.execution_type
-                    );
-                }
-                _ => (),
+            if let WebsocketEvent::OrderUpdate(trade) = event {
+                println!(
+                    "Symbol: {}, Side: {:?}, Price: {}, Execution Type: {:?}",
+                    trade.symbol, trade.side, trade.price, trade.execution_type
+                );
             };
 
             Ok(())
