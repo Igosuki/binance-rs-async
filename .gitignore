@@ -1,5 +1,6 @@
 target
 Cargo.lock
+precommit_venv
 
 *.fmt
 *.iml
