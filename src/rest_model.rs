@@ -130,7 +130,25 @@ pub struct AccountInformation {
     pub can_trade: bool,
     pub can_withdraw: bool,
     pub can_deposit: bool,
+    pub account_type: AccountType,
     pub balances: Vec<Balance>,
+    pub permissions: Vec<AccountType>,
+    pub update_time: i64,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum MarketPermission {
+    Spot,
+    Margin,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum AccountType {
+    Spot,
+    UsdtFuture,
+    CoinFuture,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
