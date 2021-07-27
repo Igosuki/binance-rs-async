@@ -5,9 +5,9 @@ use crate::rest_model::{BookTickers, KlineSummaries, KlineSummary, PairAndWindow
 use crate::util::*;
 use serde_json::Value;
 
-//TODO : Validate intervals and start/end times in history queries
-//TODO : find out the repartition of kline/candlestick columns in the future kline rows
-//TODO : make limit optional where applicable
+//TODO: Validate intervals and start/end times in history queries
+//TODO: find out the repartition of kline/candlestick columns in the future kline rows
+//TODO: make limit optional where applicable
 
 #[derive(Clone)]
 pub struct FuturesMarket {
