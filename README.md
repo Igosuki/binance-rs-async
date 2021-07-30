@@ -18,7 +18,7 @@ Add this to your Cargo.toml
 
 ```toml
 [dependencies]
-binance-rs-async = "1.0.0-beta.1"
+binance-rs-async = "1.0.0-beta.3"
 ```
 
 ## Rust >= 1.37
