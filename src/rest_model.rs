@@ -201,11 +201,37 @@ pub struct OrderCanceled {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
+pub struct Fill {
+    #[serde(with = "string_or_float")]
+    pub price: f64,
+    #[serde(with = "string_or_float")]
+    pub qty: f64,
+    #[serde(with = "string_or_float")]
+    pub commission: f64,
+    pub commission_asset: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct Transaction {
     pub symbol: String,
     pub order_id: u64,
     pub client_order_id: String,
     pub transact_time: u64,
+    #[serde(with = "string_or_float")]
+    pub price: f64,
+    #[serde(with = "string_or_float")]
+    pub orig_qty: f64,
+    #[serde(with = "string_or_float")]
+    pub executed_qty: f64,
+    #[serde(with = "string_or_float")]
+    pub cummulative_quote_qty: f64,
+    pub status: OrderStatus,
+    pub time_in_force: TimeInForce,
+    #[serde(rename = "type")]
+    pub order_type: OrderType,
+    pub side: OrderSide,
+    pub fills: Vec<Fill>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

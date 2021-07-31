@@ -6,6 +6,7 @@ use binance::account::*;
 use binance::api::*;
 use binance::config::Config;
 use binance::errors::Error as BinanceLibError;
+use binance::futures::rest_model::SymbolPrice;
 use binance::general::*;
 use binance::market::*;
 use binance::rest_model::{OrderSide, OrderType, TimeInForce};
@@ -14,8 +15,11 @@ use env_logger::Builder;
 #[tokio::main]
 async fn main() {
     Builder::new().parse_default_env().init();
+    info!("running general endpoints");
     general().await;
+    info!("running market endpoints");
     market_data().await;
+    info!("running account (private) endpoints");
     account().await;
 }
 
@@ -50,22 +54,24 @@ async fn general() {
 }
 
 async fn account() {
+    let market: Market = Binance::new(None, None);
     let account: Account = Binance::new_with_env(&Config::testnet());
-
+    let symbol = "BTCUSDT";
+    let SymbolPrice { price, .. } = market.get_price(symbol).await.unwrap();
     match account.get_account().await {
         Ok(answer) => info!("{:?}", answer.balances),
         Err(e) => error!("Error: {}", e),
     }
 
-    match account.get_open_orders("BTCUSDT").await {
+    match account.get_open_orders(symbol).await {
         Ok(answer) => info!("{:?}", answer),
         Err(e) => error!("Error: {}", e),
     }
 
     let limit_buy = OrderRequest {
-        symbol: "BTCUSDT".to_string(),
-        quantity: Some(10.0),
-        price: Some(0.014000),
+        symbol: symbol.to_string(),
+        quantity: Some(0.001),
+        price: Some(price),
         order_type: OrderType::Limit,
         side: OrderSide::Buy,
         time_in_force: Some(TimeInForce::FOK),
@@ -77,8 +83,8 @@ async fn account() {
     }
 
     let market_buy = OrderRequest {
-        symbol: "BTCUSDT".to_string(),
-        quantity: Some(5.0),
+        symbol: symbol.to_string(),
+        quantity: Some(0.001),
         order_type: OrderType::Market,
         side: OrderSide::Buy,
         ..OrderRequest::default()
@@ -89,9 +95,9 @@ async fn account() {
     }
 
     let limit_sell = OrderRequest {
-        symbol: "BTCUSDT".to_string(),
-        quantity: Some(10.0),
-        price: Some(0.035000),
+        symbol: symbol.to_string(),
+        quantity: Some(0.001),
+        price: Some(price),
         order_type: OrderType::Limit,
         side: OrderSide::Sell,
         time_in_force: Some(TimeInForce::FOK),
@@ -103,8 +109,8 @@ async fn account() {
     }
 
     let market_sell = OrderRequest {
-        symbol: "BTCUSDT".to_string(),
-        quantity: Some(5.0),
+        symbol: symbol.to_string(),
+        quantity: Some(0.001),
         order_type: OrderType::Market,
         side: OrderSide::Sell,
         ..OrderRequest::default()
@@ -116,7 +122,7 @@ async fn account() {
 
     let order_id = 1_957_528;
     let order_status = OrderStatusRequest {
-        symbol: "BTCUSDT".to_string(),
+        symbol: symbol.to_string(),
         order_id: Some(order_id),
         ..OrderStatusRequest::default()
     };
@@ -127,7 +133,7 @@ async fn account() {
     }
 
     let order_cancellation = OrderCancellation {
-        symbol: "BTCUSDT".to_string(),
+        symbol: symbol.to_string(),
         order_id: Some(order_id),
         ..OrderCancellation::default()
     };
@@ -142,7 +148,7 @@ async fn account() {
         Err(e) => error!("Error: {}", e),
     }
 
-    match account.trade_history("BTCUSDT").await {
+    match account.trade_history(symbol).await {
         Ok(answer) => info!("{:?}", answer),
         Err(e) => error!("Error: {}", e),
     }
