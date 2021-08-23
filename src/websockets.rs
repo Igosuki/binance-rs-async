@@ -12,6 +12,7 @@ use tungstenite::{connect, Message};
 pub static STREAM_ENDPOINT: &str = "stream";
 pub static WS_ENDPOINT: &str = "ws";
 pub static OUTBOUND_ACCOUNT_INFO: &str = "outboundAccountInfo";
+pub static OUTBOUND_ACCOUNT_POSITION: &str = "outboundAccountPosition";
 pub static EXECUTION_REPORT: &str = "executionReport";
 pub static KLINE: &str = "kline";
 pub static AGGREGATED_TRADE: &str = "aggTrade";

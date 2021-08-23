@@ -1,6 +1,5 @@
 #[macro_use]
 extern crate log;
-extern crate binance;
 
 use binance::account::*;
 use binance::api::*;

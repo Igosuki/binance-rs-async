@@ -62,16 +62,10 @@
 
 #![deny(unstable_features, unused_must_use, unused_mut, unused_imports, unused_import_braces)]
 
-extern crate hex;
-extern crate reqwest;
-extern crate ring;
 #[macro_use]
 extern crate serde;
-extern crate serde_json;
+
 extern crate serde_qs as qs;
-extern crate thiserror;
-extern crate tungstenite;
-extern crate url;
 
 mod client;
 pub mod errors;

@@ -64,6 +64,8 @@ pub enum ContractType {
     NextQuarter,
     #[serde(rename = "")]
     Empty,
+    #[serde(other)]
+    Other,
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
@@ -76,6 +78,8 @@ pub enum OrderType {
     TakeProfit,
     TakeProfitMarket,
     TrailingStopMarket,
+    #[serde(other)]
+    Other,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

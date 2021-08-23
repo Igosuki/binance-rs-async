@@ -1,5 +1,3 @@
-extern crate binance;
-
 use binance::api::*;
 use binance::userstream::*;
 use binance::websockets::*;
@@ -47,7 +45,7 @@ async fn user_stream_websocket() {
     if let Ok(answer) = user_stream.start().await {
         let listen_key = answer.listen_key;
 
-        let mut web_socket: WebSockets<WebsocketEvent> = WebSockets::new(|event: WebsocketEvent| {
+        let mut web_socket: WebSockets<'_, WebsocketEvent> = WebSockets::new(|event: WebsocketEvent| {
             if let WebsocketEvent::OrderUpdate(trade) = event {
                 println!(
                     "Symbol: {}, Side: {:?}, Price: {}, Execution Type: {:?}",
@@ -74,7 +72,7 @@ async fn user_stream_websocket() {
 fn market_websocket() {
     let keep_running = AtomicBool::new(true); // Used to control the event loop
     let agg_trade: String = format!("{}@aggTrade", "ethbtc");
-    let mut web_socket: WebSockets<WebsocketEvent> = WebSockets::new(|event: WebsocketEvent| {
+    let mut web_socket: WebSockets<'_, WebsocketEvent> = WebSockets::new(|event: WebsocketEvent| {
         match event {
             WebsocketEvent::Trade(trade) => {
                 println!("Symbol: {}, price: {}, qty: {}", trade.symbol, trade.price, trade.qty);
@@ -105,7 +103,7 @@ fn all_trades_websocket() {
     let agg_trade: String = "!ticker@arr".to_string();
     // NB: you may not ask for both arrays type streams and object type streams at the same time, this holds true in binance connections anyways
     // You cannot connect to multiple things for a single socket
-    let mut web_socket: WebSockets<Vec<WebsocketEvent>> = WebSockets::new(|events: Vec<WebsocketEvent>| {
+    let mut web_socket: WebSockets<'_, Vec<WebsocketEvent>> = WebSockets::new(|events: Vec<WebsocketEvent>| {
         for tick_events in events {
             if let WebsocketEvent::DayTicker(tick_event) = tick_events {
                 println!(
@@ -130,7 +128,7 @@ fn all_trades_websocket() {
 fn kline_websocket() {
     let keep_running = AtomicBool::new(true);
     let kline: String = "ethbtc@kline_1m".to_string();
-    let mut web_socket: WebSockets<WebsocketEvent> = WebSockets::new(|event: WebsocketEvent| {
+    let mut web_socket: WebSockets<'_, WebsocketEvent> = WebSockets::new(|event: WebsocketEvent| {
         if let WebsocketEvent::Kline(kline_event) = event {
             println!(
                 "Symbol: {}, high: {}, low: {}",
@@ -154,7 +152,7 @@ fn last_price() {
     let agg_trade: String = "!ticker@arr".to_string();
     let mut btcusdt: f32 = "0".parse().unwrap();
 
-    let mut web_socket: WebSockets<Vec<WebsocketEvent>> = WebSockets::new(|events: Vec<WebsocketEvent>| {
+    let mut web_socket: WebSockets<'_, Vec<WebsocketEvent>> = WebSockets::new(|events: Vec<WebsocketEvent>| {
         for tick_events in events {
             if let WebsocketEvent::DayTicker(tick_event) = tick_events {
                 if tick_event.symbol == "BTCUSDT" {

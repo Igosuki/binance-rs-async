@@ -141,6 +141,8 @@ pub struct AccountInformation {
 pub enum MarketPermission {
     Spot,
     Margin,
+    #[serde(other)]
+    Other,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -149,6 +151,9 @@ pub enum AccountType {
     Spot,
     UsdtFuture,
     CoinFuture,
+    Leveraged,
+    #[serde(other)]
+    Other,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -412,6 +417,8 @@ pub enum TimeInForce {
     FOK,
     /// Good till expired
     GTX,
+    #[serde(other)]
+    Other,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -420,6 +427,8 @@ pub enum OrderResponse {
     Ack,
     Result,
     Full,
+    #[serde(other)]
+    Other,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -452,6 +461,8 @@ pub enum OrderType {
     TakeProfit,
     TakeProfitLimit,
     LimitMaker,
+    #[serde(other)]
+    Other,
 }
 
 /// By default, use market orders
@@ -509,10 +520,13 @@ pub struct RepayState {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum TransactionStatus {
-    PENDING,
-    CONFIRMED,
-    FAILED,
+    Pending,
+    Confirmed,
+    Failed,
+    #[serde(other)]
+    Other,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -530,6 +544,8 @@ pub enum TransferType {
     RollIn,
     #[serde(rename = "ROLL_OUT")]
     RollOut,
+    #[serde(other)]
+    Other,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -548,6 +564,8 @@ pub struct OrderState {
 pub enum InterestType {
     #[serde(rename = "ON_BORROW")]
     OnBorrow,
+    #[serde(other)]
+    Other,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -736,6 +754,8 @@ pub enum SymbolStatus {
     AuctionMatch,
     Break,
     PendingTrading,
+    #[serde(other)]
+    Other,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -789,6 +809,8 @@ pub enum OCOOrderStatus {
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum ContingencyType {
     OCO,
+    #[serde(other)]
+    Other,
 }
 
 /// API Rate Limit
@@ -806,6 +828,8 @@ pub enum RateLimitType {
     RequestWeight,
     Orders,
     RawRequests,
+    #[serde(other)]
+    Other,
 }
 
 /// Rate Limit Interval, used by RateLimitType

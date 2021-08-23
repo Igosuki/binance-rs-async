@@ -240,9 +240,9 @@ impl Client {
                 let result = std::str::from_utf8(&body);
                 Ok(result?.to_string())
             }
-            StatusCode::INTERNAL_SERVER_ERROR => Err(Error::Msg("Internal Server Error".to_string())),
-            StatusCode::SERVICE_UNAVAILABLE => Err(Error::Msg("Service Unavailable".to_string())),
-            StatusCode::UNAUTHORIZED => Err(Error::Msg("Unauthorized".to_string())),
+            StatusCode::INTERNAL_SERVER_ERROR => Err(Error::InternalServerError),
+            StatusCode::SERVICE_UNAVAILABLE => Err(Error::ServiceUnavailable),
+            StatusCode::UNAUTHORIZED => Err(Error::Unauthorized),
             StatusCode::BAD_REQUEST => {
                 let error: BinanceContentError = response.json().await?;
                 Err(handle_content_error(error))
@@ -255,6 +255,7 @@ impl Client {
 fn handle_content_error(error: BinanceContentError) -> crate::errors::Error {
     match (error.code, error.msg.as_ref()) {
         (-1013, error_messages::INVALID_PRICE) => Error::InvalidPrice,
+        (-1125, msg) => Error::InvalidListenKey(msg.to_string()),
         _ => Error::BinanceError { response: error },
     }
 }

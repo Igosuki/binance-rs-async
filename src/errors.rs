@@ -43,6 +43,8 @@ pub enum Error {
         #[from]
         response: BinanceContentError,
     },
+    #[error("invalid listen key : {0}")]
+    InvalidListenKey(String),
     #[error("unknown symbol {0}")]
     UnknownSymbol(String),
     #[error("{msg}")]
@@ -51,6 +53,12 @@ pub enum Error {
     InvalidPrice,
     #[error("invalid period {0}")]
     InvalidPeriod(String),
+    #[error("internal server error")]
+    InternalServerError,
+    #[error("service unavailable")]
+    ServiceUnavailable,
+    #[error("Unauthorized")]
+    Unauthorized,
     #[error("{0}")]
     Msg(String),
 }

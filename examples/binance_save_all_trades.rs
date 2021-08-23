@@ -1,6 +1,3 @@
-extern crate binance;
-extern crate csv;
-
 use csv::Writer;
 use std::error::Error;
 use std::fs::File;
@@ -34,7 +31,7 @@ fn save_all_trades_websocket() {
 
     let mut web_socket_handler = WebSocketHandler::new(local_wrt);
     let agg_trade: String = "!ticker@arr".to_string();
-    let mut web_socket: WebSockets<Vec<WebsocketEvent>> = WebSockets::new(|events: Vec<WebsocketEvent>| {
+    let mut web_socket: WebSockets<'_, Vec<WebsocketEvent>> = WebSockets::new(|events: Vec<WebsocketEvent>| {
         // You can break the event_loop if some condition is met be setting keep_running to false
         // keep_running.store(false, Ordering::Relaxed);
         if let Err(error) = web_socket_handler.write_to_file(events) {

@@ -29,6 +29,8 @@ pub enum PositionSide {
 pub enum WorkingType {
     MarkPrice,
     ContractPrice,
+    #[serde(other)]
+    Other,
 }
 
 /// Serialize bool as str
