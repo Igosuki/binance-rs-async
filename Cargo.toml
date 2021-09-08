@@ -27,6 +27,7 @@ serde_qs = "0.8"
 thiserror = "1.0"
 tungstenite = "0.14"
 url = "2.2"
+lazy_static = "1.4"
 
 [dev-dependencies]
 csv = "1.1"

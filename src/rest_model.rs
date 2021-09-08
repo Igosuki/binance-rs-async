@@ -400,10 +400,29 @@ pub struct Transfer {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum IsolatedMarginTransferType {
+    Spot,
+    IsolatedMargin,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct IsolatedTransfer {
+    pub asset: String,
+    pub symbol: String,
+    pub amount: f64,
+    pub trans_from: IsolatedMarginTransferType,
+    pub trans_to: IsolatedMarginTransferType,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Loan {
     pub asset: String,
     pub amount: f64,
+    pub is_isolated: Option<String>,
+    pub symbol: Option<String>,
 }
 
 /// How long will an order stay alive
@@ -427,6 +446,16 @@ pub enum OrderResponse {
     Ack,
     Result,
     Full,
+    #[serde(other)]
+    Other,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum SideEffectType {
+    NoSideEffect,
+    MarginBuy,
+    AutoRepay,
     #[serde(other)]
     Other,
 }
@@ -477,13 +506,22 @@ pub struct MarginOrder {
     pub side: OrderSide,
     #[serde(rename(serialize = "type", deserialize = "type"))]
     pub order_type: OrderType,
-    pub quantity: f64,
-    pub price: f64,
-    pub stop_price: f64,
-    pub new_client_order_id: String,
-    pub iceberg_qty: f64,
+    pub quantity: Option<f64>,
+    pub quote_order_qty: Option<f64>,
+    pub price: Option<f64>,
+    /// Used with `OrderType::StopLoss`, `OrderType::StopLossLimit`, `OrderType::TakeProfit` and `OrderType::TakeProfitLimit`
+    pub stop_price: Option<f64>,
+    pub new_client_order_id: Option<String>,
+    /// Used with `OrderType::Limit`, `OrderType::StopLossLimit` and `OrderType::TakeProfitLimit` to create an iceberg order
+    pub iceberg_qty: Option<f64>,
+    /// Default is `OrderResponse::ACK`
     pub new_order_resp_type: OrderResponse,
+    /// Default is `TimeInForce::GTC`
     pub time_in_force: TimeInForce,
+    /// "TRUE" or "FALSE", in upper case, default is "FALSE"
+    pub is_isolated: Option<String>,
+    /// Default is `SideEffectType::NoSideEffect`
+    pub side_effect_type: SideEffectType,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -493,9 +531,122 @@ pub struct MarginOrderCancellation {
     pub order_id: u64,
     pub orig_client_order_id: String,
     pub new_client_order_id: String,
+    pub is_isolated: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct MarginOrderCancellationResult {
+    pub symbol: String,
+    pub order_id: u64,
+    pub orig_client_order_id: String,
+    pub client_order_id: String,
+    #[serde(with = "string_or_float")]
+    pub price: f64,
+    #[serde(with = "string_or_float")]
+    pub orig_qty: f64,
+    #[serde(with = "string_or_float")]
+    pub executed_qty: f64,
+    #[serde(with = "string_or_float")]
+    pub cummulative_quote_qty: f64,
+    pub status: OrderStatus,
+    pub time_in_force: TimeInForce,
+    #[serde(rename(serialize = "type", deserialize = "type"))]
+    pub order_type: OrderType,
+    pub side: OrderSide,
+    pub is_isolated: Option<bool>,
+    pub order_list_id: Option<i64>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct MarginOrdersCancellation {
+    pub symbol: String,
+    pub is_isolated: Option<String>,
+}
+
+pub type MarginOrdersCancellationResult = Vec<MarginOrderCancellationResult>;
+
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct MarginOCOOrder {
+    pub symbol: String,
+    /// "TRUE" or "FALSE", in upper case, default is "FALSE"
+    pub is_isolated: Option<String>,
+    /// A unique identifier that will be applied to all orders
+    pub list_client_order_id: Option<String>,
+    pub side: OrderSide,
+    pub quantity: f64,
+    /// A unique identifier that will be applied to the limit order
+    pub limit_client_order_id: Option<String>,
+    pub price: f64,
+    pub limit_iceberg_qty: Option<f64>,
+    /// A unique identifier that will be applied to the stop order
+    pub stop_client_order_id: Option<String>,
+    pub stop_price: f64,
+    pub stop_limit_price: Option<f64>,
+    pub stop_iceberg_qty: Option<f64>,
+    pub stop_limit_time_in_force: Option<TimeInForce>,
+    /// Default is `OrderResponse::ACK`
+    pub new_order_resp_type: Option<OrderResponse>,
+    /// Default is `SideEffectType::NoSideEffect`
+    pub side_effect_type: Option<SideEffectType>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct MarginOCOOrderResult {
+    pub order_list_id: u64,
+    pub contingency_type: ContingencyType,
+    pub list_status_type: OCOStatus,
+    pub list_order_status: OCOOrderStatus,
+    pub list_client_order_id: Option<String>,
+    pub transaction_time: u128,
+    pub symbol: String,
+    #[serde(with = "string_or_float_opt")]
+    pub margin_buy_borrow_amount: Option<f64>,
+    pub margin_buy_borrow_asset: Option<String>,
+    pub is_isolated: Option<bool>,
+    pub orders: Vec<OCOOrderDetail>,
+    pub order_reports: Vec<OCOOrderReport>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct OCOOrderDetail {
+    pub symbol: String,
+    pub order_id: u64,
+    pub client_order_id: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct OCOOrderReport {
+    pub symbol: String,
+    pub order_id: u64,
+    pub client_order_id: Option<String>,
+    pub transact_time: u128,
+    #[serde(with = "string_or_float")]
+    pub price: f64,
+    #[serde(with = "string_or_float")]
+    pub orig_qty: f64,
+    #[serde(with = "string_or_float")]
+    pub executed_qty: f64,
+    #[serde(with = "string_or_float")]
+    pub cummulative_quote_qty: f64,
+    pub status: OrderStatus,
+    pub time_in_force: TimeInForce,
+    #[serde(rename = "type")]
+    pub order_type: OrderType,
+    #[serde(rename = "type")]
+    pub side: OrderSide,
+    #[serde(with = "string_or_float")]
+    pub stop_price: f64,
+}
+
+/// archived and is_isolated are only applicable to certain endpoints
+/// refer to Binance documentation for full disclosure
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct RecordsQuery {
     pub asset: String,
@@ -505,18 +656,52 @@ pub struct RecordsQuery {
     pub current: Option<u16>,
     pub size: Option<u8>,
     pub transfer_type: Option<TransferType>,
+    pub archived: Option<bool>,
+    /// "TRUE" or "FALSE", default is "FALSE"
+    pub is_isolated: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct OCORecordsQuery {
+    pub symbol: String,
+    pub from_id: Option<u64>,
+    pub start_time: Option<u64>,
+    pub end_time: Option<u64>,
+    pub limit: Option<u8>,
+    /// "TRUE" or "FALSE", default is "FALSE"
+    pub is_isolated: Option<String>,
+}
+
+/// archived and is_isolated are only applicable to certain endpoints
+/// refer to Binance documentation for full disclosure
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct IsolatedTransfersQuery {
+    pub symbol: String,
+    pub asset: Option<String>,
+    pub start_time: Option<u64>,
+    pub end_time: Option<u64>,
+    pub current: Option<u16>,
+    pub size: Option<u8>,
+    pub trans_from: Option<IsolatedMarginTransferType>,
+    pub trans_to: Option<IsolatedMarginTransferType>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct RepayState {
+    #[serde(with = "string_or_float")]
     pub amount: f64,
     pub asset: String,
+    #[serde(with = "string_or_float")]
     pub interest: f64,
+    #[serde(with = "string_or_float")]
     pub principal: f64,
     pub status: TransactionStatus,
     pub timestamp: u64,
     pub tx_id: u64,
+    pub isolated_symbol: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -533,9 +718,12 @@ pub enum TransactionStatus {
 #[serde(rename_all = "camelCase")]
 pub struct LoanState {
     pub asset: String,
+    #[serde(with = "string_or_float")]
     pub principal: f64,
     pub timestamp: u64,
     pub status: TransactionStatus,
+    pub isolated_symbol: Option<String>,
+    pub tx_id: u64,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -561,9 +749,16 @@ pub struct OrderState {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum InterestType {
-    #[serde(rename = "ON_BORROW")]
+    /// First interested charged on borrow
     OnBorrow,
+    /// Interested charged per hour
+    Periodic,
+    /// Interested charged per hour converted into BNB
+    PeriodicConverted,
+    /// First interested charged on borrow converted into BNB
+    OnBorrowConverted,
     #[serde(other)]
     Other,
 }
@@ -572,25 +767,35 @@ pub enum InterestType {
 #[serde(rename_all = "camelCase")]
 pub struct InterestState {
     pub asset: String,
+    #[serde(with = "string_or_float")]
     pub interest: f64,
     pub interest_accured_time: u64,
+    #[serde(with = "string_or_float")]
     pub interest_rate: f64,
+    #[serde(with = "string_or_float")]
     pub principal: f64,
     #[serde(rename = "type")]
     pub interest_type: InterestType,
+    pub isolated_symbol: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct ForcedLiquidationState {
+    #[serde(with = "string_or_float")]
     pub avg_price: f64,
+    #[serde(with = "string_or_float")]
     pub executed_qty: f64,
     pub order_id: u64,
+    #[serde(with = "string_or_float")]
     pub price: f64,
+    #[serde(with = "string_or_float")]
     pub qty: f64,
+    pub side: OrderSide,
     pub symbol: String,
     pub time_in_force: TimeInForce,
     pub updated_time: u128,
+    pub is_isolated: Option<bool>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -604,10 +809,15 @@ pub struct RecordsQueryResult<R> {
 #[serde(rename_all = "camelCase")]
 pub struct UserAsset {
     pub asset: String,
+    #[serde(with = "string_or_float")]
     pub borrowed: f64,
+    #[serde(with = "string_or_float")]
     pub free: f64,
+    #[serde(with = "string_or_float")]
     pub interest: f64,
+    #[serde(with = "string_or_float")]
     pub locked: f64,
+    #[serde(with = "string_or_float")]
     pub net_asset: f64,
 }
 
@@ -617,10 +827,14 @@ pub type UserAssets = Vec<UserAsset>;
 #[serde(rename_all = "camelCase")]
 pub struct MarginAccountDetails {
     pub borrow_enabled: bool,
-    pub margin_level: String,
-    pub total_asset_of_btc: String,
-    pub total_liability_of_btc: String,
-    pub total_net_asset_of_btc: String,
+    #[serde(with = "string_or_float")]
+    pub margin_level: f64,
+    #[serde(with = "string_or_float")]
+    pub total_asset_of_btc: f64,
+    #[serde(with = "string_or_float")]
+    pub total_liability_of_btc: f64,
+    #[serde(with = "string_or_float")]
+    pub total_net_asset_of_btc: f64,
     pub trade_enabled: bool,
     pub transfer_enabled: bool,
     pub user_assets: UserAssets,
@@ -628,8 +842,83 @@ pub struct MarginAccountDetails {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
+pub struct IsolatedMarginAccountAsset {
+    pub asset: String,
+    pub borrow_enabled: bool,
+    #[serde(with = "string_or_float")]
+    pub borrowed: f64,
+    #[serde(with = "string_or_float")]
+    pub free: f64,
+    #[serde(with = "string_or_float")]
+    pub interest: f64,
+    #[serde(with = "string_or_float")]
+    pub locked: f64,
+    #[serde(with = "string_or_float")]
+    pub net_asset: f64,
+    #[serde(with = "string_or_float")]
+    pub net_asset_of_btc: f64,
+    pub repay_enabled: bool,
+    #[serde(with = "string_or_float")]
+    pub total_asset: f64,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct IsolatedMarginAccountAssetDetails {
+    pub base_asset: IsolatedMarginAccountAsset,
+    pub quote_asset: IsolatedMarginAccountAsset,
+    pub symbol: String,
+    pub isolated_created: bool,
+    pub enabled: bool,
+    #[serde(with = "string_or_float")]
+    pub margin_level: f64,
+    #[serde(with = "string_or_float")]
+    pub margin_ratio: f64,
+    pub margin_level_status: MarginLevelStatus,
+    #[serde(with = "string_or_float")]
+    pub index_price: f64,
+    #[serde(with = "string_or_float")]
+    pub liquidate_price: f64,
+    #[serde(with = "string_or_float")]
+    pub liquidate_rate: f64,
+    pub trade_enabled: bool,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum MarginLevelStatus {
+    Excessive,
+    Normal,
+    MarginCall,
+    PreLiquidation,
+    ForceLiquidation,
+    #[serde(other)]
+    Other,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct IsolatedMarginAccountDetails {
+    pub assets: Vec<IsolatedMarginAccountAssetDetails>,
+    #[serde(with = "string_or_float_opt")]
+    pub total_asset_of_btc: Option<f64>,
+    #[serde(with = "string_or_float_opt")]
+    pub total_liability_of_btc: Option<f64>,
+    #[serde(with = "string_or_float_opt")]
+    pub total_net_asset_of_btc: Option<f64>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct AssetQuery {
     pub asset: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct MarginAssetQuery {
+    pub asset: String,
+    pub isolated_symbol: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -647,6 +936,19 @@ pub struct AssetDetails {
 #[serde(rename_all = "camelCase")]
 pub struct PairQuery {
     pub symbol: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct MarginPairQuery {
+    pub symbol: String,
+    pub is_isolated: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct IsolatedMarginPairQuery {
+    pub symbols: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -674,6 +976,19 @@ pub type AllPairs = Vec<PairDetails>;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
+pub struct IsolatedPairDetails {
+    pub symbol: String,
+    pub base: String,
+    pub quote: String,
+    pub is_margin_trade: bool,
+    pub is_buy_allowed: bool,
+    pub is_sell_allowed: bool,
+}
+
+pub type AllIsolatedPairs = Vec<IsolatedPairDetails>;
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct PriceIndex {
     pub calc_time: u128,
     pub price: f64,
@@ -684,30 +999,64 @@ pub struct PriceIndex {
 #[serde(rename_all = "camelCase")]
 pub struct MarginOrderQuery {
     pub symbol: String,
-    pub order_id: String,
-    pub orig_client_order_id: String,
+    pub is_isolated: Option<String>,
+    pub order_id: Option<String>,
+    pub orig_client_order_id: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct MarginOrderResult {
+    pub symbol: String,
+    pub order_id: u64,
+    pub client_order_id: String,
+    pub transact_time: u128,
+    #[serde(with = "string_or_float")]
+    pub price: f64,
+    #[serde(with = "string_or_float")]
+    pub orig_qty: f64,
+    #[serde(with = "string_or_float")]
+    pub executed_qty: f64,
+    #[serde(with = "string_or_float")]
+    pub cumulative_quote_qty: f64,
+    pub status: OrderStatus,
+    pub time_in_force: TimeInForce,
+    #[serde(rename(serialize = "type", deserialize = "type"))]
+    pub order_type: OrderType,
+    pub side: OrderSide,
+    pub margin_buy_borrow_amount: Option<f64>,
+    pub margin_buy_borrow_asset: Option<String>,
+    pub is_isolated: Option<bool>,
+    pub fills: Vec<Fill>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct MarginOrderState {
     pub client_order_id: String,
+    #[serde(with = "string_or_float")]
     pub cumulative_quote_qty: f64,
+    #[serde(with = "string_or_float")]
     pub executed_qty: f64,
+    #[serde(with = "string_or_float")]
     pub iceberg_qty: f64,
-    pub is_working: bool,
     pub order_id: u64,
+    #[serde(with = "string_or_float")]
     pub orig_qty: f64,
+    #[serde(with = "string_or_float")]
     pub price: f64,
     pub side: OrderSide,
     pub status: OrderStatus,
+    #[serde(with = "string_or_float")]
     pub stop_price: f64,
     pub symbol: String,
+    pub is_isolated: Option<bool>,
     pub time: u128,
     pub time_in_force: TimeInForce,
     #[serde(rename(serialize = "type", deserialize = "type"))]
     pub order_type: OrderType,
     pub update_time: u128,
+    pub is_working: bool,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -724,6 +1073,7 @@ pub struct OrderSumaryState {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct OwnTradesState {
+    #[serde(with = "string_or_float")]
     pub commission: f64,
     pub commission_asset: String,
     pub id: u64,
@@ -731,15 +1081,28 @@ pub struct OwnTradesState {
     pub is_buyer: bool,
     pub is_maker: bool,
     pub order_id: u64,
+    #[serde(with = "string_or_float")]
     pub price: f64,
+    #[serde(with = "string_or_float")]
     pub qty: f64,
     pub symbol: String,
     pub time: u128,
+    pub is_isolated: bool,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
-pub struct MaxAmount {
+pub struct MaxBorrowableAmount {
+    #[serde(with = "string_or_float")]
+    pub amount: f64,
+    #[serde(with = "string_or_float")]
+    pub borrow_limit: f64,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct MaxTransferableAmount {
+    #[serde(with = "string_or_float")]
     pub amount: f64,
 }
 
@@ -806,6 +1169,25 @@ pub enum OCOOrderStatus {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct MarginOCOOrderCancellation {
+    pub symbol: String,
+    pub order_list_id: u64,
+    pub list_client_order_id: String,
+    pub new_client_order_id: String,
+    pub is_isolated: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct MarginOCOOrderQuery {
+    pub symbol: String,
+    pub is_isolated: Option<String>,
+    pub order_list_id: Option<String>,
+    pub orig_client_order_id: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum ContingencyType {
     OCO,
@@ -849,6 +1231,48 @@ pub struct RateLimit {
     interval_num: i32,
     limit: i32,
 }
+
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct BnbBurnQuery {
+    /// "true" or "false", defaults to "false"
+    #[serde(rename = "spotBNBBurn")]
+    spot_bnb_burn: Option<String>,
+    /// "true" or "false", defaults to "false"
+    #[serde(rename = "interestBNBBurn")]
+    interest_bnb_burn: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct BnbBurnStatus {
+    #[serde(rename = "spotBNBBurn")]
+    spot_bnb_burn: bool,
+    #[serde(rename = "interestBNBBurn")]
+    interest_bnb_burn: bool,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct InterestRateHistoryQuery {
+    asset: String,
+    vip_level: Option<u8>,
+    start_time: Option<u64>,
+    end_time: Option<u64>,
+    limit: Option<u64>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct InterestRateAssetHistory {
+    asset: String,
+    #[serde(with = "string_or_float")]
+    daily_interest_rate: f64,
+    timestamp: u128,
+    vip_level: u8,
+}
+
+pub type InterestRateHistory = Vec<InterestRateAssetHistory>;
 
 #[derive(Debug, Clone)]
 pub struct KlineSummary {
@@ -964,6 +1388,7 @@ pub(crate) mod string_or_bool {
         }
     }
 }
+
 #[cfg(test)]
 mod test {
     use crate::rest_model::ExchangeInformation;
