@@ -64,6 +64,8 @@
 
 #[macro_use]
 extern crate serde;
+#[macro_use]
+extern crate lazy_static;
 
 extern crate serde_qs as qs;
 
