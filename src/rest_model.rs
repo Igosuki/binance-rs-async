@@ -192,7 +192,7 @@ pub struct Order {
     pub update_time: u64,
     pub is_working: bool,
     #[serde(with = "string_or_float")]
-    pub orig_order_qty: f64,
+    pub orig_quote_order_qty: f64,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -1391,8 +1391,9 @@ pub(crate) mod string_or_bool {
 
 #[cfg(test)]
 mod test {
-    use crate::rest_model::ExchangeInformation;
     use std::path::PathBuf;
+
+    use crate::rest_model::ExchangeInformation;
 
     #[test]
     fn exchange_info_serde() {
