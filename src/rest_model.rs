@@ -267,9 +267,6 @@ pub struct Bids {
     pub price: f64,
     #[serde(with = "string_or_float")]
     pub qty: f64,
-
-    #[serde(skip)]
-    ignore: Vec<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -278,9 +275,6 @@ pub struct Asks {
     pub price: f64,
     #[serde(with = "string_or_float")]
     pub qty: f64,
-
-    #[serde(skip)]
-    ignore: Vec<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -1226,10 +1220,10 @@ pub enum RateLimitInterval {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct RateLimit {
-    interval: RateLimitInterval,
-    rate_limit_type: RateLimitType,
-    interval_num: i32,
-    limit: i32,
+    pub interval: RateLimitInterval,
+    pub rate_limit_type: RateLimitType,
+    pub interval_num: i32,
+    pub limit: i32,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
@@ -1237,39 +1231,39 @@ pub struct RateLimit {
 pub struct BnbBurnQuery {
     /// "true" or "false", defaults to "false"
     #[serde(rename = "spotBNBBurn")]
-    spot_bnb_burn: Option<String>,
+    pub spot_bnb_burn: Option<String>,
     /// "true" or "false", defaults to "false"
     #[serde(rename = "interestBNBBurn")]
-    interest_bnb_burn: Option<String>,
+    pub interest_bnb_burn: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct BnbBurnStatus {
     #[serde(rename = "spotBNBBurn")]
-    spot_bnb_burn: bool,
+    pub spot_bnb_burn: bool,
     #[serde(rename = "interestBNBBurn")]
-    interest_bnb_burn: bool,
+    pub interest_bnb_burn: bool,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct InterestRateHistoryQuery {
-    asset: String,
-    vip_level: Option<u8>,
-    start_time: Option<u64>,
-    end_time: Option<u64>,
-    limit: Option<u64>,
+    pub asset: String,
+    pub vip_level: Option<u8>,
+    pub start_time: Option<u64>,
+    pub end_time: Option<u64>,
+    pub limit: Option<u64>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct InterestRateAssetHistory {
-    asset: String,
+    pub asset: String,
     #[serde(with = "string_or_float")]
-    daily_interest_rate: f64,
-    timestamp: u128,
-    vip_level: u8,
+    pub daily_interest_rate: f64,
+    pub timestamp: u128,
+    pub vip_level: u8,
 }
 
 pub type InterestRateHistory = Vec<InterestRateAssetHistory>;

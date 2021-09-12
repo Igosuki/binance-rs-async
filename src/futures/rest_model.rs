@@ -276,43 +276,43 @@ pub struct OpenInterest {
     pub symbol: String,
 }
 
-#[derive(Debug, Deserialize, Clone)]
-#[serde(rename_all = "camelCase")]
-struct Order {
-    pub client_order_id: String,
-    #[serde(with = "string_or_float")]
-    pub cum_qty: f64,
-    #[serde(with = "string_or_float")]
-    pub cum_quote: f64,
-    #[serde(with = "string_or_float")]
-    pub executed_qty: f64,
-    pub order_id: u64,
-    #[serde(with = "string_or_float")]
-    pub avg_price: f64,
-    #[serde(with = "string_or_float")]
-    pub orig_qty: f64,
-    #[serde(with = "string_or_float")]
-    pub price: f64,
-    pub side: String,
-    pub reduce_only: bool,
-    pub position_side: String,
-    pub status: String,
-    #[serde(with = "string_or_float", default = "default_stop_price")]
-    pub stop_price: f64,
-    pub close_position: bool,
-    pub symbol: String,
-    pub time_in_force: String,
-    #[serde(rename = "type")]
-    pub order_type: String,
-    pub orig_type: String,
-    #[serde(with = "string_or_float", default = "default_activation_price")]
-    pub activation_price: f64,
-    #[serde(with = "string_or_float", default = "default_price_rate")]
-    pub price_rate: f64,
-    pub update_time: u64,
-    pub working_type: String,
-    pub price_protect: bool,
-}
+// #[derive(Debug, Deserialize, Clone)]
+// #[serde(rename_all = "camelCase")]
+// struct Order {
+//     pub client_order_id: String,
+//     #[serde(with = "string_or_float")]
+//     pub cum_qty: f64,
+//     #[serde(with = "string_or_float")]
+//     pub cum_quote: f64,
+//     #[serde(with = "string_or_float")]
+//     pub executed_qty: f64,
+//     pub order_id: u64,
+//     #[serde(with = "string_or_float")]
+//     pub avg_price: f64,
+//     #[serde(with = "string_or_float")]
+//     pub orig_qty: f64,
+//     #[serde(with = "string_or_float")]
+//     pub price: f64,
+//     pub side: String,
+//     pub reduce_only: bool,
+//     pub position_side: String,
+//     pub status: String,
+//     #[serde(with = "string_or_float", default = "default_stop_price")]
+//     pub stop_price: f64,
+//     pub close_position: bool,
+//     pub symbol: String,
+//     pub time_in_force: String,
+//     #[serde(rename = "type")]
+//     pub order_type: String,
+//     pub orig_type: String,
+//     #[serde(with = "string_or_float", default = "default_activation_price")]
+//     pub activation_price: f64,
+//     #[serde(with = "string_or_float", default = "default_price_rate")]
+//     pub price_rate: f64,
+//     pub update_time: u64,
+//     pub working_type: String,
+//     pub price_protect: bool,
+// }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -442,10 +442,6 @@ pub struct ChangeLeverageResponse {
     pub max_notional_value: f64,
     pub symbol: String,
 }
-
-fn default_stop_price() -> f64 { 0.0 }
-fn default_activation_price() -> f64 { 0.0 }
-fn default_price_rate() -> f64 { 0.0 }
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
