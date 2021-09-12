@@ -1,16 +1,17 @@
+use std::time::Duration;
+
 use hex::encode as hex_encode;
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue, CONTENT_TYPE, USER_AGENT};
 use reqwest::Response;
 use reqwest::StatusCode;
 use ring::hmac;
 use serde::de;
+use serde::de::DeserializeOwned;
 use serde_json::from_str;
-use std::time::Duration;
 
 use crate::errors::error_messages;
 use crate::errors::*;
 use crate::util::{build_request_p, build_signed_request_p};
-use serde::de::DeserializeOwned;
 
 #[derive(Clone)]
 pub struct Client {
@@ -58,9 +59,10 @@ impl Client {
         &self,
         endpoint: &str,
         payload: Option<P>,
+        recv_window: u64,
     ) -> Result<T> {
         let req = if let Some(p) = payload {
-            build_request_p(p)?
+            build_signed_request_p(p, recv_window)?
         } else {
             String::new()
         };

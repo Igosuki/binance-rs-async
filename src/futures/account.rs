@@ -1,14 +1,16 @@
 use std::collections::BTreeMap;
+use std::fmt;
 
-use super::rest_model::{AccountBalance, CanceledOrder, ChangeLeverageResponse, OrderType, Position, Transaction};
+use serde::Serializer;
+
 use crate::account::OrderCancellation;
 use crate::client::Client;
 use crate::errors::*;
 use crate::rest_model::{OrderSide, TimeInForce};
 use crate::rest_model::{PairAndWindowQuery, PairQuery};
 use crate::util::*;
-use serde::Serializer;
-use std::fmt;
+
+use super::rest_model::{AccountBalance, CanceledOrder, ChangeLeverageResponse, OrderType, Position, Transaction};
 
 #[derive(Clone)]
 pub struct FuturesAccount {
@@ -209,6 +211,7 @@ impl FuturesAccount {
                     symbol: symbol.into(),
                     recv_window: self.recv_window,
                 }),
+                self.recv_window,
             )
             .await
     }

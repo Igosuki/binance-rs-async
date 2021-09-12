@@ -1,9 +1,10 @@
+use serde_json::Value;
+
 use crate::client::*;
 use crate::errors::*;
 use crate::futures::rest_model::*;
 use crate::rest_model::{BookTickers, KlineSummaries, KlineSummary, PairAndWindowQuery, PairQuery, SymbolPrice, Tickers};
 use crate::util::*;
-use serde_json::Value;
 
 //TODO: Validate intervals and start/end times in history queries
 //TODO: find out the repartition of kline/candlestick columns in the future kline rows
@@ -55,6 +56,7 @@ impl FuturesMarket {
                     interval: None,
                     period: None,
                 }),
+                self.recv_window,
             )
             .await
     }
@@ -87,6 +89,7 @@ impl FuturesMarket {
                     interval: None,
                     period: None,
                 }),
+                self.recv_window,
             )
             .await
     }
@@ -117,6 +120,7 @@ impl FuturesMarket {
                     interval: None,
                     period: None,
                 }),
+                self.recv_window,
             )
             .await
     }
@@ -148,7 +152,7 @@ impl FuturesMarket {
         };
         query.validate()?;
         self.client
-            .get_signed_p("/futures/data/openInterestHist", Some(query))
+            .get_signed_p("/futures/data/openInterestHist", Some(query), self.recv_window)
             .await
     }
 
@@ -179,7 +183,7 @@ impl FuturesMarket {
         };
         query.validate()?;
         self.client
-            .get_signed_p("/futures/data/topLongShortAccountRatio", Some(query))
+            .get_signed_p("/futures/data/topLongShortAccountRatio", Some(query), self.recv_window)
             .await
     }
 
@@ -210,7 +214,7 @@ impl FuturesMarket {
         };
         query.validate()?;
         self.client
-            .get_signed_p("/futures/data/topLongShortPositionRatio", Some(query))
+            .get_signed_p("/futures/data/topLongShortPositionRatio", Some(query), self.recv_window)
             .await
     }
 
@@ -241,7 +245,11 @@ impl FuturesMarket {
         };
         query.validate()?;
         self.client
-            .get_signed_p("/futures/data/globalLongShortAccountRatio", Some(query))
+            .get_signed_p(
+                "/futures/data/globalLongShortAccountRatio",
+                Some(query),
+                self.recv_window,
+            )
             .await
     }
 
@@ -272,7 +280,7 @@ impl FuturesMarket {
         };
         query.validate()?;
         self.client
-            .get_signed_p("/futures/data/takerlongshortRatio", Some(query))
+            .get_signed_p("/futures/data/takerlongshortRatio", Some(query), self.recv_window)
             .await
     }
 
@@ -467,7 +475,9 @@ impl FuturesMarket {
             symbol: symbol.into(),
             recv_window: self.recv_window,
         };
-        self.client.get_signed_p("/fapi/v1/leverageBracket", Some(p)).await
+        self.client
+            .get_signed_p("/fapi/v1/leverageBracket", Some(p), self.recv_window)
+            .await
     }
 
     /// https://binance-docs.github.io/apidocs/futures/en/#composite-index-symbol-information
