@@ -1,7 +1,9 @@
-use crate::errors::*;
+use std::collections::BTreeMap;
+
 use chrono::Utc;
 use serde_json::Value;
-use std::collections::BTreeMap;
+
+use crate::errors::*;
 
 pub fn build_request(parameters: &BTreeMap<String, String>) -> String {
     let mut request = String::new();
@@ -91,3 +93,5 @@ pub fn bool_to_string(b: bool) -> String {
         FALSE.to_string()
     }
 }
+
+pub fn bool_to_string_some(b: bool) -> Option<String> { Some(bool_to_string(b)) }

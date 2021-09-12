@@ -11,6 +11,7 @@ use serde_json::from_str;
 
 use crate::errors::error_messages;
 use crate::errors::*;
+use crate::rest_model::PairQuery;
 use crate::util::{build_request_p, build_signed_request_p};
 
 #[derive(Clone)]
@@ -64,7 +65,8 @@ impl Client {
         let req = if let Some(p) = payload {
             build_signed_request_p(p, recv_window)?
         } else {
-            String::new()
+            let option: Option<PairQuery> = None;
+            build_signed_request_p(option, recv_window)?
         };
         let string = self.get_signed(endpoint, &req).await?;
         let data: &str = string.as_str();

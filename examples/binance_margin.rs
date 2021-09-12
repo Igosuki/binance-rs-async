@@ -1,19 +1,19 @@
 #[macro_use]
 extern crate log;
 
+use std::ops::Sub;
+
+use chrono::{Duration, Utc};
 use env_logger::Builder;
 
-use binance::account::*;
 use binance::api::*;
+use binance::bool_to_string_some;
 use binance::config::Config;
-use binance::errors::Error as BinanceLibError;
-use binance::futures::rest_model::SymbolPrice;
-use binance::general::*;
 use binance::margin::Margin;
-use binance::market::*;
 use binance::rest_model::{BnbBurnQuery, InterestRateHistoryQuery, IsolatedMarginTransferType, IsolatedTransfersQuery,
-                          MarginOCOOrderQuery, MarginOrder, MarginOrderQuery, MarginTransferType, OCORecordsQuery,
-                          OrderResponse, OrderSide, OrderType, RecordsQuery, SideEffectType, TimeInForce, TransferType};
+                          MarginOCOOrderQuery, MarginOrder, MarginOrderQuery, MarginRecordsQuery, MarginTransferType,
+                          OCORecordsQuery, OrderResponse, OrderSide, OrderType, RecordsQuery, SideEffectType,
+                          TimeInForce, TransferType};
 
 #[tokio::main]
 async fn main() {
@@ -24,14 +24,22 @@ async fn main() {
 }
 
 async fn margin_query() {
+    eprintln!("----------- Margin GET queries ----------");
     let margin: Margin = Binance::new_with_env(&Config::default());
+    let yesterday = Utc::now().sub(Duration::days(1));
+    let yesterday_millis = yesterday.timestamp_millis() as u64;
     let interest_rate_history = margin
         .interest_rate_history(InterestRateHistoryQuery {
             asset: "BTC".to_string(),
-            vip_level: None,
-            start_time: None,
-            end_time: None,
-            limit: None,
+            ..InterestRateHistoryQuery::default()
+        })
+        .await
+        .unwrap();
+    eprintln!("interest_rate_history = {:?}", interest_rate_history);
+    let interest_rate_history = margin
+        .interest_rate_history(InterestRateHistoryQuery {
+            asset: "LTC".to_string(),
+            ..InterestRateHistoryQuery::default()
         })
         .await
         .unwrap();
@@ -39,6 +47,7 @@ async fn margin_query() {
     let records_query = RecordsQuery {
         asset: "BTC".to_string(),
         transfer_type: Some(TransferType::RollIn),
+        start_time: Some(yesterday_millis),
         ..RecordsQuery::default()
     };
     let loans = margin.loans(records_query).await;
@@ -46,6 +55,7 @@ async fn margin_query() {
     let records_query = RecordsQuery {
         asset: "BTC".to_string(),
         transfer_type: Some(TransferType::RollIn),
+        start_time: Some(yesterday_millis),
         ..RecordsQuery::default()
     };
     let repays = margin.repays(records_query).await;
@@ -107,28 +117,29 @@ async fn margin_query() {
     eprintln!("order = {:?}", order);
     let open_orders = margin.open_orders("BTCUSDT", None).await;
     eprintln!("open_orders = {:?}", open_orders);
-    let records_query = RecordsQuery {
-        asset: "BTC".to_string(),
-        transfer_type: Some(TransferType::RollIn),
-        ..RecordsQuery::default()
+    let records_query = MarginRecordsQuery {
+        symbol: "BTCUSDT".to_string(),
+        ..MarginRecordsQuery::default()
     };
     let orders = margin.orders(records_query).await;
     eprintln!("orders = {:?}", orders);
-    let records_query = RecordsQuery {
-        asset: "BTC".to_string(),
-        transfer_type: Some(TransferType::RollIn),
-        ..RecordsQuery::default()
+    let records_query = MarginRecordsQuery {
+        symbol: "BTCUSDT".to_string(),
+        ..MarginRecordsQuery::default()
     };
     let trades = margin.trades(records_query).await;
     eprintln!("trades = {:?}", trades);
     let records_query = MarginOCOOrderQuery {
-        symbol: "BTCUSDT".to_string(),
+        symbol: Some("BTCUSDT".to_string()),
+        is_isolated: bool_to_string_some(true),
+        orig_client_order_id: Some("id".to_string()),
         ..MarginOCOOrderQuery::default()
     };
     let oco_order = margin.oco_order(records_query).await;
     eprintln!("oco_order = {:?}", oco_order);
     let records_query = OCORecordsQuery {
-        symbol: "BTCUSDT".to_string(),
+        symbol: Some("BTCUSDT".to_string()),
+        is_isolated: bool_to_string_some(true),
         ..OCORecordsQuery::default()
     };
     let all_oco_orders = margin.all_oco_orders(records_query).await;
@@ -140,6 +151,7 @@ async fn margin_query() {
 }
 
 async fn margin_post() {
+    eprintln!("----------- Margin POST queries ----------");
     let margin: Margin = Binance::new_with_env(&Config::testnet());
 
     let transfer = margin

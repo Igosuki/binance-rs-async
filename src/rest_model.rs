@@ -658,13 +658,28 @@ pub struct RecordsQuery {
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct OCORecordsQuery {
-    pub symbol: String,
+    pub symbol: Option<String>,
     pub from_id: Option<u64>,
     pub start_time: Option<u64>,
     pub end_time: Option<u64>,
     pub limit: Option<u8>,
     /// "TRUE" or "FALSE", default is "FALSE"
     pub is_isolated: Option<String>,
+}
+
+/// archived and is_isolated are only applicable to certain endpoints
+/// refer to Binance documentation for full disclosure
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct MarginRecordsQuery {
+    pub symbol: String,
+    /// "TRUE" or "FALSE", default is "FALSE"
+    pub is_isolated: Option<String>,
+    pub order_id: u64,
+    pub start_time: Option<u64>,
+    pub end_time: Option<u64>,
+    pub limit: Option<u8>,
+    pub archived: Option<bool>,
 }
 
 /// archived and is_isolated are only applicable to certain endpoints
@@ -733,6 +748,7 @@ pub enum TransferType {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct OrderState {
+    #[serde(with = "string_or_float")]
     pub amount: f64,
     pub asset: String,
     pub status: TransactionStatus,
@@ -922,7 +938,9 @@ pub struct AssetDetails {
     pub asset_name: String,
     pub is_borrowable: bool,
     pub is_mortgageable: bool,
+    #[serde(with = "string_or_float")]
     pub user_min_borrow: f64,
+    #[serde(with = "string_or_float")]
     pub user_min_repay: f64,
 }
 
@@ -985,6 +1003,7 @@ pub type AllIsolatedPairs = Vec<IsolatedPairDetails>;
 #[serde(rename_all = "camelCase")]
 pub struct PriceIndex {
     pub calc_time: u128,
+    #[serde(with = "string_or_float")]
     pub price: f64,
     pub symbol: String,
 }
@@ -1175,7 +1194,7 @@ pub struct MarginOCOOrderCancellation {
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct MarginOCOOrderQuery {
-    pub symbol: String,
+    pub symbol: Option<String>,
     pub is_isolated: Option<String>,
     pub order_list_id: Option<String>,
     pub orig_client_order_id: Option<String>,
@@ -1238,12 +1257,11 @@ pub struct BnbBurnQuery {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-#[serde(rename_all = "camelCase")]
 pub struct BnbBurnStatus {
     #[serde(rename = "spotBNBBurn")]
-    pub spot_bnb_burn: bool,
+    pub spot_bnb_burn: Option<bool>,
     #[serde(rename = "interestBNBBurn")]
-    pub interest_bnb_burn: bool,
+    pub interest_bnb_burn: Option<bool>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
