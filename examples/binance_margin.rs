@@ -31,6 +31,7 @@ async fn margin_query() {
     let interest_rate_history = margin
         .interest_rate_history(InterestRateHistoryQuery {
             asset: "BTC".to_string(),
+            vip_level: Some(1),
             ..InterestRateHistoryQuery::default()
         })
         .await

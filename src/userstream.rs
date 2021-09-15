@@ -1,7 +1,8 @@
+use serde_json::from_str;
+
 use crate::client::*;
 use crate::errors::*;
 use crate::rest_model::*;
-use serde_json::from_str;
 
 static USER_DATA_STREAM: &str = "/api/v3/userDataStream";
 
