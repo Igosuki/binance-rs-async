@@ -3,8 +3,9 @@ use serde_json::from_str;
 use url::Url;
 
 use crate::config::Config;
+use std::net::TcpStream;
 use std::sync::atomic::{AtomicBool, Ordering};
-use tungstenite::client::AutoStream;
+use tungstenite::stream::MaybeTlsStream;
 use tungstenite::handshake::client::Response;
 use tungstenite::protocol::WebSocket;
 use tungstenite::{connect, Message};
@@ -21,7 +22,7 @@ pub static PARTIAL_ORDERBOOK: &str = "lastUpdateId";
 pub static DAYTICKER: &str = "24hrTicker";
 
 pub struct WebSockets<'a, WE> {
-    pub socket: Option<(WebSocket<AutoStream>, Response)>,
+    pub socket: Option<(WebSocket<MaybeTlsStream<TcpStream>>, Response)>,
     handler: Box<dyn FnMut(WE) -> Result<()> + 'a>,
     conf: Config,
 }
