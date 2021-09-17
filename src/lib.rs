@@ -72,7 +72,7 @@ pub use util::{bool_to_string, bool_to_string_some};
 
 mod client;
 pub mod errors;
-mod util;
+pub mod util;
 
 pub mod account;
 pub mod api;
