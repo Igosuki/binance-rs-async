@@ -13,6 +13,8 @@ pub enum WebsocketEvent {
     DayMiniTicker(Box<MiniDayTickerEvent>),
     #[serde(alias = "24hrTicker")]
     DayTicker(Box<DayTickerEvent>),
+    #[serde(alias = "bookTicker")]
+    BookTicker(Box<BookTickerEvent>),
     #[serde(alias = "depthUpdate")]
     DepthOrderBook(Box<DepthOrderBookEvent>),
     #[serde(alias = "outboundAccountPosition")]
