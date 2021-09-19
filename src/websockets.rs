@@ -1,14 +1,15 @@
 use crate::errors::*;
+use futures::StreamExt;
 use serde_json::from_str;
 use url::Url;
 
 use crate::config::Config;
-use std::net::TcpStream;
 use std::sync::atomic::{AtomicBool, Ordering};
-use tungstenite::stream::MaybeTlsStream;
+use tokio::net::TcpStream;
+use tokio_tungstenite::tungstenite::Message;
+use tokio_tungstenite::WebSocketStream;
+use tokio_tungstenite::{connect_async, MaybeTlsStream};
 use tungstenite::handshake::client::Response;
-use tungstenite::protocol::WebSocket;
-use tungstenite::{connect, Message};
 
 pub static STREAM_ENDPOINT: &str = "stream";
 pub static WS_ENDPOINT: &str = "ws";
@@ -22,7 +23,7 @@ pub static PARTIAL_ORDERBOOK: &str = "lastUpdateId";
 pub static DAYTICKER: &str = "24hrTicker";
 
 pub struct WebSockets<'a, WE> {
-    pub socket: Option<(WebSocket<MaybeTlsStream<TcpStream>>, Response)>,
+    pub socket: Option<(WebSocketStream<MaybeTlsStream<TcpStream>>, Response)>,
     handler: Box<dyn FnMut(WE) -> Result<()> + 'a>,
     conf: Config,
 }
@@ -51,13 +52,12 @@ impl<'a, WE: serde::de::DeserializeOwned> WebSockets<'a, WE> {
             conf,
         }
     }
-
     /// Connect to a websocket endpoint
-    pub fn connect(&mut self, endpoint: &str) -> Result<()> {
+    pub async fn connect(&mut self, endpoint: &str) -> Result<()> {
         let wss: String = format!("{}/{}/{}", self.conf.ws_endpoint, WS_ENDPOINT, endpoint);
         let url = Url::parse(&wss)?;
 
-        match connect(url) {
+        match connect_async(url).await {
             Ok(answer) => {
                 self.socket = Some(answer);
                 Ok(())
@@ -67,19 +67,20 @@ impl<'a, WE: serde::de::DeserializeOwned> WebSockets<'a, WE> {
     }
 
     /// Disconnect from the endpoint
-    pub fn disconnect(&mut self) -> Result<()> {
+    pub async fn disconnect(&mut self) -> Result<()> {
         if let Some(ref mut socket) = self.socket {
-            socket.0.close(None)?;
+            socket.0.close(None).await?;
             Ok(())
         } else {
             Err(Error::Msg("Not able to close the connection".to_string()))
         }
     }
 
-    pub fn event_loop(&mut self, running: &AtomicBool) -> Result<()> {
+    pub async fn event_loop(&mut self, running: &AtomicBool) -> Result<()> {
         while running.load(Ordering::Relaxed) {
             if let Some(ref mut socket) = self.socket {
-                let message = socket.0.read_message()?;
+                let message = socket.0.next().await.unwrap()?;
+
                 match message {
                     Message::Text(msg) => {
                         if msg.is_empty() {

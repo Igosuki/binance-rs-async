@@ -113,7 +113,10 @@ impl Savings {
     /// let coins = tokio_test::block_on(savings.asset_detail(Some("CTR".to_string())));
     /// assert!(coins.is_ok(), "{:?}", coins)
     /// ```
-    pub async fn asset_detail(&self, asset: Option<String>) -> Result<BTreeMap<String, AssetDetail>> {
+    pub async fn asset_detail(
+        &self,
+        asset: Option<String>,
+    ) -> Result<BTreeMap<String, AssetDetail>> {
         let mut parameters = BTreeMap::new();
         if let Some(asset) = asset {
             parameters.insert("asset".into(), asset);
@@ -135,7 +138,11 @@ impl Savings {
     /// let coins = tokio_test::block_on(savings.deposit_address("CTR", None));
     /// assert!(coins.is_ok(), "{:?}", coins)
     /// ```
-    pub async fn deposit_address<S>(&self, coin: S, network: Option<String>) -> Result<DepositAddress>
+    pub async fn deposit_address<S>(
+        &self,
+        coin: S,
+        network: Option<String>,
+    ) -> Result<DepositAddress>
     where
         S: Into<String>,
     {

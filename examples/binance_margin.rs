@@ -10,10 +10,12 @@ use binance::api::*;
 use binance::bool_to_string_some;
 use binance::config::Config;
 use binance::margin::Margin;
-use binance::rest_model::{BnbBurnQuery, InterestRateHistoryQuery, IsolatedMarginTransferType, IsolatedTransfersQuery,
-                          MarginOCOOrderQuery, MarginOrder, MarginOrderQuery, MarginOrdersQuery, MarginOwnTradesQuery,
-                          MarginTransferType, OCORecordsQuery, OrderResponse, OrderSide, OrderType, RecordsQuery,
-                          SideEffectType, TimeInForce, TransferType};
+use binance::rest_model::{
+    BnbBurnQuery, InterestRateHistoryQuery, IsolatedMarginTransferType, IsolatedTransfersQuery,
+    MarginOCOOrderQuery, MarginOrder, MarginOrderQuery, MarginOrdersQuery, MarginOwnTradesQuery,
+    MarginTransferType, OCORecordsQuery, OrderResponse, OrderSide, OrderType, RecordsQuery,
+    SideEffectType, TimeInForce, TransferType,
+};
 
 #[tokio::main]
 async fn main() {
@@ -200,11 +202,23 @@ async fn margin_post() {
     eprintln!("new_order = {:?}", new_order);
 
     let cancel_trade = margin
-        .cancel_trade("BTCUSDT", 1_u64, "my_id".to_string(), "my_next_id".to_string(), None)
+        .cancel_trade(
+            "BTCUSDT",
+            1_u64,
+            "my_id".to_string(),
+            "my_next_id".to_string(),
+            None,
+        )
         .await;
     eprintln!("cancel_trade = {:?}", cancel_trade);
     let cancel_oco_order = margin
-        .cancel_oco_order("BTCUSDT", 1_u64, "my_id".to_string(), "my_next_id".to_string(), None)
+        .cancel_oco_order(
+            "BTCUSDT",
+            1_u64,
+            "my_id".to_string(),
+            "my_next_id".to_string(),
+            None,
+        )
         .await;
     eprintln!("cancel_oco_order = {:?}", cancel_oco_order);
     let cancel_all_orders = margin.cancel_all_orders("BTCUSDT", None).await;

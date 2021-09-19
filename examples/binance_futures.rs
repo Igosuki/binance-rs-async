@@ -61,7 +61,10 @@ async fn market_data() {
         Err(e) => error!("Error: {:?}", e),
     }
 
-    match market.get_agg_trades("btcusdt", None, None, None, 500u16).await {
+    match market
+        .get_agg_trades("btcusdt", None, None, None, 500u16)
+        .await
+    {
         Ok(AggTrades::AllAggTrades(answer)) => info!("First aggregated trade: {:?}", answer[0]),
         Err(e) => error!("Error: {:?}", e),
     }

@@ -23,7 +23,10 @@ where
     Ok(qs::to_string(&payload)?)
 }
 
-pub fn build_signed_request(mut parameters: BTreeMap<String, String>, recv_window: u64) -> Result<String> {
+pub fn build_signed_request(
+    mut parameters: BTreeMap<String, String>,
+    recv_window: u64,
+) -> Result<String> {
     if recv_window > 0 {
         parameters.insert("recvWindow".into(), recv_window.to_string());
     }
@@ -73,11 +76,17 @@ where
     }
 }
 
-pub fn to_i64(v: &Value) -> i64 { v.as_i64().unwrap() }
+pub fn to_i64(v: &Value) -> i64 {
+    v.as_i64().unwrap()
+}
 
-pub fn to_f64(v: &Value) -> f64 { v.as_str().unwrap().parse().unwrap() }
+pub fn to_f64(v: &Value) -> f64 {
+    v.as_str().unwrap().parse().unwrap()
+}
 
-pub fn get_timestamp() -> Result<u64> { Ok(Utc::now().timestamp_millis() as u64) }
+pub fn get_timestamp() -> Result<u64> {
+    Ok(Utc::now().timestamp_millis() as u64)
+}
 
 lazy_static! {
     static ref TRUE: String = "TRUE".to_string();
@@ -94,4 +103,6 @@ pub fn bool_to_string(b: bool) -> String {
     }
 }
 
-pub fn bool_to_string_some(b: bool) -> Option<String> { Some(bool_to_string(b)) }
+pub fn bool_to_string_some(b: bool) -> Option<String> {
+    Some(bool_to_string(b))
+}
