@@ -1,6 +1,6 @@
 [package]
 name = "binance-rs-async"
-version = "1.1.0-beta.1"
+version = "1.1.0-beta.4"
 license = "MIT OR Apache-2.0"
 authors = ["Guillaume Balaine igosuki.github@gmail.com"]
 edition = "2018"
@@ -17,12 +17,14 @@ path = "src/lib.rs"
 
 [features]
 rustls-tls = ["tungstenite/rustls-tls-webpki-roots", "reqwest/rustls-tls"]
+native-tls = ["tungstenite/native-tls", "reqwest/default-tls"]
+default = ["native-tls"]
 
 [dependencies]
 chrono = "0.4"
 futures = "0.3"
 hex = "0.4"
-reqwest = { version = "0.11", features = ["json"] }
+reqwest = { version = "0.11", features = ["json"], default-features = false }
 ring = "0.16"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
