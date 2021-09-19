@@ -69,7 +69,7 @@ impl Margin {
     /// ```rust,no_run
     /// use binance::{api::*, margin::*, config::*, rest_model::*};
     /// let margin: Margin = Binance::new_with_env(&Config::testnet());
-    /// let transaction_id = tokio_test::block_on(margin.isolated_transfer("BTCUSDT", 0.001, MarginTransferType::FromMainToMargin));
+    /// let transaction_id = tokio_test::block_on(margin.isolated_transfer("BTC", "BTC", 0.001, IsolatedMarginTransferType::Spot, IsolatedMarginTransferType::IsolatedMargin));
     /// assert!(transaction_id.is_ok(), "{:?}", transaction_id);
     /// ```
     pub async fn isolated_transfer<S, F>(
@@ -253,10 +253,10 @@ impl Margin {
     ///     side: OrderSide::Sell,
     ///     quantity: 10.0,
     ///     price: 10.0,
-    ///     stop_price: 1.0
+    ///     stop_price: 1.0,
     ///     ..MarginOCOOrder::default()
     /// };
-    /// let transaction_id = tokio_test::block_on(margin.new_order(margin_order));
+    /// let transaction_id = tokio_test::block_on(margin.new_oco_order(margin_order));
     /// assert!(transaction_id.is_ok(), "{:?}", transaction_id);
     /// ```
     pub async fn new_oco_order(&self, margin_order: MarginOCOOrder) -> Result<MarginOCOOrderResult> {
@@ -647,7 +647,7 @@ impl Margin {
     /// use binance::{api::*, margin::*, config::*, rest_model::*};
     /// let margin: Margin = Binance::new_with_env(&Config::testnet());
     /// let records_query = IsolatedTransfersQuery {
-    ///    asset: "BTC".to_string(),
+    ///    symbol: "BTC".to_string(),
     ///    ..IsolatedTransfersQuery::default()
     /// };
     /// let records = tokio_test::block_on(margin.isolated_transfers(records_query));
@@ -720,7 +720,7 @@ impl Margin {
     ///     symbol: "BTCUSDT".to_string(),
     ///     order_id: Some("1".to_string()),
     ///     orig_client_order_id: Some("my_id".to_string()),
-    ///     is_isolated: Some("FALSE"),
+    ///     is_isolated: Some("FALSE".to_string()),
     /// };
     /// let records = tokio_test::block_on(margin.order(records_query));
     /// assert!(records.is_ok(), "{:?}", records);
@@ -760,14 +760,14 @@ impl Margin {
     /// ```rust,no_run
     /// use binance::{api::*, margin::*, config::*, rest_model::*};
     /// let margin: Margin = Binance::new_with_env(&Config::testnet());
-    /// let records_query = MarginRecordsQuery {
+    /// let records_query = MarginOrdersQuery {
     ///    symbol: "BTCUSDT".to_string(),
-    ///    ..MarginRecordsQuery::default()
+    ///    ..MarginOrdersQuery::default()
     /// };
     /// let records = tokio_test::block_on(margin.orders(records_query));
     /// assert!(records.is_ok(), "{:?}", records);
     /// ```
-    pub async fn orders(&self, all_orders_query: MarginRecordsQuery) -> Result<Vec<MarginOrderState>> {
+    pub async fn orders(&self, all_orders_query: MarginOrdersQuery) -> Result<Vec<MarginOrderState>> {
         self.client
             .get_signed_p(SAPI_V1_MARGIN_ALL_ORDERS, Some(all_orders_query), self.recv_window)
             .await
@@ -778,16 +778,16 @@ impl Margin {
     /// ```rust,no_run
     /// use binance::{api::*, margin::*, config::*, rest_model::*};
     /// let margin: Margin = Binance::new_with_env(&Config::testnet());
-    /// let records_query = MarginRecordsQuery {
+    /// let records_query = MarginOwnTradesQuery {
     ///    symbol: "BTCUSDT".to_string(),
-    ///    ..MarginRecordsQuery::default()
+    ///    ..MarginOwnTradesQuery::default()
     /// };
     /// let records = tokio_test::block_on(margin.trades(records_query));
     /// assert!(records.is_ok(), "{:?}", records);
     /// ```
-    pub async fn trades(&self, all_orders_query: MarginRecordsQuery) -> Result<Vec<OwnTradesState>> {
+    pub async fn trades(&self, my_trades_query: MarginOwnTradesQuery) -> Result<Vec<OwnTradesState>> {
         self.client
-            .get_signed_p(SAPI_V1_MARGIN_MY_TRADES, Some(all_orders_query), self.recv_window)
+            .get_signed_p(SAPI_V1_MARGIN_MY_TRADES, Some(my_trades_query), self.recv_window)
             .await
     }
 
@@ -797,7 +797,7 @@ impl Margin {
     /// use binance::{api::*, margin::*, config::*, rest_model::*};
     /// let margin: Margin = Binance::new_with_env(&Config::testnet());
     /// let records_query = MarginOCOOrderQuery {
-    ///     symbol: "BTCUSDT".to_string(),
+    ///     symbol: Some("BTCUSDT".to_string()),
     ///     ..MarginOCOOrderQuery::default()
     /// };
     /// let records = tokio_test::block_on(margin.oco_order(records_query));
@@ -815,7 +815,7 @@ impl Margin {
     /// use binance::{api::*, margin::*, config::*, rest_model::*};
     /// let margin: Margin = Binance::new_with_env(&Config::testnet());
     /// let records_query = OCORecordsQuery {
-    ///     symbol: "BTCUSDT".to_string(),
+    ///     symbol: Some("BTCUSDT".to_string()),
     ///     ..OCORecordsQuery::default()
     /// };
     /// let records = tokio_test::block_on(margin.all_oco_orders(records_query));
@@ -836,7 +836,7 @@ impl Margin {
     ///     symbol: "BTCUSDT".to_string(),
     ///     is_isolated: None
     /// };
-    /// let records = tokio_test::block_on(margin.all_oco_orders(records_query));
+    /// let records = tokio_test::block_on(margin.open_oco_orders(records_query));
     /// assert!(records.is_ok(), "{:?}", records);
     /// ```
     pub async fn open_oco_orders(&self, query: MarginPairQuery) -> Result<Vec<MarginOCOOrderResult>> {
@@ -850,7 +850,7 @@ impl Margin {
     /// ```rust,no_run
     /// use binance::{api::*, margin::*, config::*, rest_model::*};
     /// let margin: Margin = Binance::new_with_env(&Config::testnet());
-    /// let max = tokio_test::block_on(margin.max_borrowable("BTC"));
+    /// let max = tokio_test::block_on(margin.max_borrowable("BTC", None));
     /// assert!(max.is_ok(), "{:?}", max);
     /// ```
     pub async fn max_borrowable<S>(&self, asset: S, isolated_symbol: Option<String>) -> Result<MaxBorrowableAmount>

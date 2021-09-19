@@ -11,9 +11,9 @@ use binance::bool_to_string_some;
 use binance::config::Config;
 use binance::margin::Margin;
 use binance::rest_model::{BnbBurnQuery, InterestRateHistoryQuery, IsolatedMarginTransferType, IsolatedTransfersQuery,
-                          MarginOCOOrderQuery, MarginOrder, MarginOrderQuery, MarginRecordsQuery, MarginTransferType,
-                          OCORecordsQuery, OrderResponse, OrderSide, OrderType, RecordsQuery, SideEffectType,
-                          TimeInForce, TransferType};
+                          MarginOCOOrderQuery, MarginOrder, MarginOrderQuery, MarginOrdersQuery, MarginOwnTradesQuery,
+                          MarginTransferType, OCORecordsQuery, OrderResponse, OrderSide, OrderType, RecordsQuery,
+                          SideEffectType, TimeInForce, TransferType};
 
 #[tokio::main]
 async fn main() {
@@ -118,15 +118,15 @@ async fn margin_query() {
     eprintln!("order = {:?}", order);
     let open_orders = margin.open_orders("BTCUSDT", None).await;
     eprintln!("open_orders = {:?}", open_orders);
-    let records_query = MarginRecordsQuery {
+    let records_query = MarginOrdersQuery {
         symbol: "BTCUSDT".to_string(),
-        ..MarginRecordsQuery::default()
+        ..MarginOrdersQuery::default()
     };
     let orders = margin.orders(records_query).await;
     eprintln!("orders = {:?}", orders);
-    let records_query = MarginRecordsQuery {
+    let records_query = MarginOwnTradesQuery {
         symbol: "BTCUSDT".to_string(),
-        ..MarginRecordsQuery::default()
+        ..MarginOwnTradesQuery::default()
     };
     let trades = margin.trades(records_query).await;
     eprintln!("trades = {:?}", trades);

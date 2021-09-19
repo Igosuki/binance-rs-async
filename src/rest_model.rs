@@ -667,11 +667,9 @@ pub struct OCORecordsQuery {
     pub is_isolated: Option<String>,
 }
 
-/// archived and is_isolated are only applicable to certain endpoints
-/// refer to Binance documentation for full disclosure
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
 #[serde(rename_all = "camelCase")]
-pub struct MarginRecordsQuery {
+pub struct MarginOrdersQuery {
     pub symbol: String,
     /// "TRUE" or "FALSE", default is "FALSE"
     pub is_isolated: Option<String>,
@@ -679,7 +677,18 @@ pub struct MarginRecordsQuery {
     pub start_time: Option<u64>,
     pub end_time: Option<u64>,
     pub limit: Option<u8>,
-    pub archived: Option<bool>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct MarginOwnTradesQuery {
+    pub symbol: String,
+    /// "TRUE" or "FALSE", default is "FALSE"
+    pub is_isolated: Option<String>,
+    pub from_id: u64,
+    pub start_time: Option<u64>,
+    pub end_time: Option<u64>,
+    pub limit: Option<u8>,
 }
 
 /// archived and is_isolated are only applicable to certain endpoints
