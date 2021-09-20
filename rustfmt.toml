@@ -1,0 +1,36 @@
+# Enable unstable features on stable and beta channels (unstable features are available by default on nightly).
+# https://github.com/rust-lang/rustfmt/blob/master/Configurations.md#unstable_features
+unstable_features = true
+
+# Put single-expression functions on a single line
+# Note: Unstable
+# https://github.com/rust-lang/rustfmt/blob/master/Configurations.md#fn_single_line
+fn_single_line = true
+
+# Force multiline closure and match arm bodies to be wrapped in a block
+# https://github.com/rust-lang/rustfmt/blob/master/Configurations.md#force_multiline_blocks
+force_multiline_blocks = false
+
+# Indent style of imports
+# Note: Unstable
+# https://github.com/rust-lang/rustfmt/blob/master/Configurations.md#imports_indent
+imports_indent = "Visual"
+
+# Maximum width of each line.
+# Default: 100
+# https://github.com/rust-lang/rustfmt/blob/master/Configurations.md#max_width
+max_width = 120
+
+comment_width = 100
+
+# When structs, slices, arrays, and block/array-like macros are used as the last argument in an expression list,
+# allow them to overflow (like blocks/closures) instead of being indented on a new line.
+# Note: Unstable
+# https://github.com/rust-lang/rustfmt/blob/master/Configurations.md#overflow_delimited_expr
+overflow_delimited_expr = true
+
+# Use field initialize shorthand if possible.
+# https://github.com/rust-lang/rustfmt/blob/master/Configurations.md#use_field_init_shorthand
+use_field_init_shorthand = true
+
+
