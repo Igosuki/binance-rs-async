@@ -597,7 +597,7 @@ pub struct MarginOCOOrderResult {
     pub list_client_order_id: Option<String>,
     pub transaction_time: u128,
     pub symbol: String,
-    #[serde(with = "string_or_float_opt")]
+    #[serde(default, with = "string_or_float_opt")]
     pub margin_buy_borrow_amount: Option<f64>,
     pub margin_buy_borrow_asset: Option<String>,
     pub is_isolated: Option<bool>,
@@ -919,11 +919,11 @@ pub enum MarginLevelStatus {
 #[serde(rename_all = "camelCase")]
 pub struct IsolatedMarginAccountDetails {
     pub assets: Vec<IsolatedMarginAccountAssetDetails>,
-    #[serde(with = "string_or_float_opt")]
+    #[serde(default, with = "string_or_float_opt")]
     pub total_asset_of_btc: Option<f64>,
-    #[serde(with = "string_or_float_opt")]
+    #[serde(default, with = "string_or_float_opt")]
     pub total_liability_of_btc: Option<f64>,
-    #[serde(with = "string_or_float_opt")]
+    #[serde(default, with = "string_or_float_opt")]
     pub total_net_asset_of_btc: Option<f64>,
 }
 
@@ -1046,6 +1046,7 @@ pub struct MarginOrderResult {
     #[serde(rename(serialize = "type", deserialize = "type"))]
     pub order_type: OrderType,
     pub side: OrderSide,
+    #[serde(default, with = "string_or_float_opt")]
     pub margin_buy_borrow_amount: Option<f64>,
     pub margin_buy_borrow_asset: Option<String>,
     pub is_isolated: Option<bool>,
