@@ -4,13 +4,14 @@ use binance::websockets::*;
 use binance::ws_model::WebsocketEvent;
 use std::sync::atomic::{AtomicBool, Ordering};
 
-fn main() {
-    //user_stream();
-    //user_stream_websocket();
-    //market_websocket();
-    //kline_websocket();
-    //all_trades_websocket();
-    last_price();
+#[tokio::main]
+async fn main() {
+    //user_stream().await;
+    //user_stream_websocket().await;
+    //market_websocket().await;
+    //kline_websocket().await;
+    //all_trades_websocket().await;
+    last_price().await;
 }
 
 #[allow(dead_code)]
@@ -37,7 +38,7 @@ async fn user_stream() {
 }
 
 #[allow(dead_code)]
-async fn user_stream_websocket() {
+async fn user_stream_websocket<F>() {
     let keep_running = AtomicBool::new(true); // Used to control the event loop
     let api_key_user = Some("YOUR_KEY".into());
     let user_stream: UserStream = Binance::new(api_key_user, None);
@@ -56,12 +57,12 @@ async fn user_stream_websocket() {
             Ok(())
         });
 
-        web_socket.connect(&listen_key).unwrap(); // check error
-        if let Err(e) = web_socket.event_loop(&keep_running) {
+        web_socket.connect(&listen_key).await.unwrap(); // check error
+        if let Err(e) = web_socket.event_loop(&keep_running).await {
             println!("Error: {}", e);
         }
         user_stream.close(&listen_key).await.unwrap();
-        web_socket.disconnect().unwrap();
+        web_socket.disconnect().await.unwrap();
         println!("Userstrem closed and disconnected");
     } else {
         println!("Not able to start an User Stream (Check your API_KEY)");
@@ -69,7 +70,7 @@ async fn user_stream_websocket() {
 }
 
 #[allow(dead_code)]
-fn market_websocket() {
+async fn market_websocket() {
     let keep_running = AtomicBool::new(true); // Used to control the event loop
     let agg_trade: String = format!("{}@aggTrade", "ethbtc");
     let mut web_socket: WebSockets<'_, WebsocketEvent> = WebSockets::new(|event: WebsocketEvent| {
@@ -89,16 +90,16 @@ fn market_websocket() {
         Ok(())
     });
 
-    web_socket.connect(&agg_trade).unwrap(); // check error
-    if let Err(e) = web_socket.event_loop(&keep_running) {
+    web_socket.connect(&agg_trade).await.unwrap(); // check error
+    if let Err(e) = web_socket.event_loop(&keep_running).await {
         println!("Error: {}", e);
     }
-    web_socket.disconnect().unwrap();
+    web_socket.disconnect().await.unwrap();
     println!("disconnected");
 }
 
 #[allow(dead_code)]
-fn all_trades_websocket() {
+async fn all_trades_websocket() {
     let keep_running = AtomicBool::new(true); // Used to control the event loop
     let agg_trade: String = "!ticker@arr".to_string();
     // NB: you may not ask for both arrays type streams and object type streams at the same time, this holds true in binance connections anyways
@@ -116,16 +117,16 @@ fn all_trades_websocket() {
         Ok(())
     });
 
-    web_socket.connect(&agg_trade).unwrap(); // check error
-    if let Err(e) = web_socket.event_loop(&keep_running) {
+    web_socket.connect(&agg_trade).await.unwrap(); // check error
+    if let Err(e) = web_socket.event_loop(&keep_running).await {
         println!("Error: {}", e);
     }
-    web_socket.disconnect().unwrap();
+    web_socket.disconnect().await.unwrap();
     println!("disconnected");
 }
 
 #[allow(dead_code)]
-fn kline_websocket() {
+async fn kline_websocket() {
     let keep_running = AtomicBool::new(true);
     let kline: String = "ethbtc@kline_1m".to_string();
     let mut web_socket: WebSockets<'_, WebsocketEvent> = WebSockets::new(|event: WebsocketEvent| {
@@ -139,15 +140,15 @@ fn kline_websocket() {
         Ok(())
     });
 
-    web_socket.connect(&kline).unwrap(); // check error
-    if let Err(e) = web_socket.event_loop(&keep_running) {
+    web_socket.connect(&kline).await.unwrap(); // check error
+    if let Err(e) = web_socket.event_loop(&keep_running).await {
         println!("Error: {}", e);
     }
-    web_socket.disconnect().unwrap();
+    web_socket.disconnect().await.unwrap();
     println!("disconnected");
 }
 
-fn last_price() {
+async fn last_price() {
     let keep_running = AtomicBool::new(true);
     let agg_trade: String = "!ticker@arr".to_string();
     let mut btcusdt: f32 = "0".parse().unwrap();
@@ -171,10 +172,10 @@ fn last_price() {
         Ok(())
     });
 
-    web_socket.connect(&agg_trade).unwrap(); // check error
-    if let Err(e) = web_socket.event_loop(&keep_running) {
+    web_socket.connect(&agg_trade).await.unwrap(); // check error
+    if let Err(e) = web_socket.event_loop(&keep_running).await {
         println!("Error: {}", e);
     }
-    web_socket.disconnect().unwrap();
+    web_socket.disconnect().await.unwrap();
     println!("disconnected");
 }

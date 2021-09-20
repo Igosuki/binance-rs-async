@@ -16,8 +16,8 @@ name = "binance"
 path = "src/lib.rs"
 
 [features]
-rustls-tls = ["tungstenite/rustls-tls-webpki-roots", "reqwest/rustls-tls"]
-native-tls = ["tungstenite/native-tls", "reqwest/default-tls"]
+rustls-tls = ["tungstenite/rustls-tls-webpki-roots", "tokio-tungstenite/rustls-tls", "reqwest/rustls-tls"]
+native-tls = ["tungstenite/native-tls", "tokio-tungstenite/native-tls", "reqwest/default-tls"]
 default = ["native-tls"]
 
 [dependencies]
@@ -33,10 +33,11 @@ thiserror = "1.0"
 tungstenite = "0.15"
 url = "2.2"
 lazy_static = "1.4"
+tokio-tungstenite = "0.15"
+tokio = { version = "1", features = ["full"] }
 
 [dev-dependencies]
 csv = "1.1"
 env_logger = "0.9"
 log = "0.4"
-tokio = { version = "1", features = ["full"] }
 tokio-test = "0.4"
