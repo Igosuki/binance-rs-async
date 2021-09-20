@@ -3,9 +3,7 @@ use serde_json::Value;
 use crate::client::*;
 use crate::errors::*;
 use crate::futures::rest_model::*;
-use crate::rest_model::{
-    BookTickers, KlineSummaries, KlineSummary, PairAndWindowQuery, PairQuery, SymbolPrice, Tickers,
-};
+use crate::rest_model::{BookTickers, KlineSummaries, KlineSummary, PairAndWindowQuery, PairQuery, SymbolPrice, Tickers};
 use crate::util::*;
 
 //TODO: Validate intervals and start/end times in history queries
@@ -25,12 +23,7 @@ impl FuturesMarket {
         S: Into<String>,
     {
         self.client
-            .get_d(
-                "/fapi/v1/depth",
-                Some(PairQuery {
-                    symbol: symbol.into(),
-                }),
-            )
+            .get_d("/fapi/v1/depth", Some(PairQuery { symbol: symbol.into() }))
             .await
     }
 
@@ -40,22 +33,12 @@ impl FuturesMarket {
         S: Into<String>,
     {
         self.client
-            .get_d(
-                "/fapi/v1/trades",
-                Some(PairQuery {
-                    symbol: symbol.into(),
-                }),
-            )
+            .get_d("/fapi/v1/trades", Some(PairQuery { symbol: symbol.into() }))
             .await
     }
 
     /// Get historical trades
-    pub async fn get_historical_trades<S1, S2, S3>(
-        &self,
-        symbol: S1,
-        from_id: S2,
-        limit: S3,
-    ) -> Result<Trades>
+    pub async fn get_historical_trades<S1, S2, S3>(&self, symbol: S1, from_id: S2, limit: S3) -> Result<Trades>
     where
         S1: Into<String>,
         S2: Into<Option<u64>>,
@@ -169,11 +152,7 @@ impl FuturesMarket {
         };
         query.validate()?;
         self.client
-            .get_signed_p(
-                "/futures/data/openInterestHist",
-                Some(query),
-                self.recv_window,
-            )
+            .get_signed_p("/futures/data/openInterestHist", Some(query), self.recv_window)
             .await
     }
 
@@ -204,11 +183,7 @@ impl FuturesMarket {
         };
         query.validate()?;
         self.client
-            .get_signed_p(
-                "/futures/data/topLongShortAccountRatio",
-                Some(query),
-                self.recv_window,
-            )
+            .get_signed_p("/futures/data/topLongShortAccountRatio", Some(query), self.recv_window)
             .await
     }
 
@@ -239,11 +214,7 @@ impl FuturesMarket {
         };
         query.validate()?;
         self.client
-            .get_signed_p(
-                "/futures/data/topLongShortPositionRatio",
-                Some(query),
-                self.recv_window,
-            )
+            .get_signed_p("/futures/data/topLongShortPositionRatio", Some(query), self.recv_window)
             .await
     }
 
@@ -309,11 +280,7 @@ impl FuturesMarket {
         };
         query.validate()?;
         self.client
-            .get_signed_p(
-                "/futures/data/takerlongshortRatio",
-                Some(query),
-                self.recv_window,
-            )
+            .get_signed_p("/futures/data/takerlongshortRatio", Some(query), self.recv_window)
             .await
     }
 
@@ -427,10 +394,7 @@ impl FuturesMarket {
             from_id: None,
             period: None,
         };
-        let klines = self
-            .client
-            .get_d("/fapi/v1/markPriceKlines", Some(query))
-            .await?;
+        let klines = self.client.get_d("/fapi/v1/markPriceKlines", Some(query)).await?;
 
         Ok(klines)
     }
@@ -464,10 +428,7 @@ impl FuturesMarket {
             period: None,
         };
 
-        let klines = self
-            .client
-            .get_d("/fapi/v1/indexPriceKlines", Some(query))
-            .await?;
+        let klines = self.client.get_d("/fapi/v1/indexPriceKlines", Some(query)).await?;
 
         Ok(klines)
     }
@@ -500,10 +461,7 @@ impl FuturesMarket {
             from_id: None,
             period: None,
         };
-        let klines = self
-            .client
-            .get_d("/fapi/v1/continuousKlines", Some(query))
-            .await?;
+        let klines = self.client.get_d("/fapi/v1/continuousKlines", Some(query)).await?;
 
         Ok(klines)
     }
@@ -538,12 +496,7 @@ impl FuturesMarket {
         S: Into<String>,
     {
         self.client
-            .get_d(
-                "/fapi/v1/ticker/24hr",
-                Some(PairQuery {
-                    symbol: symbol.into(),
-                }),
-            )
+            .get_d("/fapi/v1/ticker/24hr", Some(PairQuery { symbol: symbol.into() }))
             .await
     }
 
@@ -558,12 +511,7 @@ impl FuturesMarket {
         S: Into<String>,
     {
         self.client
-            .get_d(
-                "/fapi/v1/ticker/price",
-                Some(PairQuery {
-                    symbol: symbol.into(),
-                }),
-            )
+            .get_d("/fapi/v1/ticker/price", Some(PairQuery { symbol: symbol.into() }))
             .await
     }
 
@@ -579,18 +527,11 @@ impl FuturesMarket {
         S: Into<String>,
     {
         self.client
-            .get_d(
-                "/fapi/v1/ticker/bookTicker",
-                Some(PairQuery {
-                    symbol: symbol.into(),
-                }),
-            )
+            .get_d("/fapi/v1/ticker/bookTicker", Some(PairQuery { symbol: symbol.into() }))
             .await
     }
 
-    pub async fn get_mark_prices(&self) -> Result<MarkPrices> {
-        self.client.get_p("/fapi/v1/premiumIndex", "").await
-    }
+    pub async fn get_mark_prices(&self) -> Result<MarkPrices> { self.client.get_p("/fapi/v1/premiumIndex", "").await }
 
     pub async fn get_all_liquidation_orders(&self) -> Result<LiquidationOrders> {
         self.client.get_p("/fapi/v1/allForceOrders", "").await
@@ -601,12 +542,7 @@ impl FuturesMarket {
         S: Into<String>,
     {
         self.client
-            .get_d(
-                "/fapi/v1/openInterest",
-                Some(PairQuery {
-                    symbol: symbol.into(),
-                }),
-            )
+            .get_d("/fapi/v1/openInterest", Some(PairQuery { symbol: symbol.into() }))
             .await
     }
 }

@@ -49,12 +49,7 @@ impl Margin {
     /// let transaction_id = tokio_test::block_on(margin.transfer("BTCUSDT", 0.001, MarginTransferType::FromMainToMargin));
     /// assert!(transaction_id.is_ok(), "{:?}", transaction_id);
     /// ```
-    pub async fn transfer<S, F>(
-        &self,
-        symbol: S,
-        qty: F,
-        transfer_type: MarginTransferType,
-    ) -> Result<TransactionId>
+    pub async fn transfer<S, F>(&self, symbol: S, qty: F, transfer_type: MarginTransferType) -> Result<TransactionId>
     where
         S: Into<String>,
         F: Into<f64>,
@@ -264,10 +259,7 @@ impl Margin {
     /// let transaction_id = tokio_test::block_on(margin.new_oco_order(margin_order));
     /// assert!(transaction_id.is_ok(), "{:?}", transaction_id);
     /// ```
-    pub async fn new_oco_order(
-        &self,
-        margin_order: MarginOCOOrder,
-    ) -> Result<MarginOCOOrderResult> {
+    pub async fn new_oco_order(&self, margin_order: MarginOCOOrder) -> Result<MarginOCOOrderResult> {
         self.client
             .post_signed_p(SAPI_V1_MARGIN_OCO_ORDER, margin_order, self.recv_window)
             .await
@@ -301,11 +293,7 @@ impl Margin {
             is_isolated: is_isolated.map(bool_to_string),
         };
         self.client
-            .delete_signed_p(
-                SAPI_V1_MARGIN_ORDER,
-                margin_order_cancellation,
-                self.recv_window,
-            )
+            .delete_signed_p(SAPI_V1_MARGIN_ORDER, margin_order_cancellation, self.recv_window)
             .await
     }
 
@@ -337,11 +325,7 @@ impl Margin {
             is_isolated: is_isolated.map(bool_to_string),
         };
         self.client
-            .delete_signed_p(
-                SAPI_V1_MARGIN_OCO_ORDER,
-                margin_order_cancellation,
-                self.recv_window,
-            )
+            .delete_signed_p(SAPI_V1_MARGIN_OCO_ORDER, margin_order_cancellation, self.recv_window)
             .await
     }
 
@@ -366,11 +350,7 @@ impl Margin {
             is_isolated: is_isolated.map(bool_to_string),
         };
         self.client
-            .delete_signed_p(
-                SAPI_V1_MARGIN_OPEN_ORDERS,
-                margin_orders_cancellation,
-                self.recv_window,
-            )
+            .delete_signed_p(SAPI_V1_MARGIN_OPEN_ORDERS, margin_orders_cancellation, self.recv_window)
             .await
     }
 
@@ -406,10 +386,7 @@ impl Margin {
     /// let records = tokio_test::block_on(margin.repays(records_query));
     /// assert!(records.is_ok(), "{:?}", records);
     /// ```
-    pub async fn repays(
-        &self,
-        repays_query: RecordsQuery,
-    ) -> Result<RecordsQueryResult<RepayState>> {
+    pub async fn repays(&self, repays_query: RecordsQuery) -> Result<RecordsQueryResult<RepayState>> {
         self.client
             .get_signed_p(SAPI_V1_MARGIN_REPAY, Some(repays_query), self.recv_window)
             .await
@@ -438,13 +415,8 @@ impl Margin {
     /// let account_details = tokio_test::block_on(margin.isolated_details(None));
     /// assert!(account_details.is_ok(), "{:?}", account_details);
     /// ```
-    pub async fn isolated_details(
-        &self,
-        symbols: Option<Vec<String>>,
-    ) -> Result<IsolatedMarginAccountDetails> {
-        let q: Option<IsolatedMarginPairQuery> = symbols.map(|s| IsolatedMarginPairQuery {
-            symbols: s.join(","),
-        });
+    pub async fn isolated_details(&self, symbols: Option<Vec<String>>) -> Result<IsolatedMarginAccountDetails> {
+        let q: Option<IsolatedMarginPairQuery> = symbols.map(|s| IsolatedMarginPairQuery { symbols: s.join(",") });
         self.client
             .get_signed_p(SAPI_V1_MARGIN_ISOLATED_ACCOUNT, q, self.recv_window)
             .await
@@ -495,9 +467,7 @@ impl Margin {
         self.client
             .get_signed_p(
                 SAPI_V1_MARGIN_ISOLATED_PAIR,
-                Some(PairQuery {
-                    symbol: symbol.into(),
-                }),
+                Some(PairQuery { symbol: symbol.into() }),
                 self.recv_window,
             )
             .await
@@ -542,9 +512,7 @@ impl Margin {
     /// ```
     pub async fn bnb_burn_status(&self) -> Result<BnbBurnStatus> {
         let q: Option<PairQuery> = None;
-        self.client
-            .get_signed_p(SAPI_V1_BNB_BURN, q, self.recv_window)
-            .await
+        self.client.get_signed_p(SAPI_V1_BNB_BURN, q, self.recv_window).await
     }
 
     /// Query Interest rate history
@@ -555,16 +523,9 @@ impl Margin {
     /// let all_pairs = tokio_test::block_on(margin.interest_rate_history(InterestRateHistoryQuery::default()));
     /// assert!(all_pairs.is_ok(), "{:?}", all_pairs);
     /// ```
-    pub async fn interest_rate_history(
-        &self,
-        q: InterestRateHistoryQuery,
-    ) -> Result<InterestRateHistory> {
+    pub async fn interest_rate_history(&self, q: InterestRateHistoryQuery) -> Result<InterestRateHistory> {
         self.client
-            .get_signed_p(
-                SAPI_V1_MARGIN_INTEREST_RATE_HISTORY,
-                Some(q),
-                self.recv_window,
-            )
+            .get_signed_p(SAPI_V1_MARGIN_INTEREST_RATE_HISTORY, Some(q), self.recv_window)
             .await
     }
 
@@ -583,9 +544,7 @@ impl Margin {
         self.client
             .get_signed_p(
                 SAPI_V1_MARGIN_ASSET,
-                Some(AssetQuery {
-                    asset: asset.into(),
-                }),
+                Some(AssetQuery { asset: asset.into() }),
                 self.recv_window,
             )
             .await
@@ -606,9 +565,7 @@ impl Margin {
         self.client
             .get_signed_p(
                 SAPI_V1_MARGIN_PAIR,
-                Some(PairQuery {
-                    symbol: symbol.into(),
-                }),
+                Some(PairQuery { symbol: symbol.into() }),
                 self.recv_window,
             )
             .await
@@ -659,9 +616,7 @@ impl Margin {
         self.client
             .get_signed_p(
                 SAPI_V1_MARGIN_PRICE_INDEX,
-                Some(PairQuery {
-                    symbol: symbol.into(),
-                }),
+                Some(PairQuery { symbol: symbol.into() }),
                 self.recv_window,
             )
             .await
@@ -680,16 +635,9 @@ impl Margin {
     /// let records = tokio_test::block_on(margin.transfers(records_query));
     /// assert!(records.is_ok(), "{:?}", records);
     /// ```
-    pub async fn transfers(
-        &self,
-        transfers_query: RecordsQuery,
-    ) -> Result<RecordsQueryResult<OrderState>> {
+    pub async fn transfers(&self, transfers_query: RecordsQuery) -> Result<RecordsQueryResult<OrderState>> {
         self.client
-            .get_signed_p(
-                SAPI_V1_MARGIN_TRANSFER,
-                Some(transfers_query),
-                self.recv_window,
-            )
+            .get_signed_p(SAPI_V1_MARGIN_TRANSFER, Some(transfers_query), self.recv_window)
             .await
     }
 
@@ -731,16 +679,9 @@ impl Margin {
     /// let records = tokio_test::block_on(margin.interests(records_query));
     /// assert!(records.is_ok(), "{:?}", records);
     /// ```
-    pub async fn interests(
-        &self,
-        interest_query: RecordsQuery,
-    ) -> Result<RecordsQueryResult<InterestState>> {
+    pub async fn interests(&self, interest_query: RecordsQuery) -> Result<RecordsQueryResult<InterestState>> {
         self.client
-            .get_signed_p(
-                SAPI_V1_MARGIN_INTEREST_HISTORY,
-                Some(interest_query),
-                self.recv_window,
-            )
+            .get_signed_p(SAPI_V1_MARGIN_INTEREST_HISTORY, Some(interest_query), self.recv_window)
             .await
     }
 
@@ -798,11 +739,7 @@ impl Margin {
     /// let order_state = tokio_test::block_on(margin.open_orders("BTCUSDT", None));
     /// assert!(order_state.is_ok(), "{:?}", order_state);
     /// ```
-    pub async fn open_orders<S>(
-        &self,
-        symbol: S,
-        is_isolated: Option<bool>,
-    ) -> Result<Vec<MarginOrderState>>
+    pub async fn open_orders<S>(&self, symbol: S, is_isolated: Option<bool>) -> Result<Vec<MarginOrderState>>
     where
         S: Into<String>,
     {
@@ -830,16 +767,9 @@ impl Margin {
     /// let records = tokio_test::block_on(margin.orders(records_query));
     /// assert!(records.is_ok(), "{:?}", records);
     /// ```
-    pub async fn orders(
-        &self,
-        all_orders_query: MarginOrdersQuery,
-    ) -> Result<Vec<MarginOrderState>> {
+    pub async fn orders(&self, all_orders_query: MarginOrdersQuery) -> Result<Vec<MarginOrderState>> {
         self.client
-            .get_signed_p(
-                SAPI_V1_MARGIN_ALL_ORDERS,
-                Some(all_orders_query),
-                self.recv_window,
-            )
+            .get_signed_p(SAPI_V1_MARGIN_ALL_ORDERS, Some(all_orders_query), self.recv_window)
             .await
     }
 
@@ -855,16 +785,9 @@ impl Margin {
     /// let records = tokio_test::block_on(margin.trades(records_query));
     /// assert!(records.is_ok(), "{:?}", records);
     /// ```
-    pub async fn trades(
-        &self,
-        my_trades_query: MarginOwnTradesQuery,
-    ) -> Result<Vec<OwnTradesState>> {
+    pub async fn trades(&self, my_trades_query: MarginOwnTradesQuery) -> Result<Vec<OwnTradesState>> {
         self.client
-            .get_signed_p(
-                SAPI_V1_MARGIN_MY_TRADES,
-                Some(my_trades_query),
-                self.recv_window,
-            )
+            .get_signed_p(SAPI_V1_MARGIN_MY_TRADES, Some(my_trades_query), self.recv_window)
             .await
     }
 
@@ -898,16 +821,9 @@ impl Margin {
     /// let records = tokio_test::block_on(margin.all_oco_orders(records_query));
     /// assert!(records.is_ok(), "{:?}", records);
     /// ```
-    pub async fn all_oco_orders(
-        &self,
-        query: OCORecordsQuery,
-    ) -> Result<Vec<MarginOCOOrderResult>> {
+    pub async fn all_oco_orders(&self, query: OCORecordsQuery) -> Result<Vec<MarginOCOOrderResult>> {
         self.client
-            .get_signed_p(
-                SAPI_V1_MARGIN_OCO_ALL_ORDER_LIST,
-                Some(query),
-                self.recv_window,
-            )
+            .get_signed_p(SAPI_V1_MARGIN_OCO_ALL_ORDER_LIST, Some(query), self.recv_window)
             .await
     }
 
@@ -923,16 +839,9 @@ impl Margin {
     /// let records = tokio_test::block_on(margin.open_oco_orders(records_query));
     /// assert!(records.is_ok(), "{:?}", records);
     /// ```
-    pub async fn open_oco_orders(
-        &self,
-        query: MarginPairQuery,
-    ) -> Result<Vec<MarginOCOOrderResult>> {
+    pub async fn open_oco_orders(&self, query: MarginPairQuery) -> Result<Vec<MarginOCOOrderResult>> {
         self.client
-            .get_signed_p(
-                SAPI_V1_MARGIN_OCO_OPEN_ORDER_LIST,
-                Some(query),
-                self.recv_window,
-            )
+            .get_signed_p(SAPI_V1_MARGIN_OCO_OPEN_ORDER_LIST, Some(query), self.recv_window)
             .await
     }
 
@@ -944,11 +853,7 @@ impl Margin {
     /// let max = tokio_test::block_on(margin.max_borrowable("BTC", None));
     /// assert!(max.is_ok(), "{:?}", max);
     /// ```
-    pub async fn max_borrowable<S>(
-        &self,
-        asset: S,
-        isolated_symbol: Option<String>,
-    ) -> Result<MaxBorrowableAmount>
+    pub async fn max_borrowable<S>(&self, asset: S, isolated_symbol: Option<String>) -> Result<MaxBorrowableAmount>
     where
         S: Into<String>,
     {
@@ -972,11 +877,7 @@ impl Margin {
     /// let max = tokio_test::block_on(margin.max_transferable("BTC", None));
     /// assert!(max.is_ok(), "{:?}", max);
     /// ```
-    pub async fn max_transferable<S>(
-        &self,
-        asset: S,
-        isolated_symbol: Option<String>,
-    ) -> Result<MaxTransferableAmount>
+    pub async fn max_transferable<S>(&self, asset: S, isolated_symbol: Option<String>) -> Result<MaxTransferableAmount>
     where
         S: Into<String>,
     {
@@ -1037,10 +938,7 @@ impl Margin {
     /// assert!(close.is_ok())
     /// ```
     pub async fn close(&self, listen_key: &str) -> Result<Success> {
-        let data = self
-            .client
-            .delete(SAPI_USER_DATA_STREAM, listen_key)
-            .await?;
+        let data = self.client.delete(SAPI_USER_DATA_STREAM, listen_key).await?;
 
         let success: Success = from_str(data.as_str())?;
 

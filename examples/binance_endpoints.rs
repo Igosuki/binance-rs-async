@@ -188,10 +188,7 @@ async fn market_data() {
 
     // Best price/qty on the order book for ONE symbol
     match market.get_book_ticker("BNBETH").await {
-        Ok(answer) => info!(
-            "Bid Price: {}, Ask Price: {}",
-            answer.bid_price, answer.ask_price
-        ),
+        Ok(answer) => info!("Bid Price: {}, Ask Price: {}", answer.bid_price, answer.ask_price),
         Err(e) => error!("Error: {}", e),
     }
 

@@ -463,9 +463,7 @@ pub enum OrderSide {
 
 /// By default, buy
 impl Default for OrderSide {
-    fn default() -> Self {
-        Self::Buy
-    }
+    fn default() -> Self { Self::Buy }
 }
 
 /// Order types, the following restrictions apply
@@ -492,9 +490,7 @@ pub enum OrderType {
 
 /// By default, use market orders
 impl Default for OrderType {
-    fn default() -> Self {
-        Self::Market
-    }
+    fn default() -> Self { Self::Market }
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -1379,9 +1375,7 @@ pub(crate) mod string_or_float_opt {
             Float(f64),
         }
 
-        Ok(Some(crate::rest_model::string_or_float::deserialize(
-            deserializer,
-        )?))
+        Ok(Some(crate::rest_model::string_or_float::deserialize(deserializer)?))
     }
 }
 

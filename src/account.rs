@@ -358,10 +358,7 @@ impl Account {
     pub async fn test_cancel_order(&self, o: OrderCancellation) -> Result<TestResponse> {
         let recv_window = o.recv_window.unwrap_or(self.recv_window);
         let request = build_signed_request_p(o, recv_window)?;
-        let data = self
-            .client
-            .delete_signed(API_V3_ORDER_TEST, &request)
-            .await?;
+        let data = self.client.delete_signed(API_V3_ORDER_TEST, &request).await?;
         let tr: TestResponse = from_str(data.as_str())?;
 
         Ok(tr)
