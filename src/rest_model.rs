@@ -510,8 +510,8 @@ pub struct MarginOrder {
     pub iceberg_qty: Option<f64>,
     /// Default is `OrderResponse::ACK`
     pub new_order_resp_type: OrderResponse,
-    /// Default is `TimeInForce::GTC`
-    pub time_in_force: TimeInForce,
+    /// N.B. : do not set with `OrderType::Market`
+    pub time_in_force: Option<TimeInForce>,
     /// "TRUE" or "FALSE", in upper case, default is "FALSE"
     pub is_isolated: Option<String>,
     /// Default is `SideEffectType::NoSideEffect`
@@ -1040,7 +1040,7 @@ pub struct MarginOrderResult {
     #[serde(with = "string_or_float")]
     pub executed_qty: f64,
     #[serde(with = "string_or_float")]
-    pub cumulative_quote_qty: f64,
+    pub cummulative_quote_qty: f64,
     pub status: OrderStatus,
     pub time_in_force: TimeInForce,
     #[serde(rename(serialize = "type", deserialize = "type"))]
@@ -1057,7 +1057,7 @@ pub struct MarginOrderResult {
 pub struct MarginOrderState {
     pub client_order_id: String,
     #[serde(with = "string_or_float")]
-    pub cumulative_quote_qty: f64,
+    pub cummulative_quote_qty: f64,
     #[serde(with = "string_or_float")]
     pub executed_qty: f64,
     #[serde(with = "string_or_float")]

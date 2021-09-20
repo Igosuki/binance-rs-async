@@ -192,7 +192,7 @@ async fn margin_post() {
         new_client_order_id: Some("my_id".to_string()),
         iceberg_qty: Some(10.0),
         new_order_resp_type: OrderResponse::Ack,
-        time_in_force: TimeInForce::FOK,
+        time_in_force: Some(TimeInForce::FOK),
         side_effect_type: SideEffectType::NoSideEffect,
         is_isolated: None,
     };
