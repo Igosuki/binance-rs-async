@@ -9,12 +9,10 @@ pub enum WebsocketEvent {
     Trade(Box<TradeEvent>),
     #[serde(alias = "kline")]
     Kline(Box<KlineEvent>),
-    #[serde(alias = "24hrMiniTicker")]
-    DayMiniTicker(Box<MiniDayTickerEvent>),
     #[serde(alias = "24hrTicker")]
     DayTicker(Box<DayTickerEvent>),
-    #[serde(alias = "bookTicker")]
-    BookTicker(Box<BookTickerEvent>),
+    #[serde(alias = "24hrMiniTicker")]
+    DayMiniTicker(Box<MiniDayTickerEvent>),
     #[serde(alias = "depthUpdate")]
     DepthOrderBook(Box<DepthOrderBookEvent>),
     #[serde(alias = "outboundAccountPosition")]
@@ -247,33 +245,35 @@ pub struct BookTickerEvent {
     #[serde(rename = "s")]
     pub symbol: String,
 
-    #[serde(rename = "b")]
-    pub best_bid: String,
+    #[serde(rename = "b", with = "string_or_float")]
+    pub best_bid: f64,
 
-    #[serde(rename = "B")]
-    pub best_bid_qty: String,
+    #[serde(rename = "B", with = "string_or_float")]
+    pub best_bid_qty: f64,
 
-    #[serde(rename = "a")]
-    pub best_ask: String,
+    #[serde(rename = "a", with = "string_or_float")]
+    pub best_ask: f64,
 
-    #[serde(rename = "A")]
-    pub best_ask_qty: String,
+    #[serde(rename = "A", with = "string_or_float")]
+    pub best_ask_qty: f64,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct StreamEvent {
+pub struct CombinedStreamEvent<T> {
     stream: String,
-    pub data: WebsocketEventAlt,
+    pub data: T,
 }
 
+///
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(untagged)]
-pub enum WebsocketEventAlt {
+pub enum WebsocketEventUntag {
     WebsocketEvent(WebsocketEvent),
     Orderbook(Box<OrderBook>),
+    BookTicker(Box<BookTickerEvent>),
 }
 
-impl StreamEvent {
+impl<T> CombinedStreamEvent<T> {
     /// Returns (stream_name, channel)
     pub fn parse_stream(&self) -> (String, String) {
         let mut parsed = self.stream.clone();
