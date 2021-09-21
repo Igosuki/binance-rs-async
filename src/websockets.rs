@@ -95,7 +95,9 @@ impl<'a, WE: serde::de::DeserializeOwned> WebSockets<'a, WE> {
     /// N.B: WE has to be CombinedStreamEvent
     pub async fn connect_multiple(&mut self, endpoints: Vec<String>) -> Result<()> {
         let mut url = Url::parse(&self.conf.ws_endpoint)?;
-        url.path_segments_mut()?.push(STREAM_ENDPOINT);
+        url.path_segments_mut()
+            .map_err(|_| Error::UrlParserError(url::ParseError::RelativeUrlWithoutBase))?
+            .push(STREAM_ENDPOINT);
         url.set_query(Some(&format!("streams={}", combined_stream(endpoints))));
 
         match connect_async(url).await {
@@ -133,8 +135,8 @@ impl<'a, WE: serde::de::DeserializeOwned> WebSockets<'a, WE> {
 
     pub async fn event_loop(&mut self, running: &AtomicBool) -> Result<()> {
         while running.load(Ordering::Relaxed) {
-            if let Some(ref mut socket) = self.socket {
-                let message = socket.0.next().await.unwrap()?;
+            if let Some((ref mut socket, _)) = self.socket {
+                let message = socket.next().await.unwrap()?;
 
                 match message {
                     Message::Text(msg) => {

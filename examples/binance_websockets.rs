@@ -1,4 +1,5 @@
 use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::RwLock;
 
 use binance::api::*;
 use binance::userstream::*;
@@ -155,13 +156,14 @@ async fn kline_websocket() {
 async fn last_price() {
     let keep_running = AtomicBool::new(true);
     let all_ticker = all_ticker_stream();
-    let mut btcusdt: f32 = "0".parse().unwrap();
+    let btcusdt: RwLock<f32> = RwLock::new("0".parse().unwrap());
 
     let mut web_socket: WebSockets<'_, Vec<WebsocketEvent>> = WebSockets::new(|events: Vec<WebsocketEvent>| {
         for tick_events in events {
             if let WebsocketEvent::DayTicker(tick_event) = tick_events {
                 if tick_event.symbol == "BTCUSDT" {
-                    btcusdt = tick_event.average_price.parse().unwrap();
+                    let mut btcusdt = btcusdt.write().unwrap();
+                    *btcusdt = tick_event.average_price.parse::<f32>().unwrap();
                     let btcusdt_close: f32 = tick_event.current_close.parse().unwrap();
                     println!("{} - {}", btcusdt, btcusdt_close);
 
@@ -211,7 +213,6 @@ async fn combined_orderbook() {
         .into_iter()
         .map(|symbol| partial_book_depth_stream(symbol, 5, 1000))
         .collect();
-    let book_ticker: String = book_ticker_stream("btcusdt");
 
     let mut web_socket: WebSockets<'_, CombinedStreamEvent<_>> =
         WebSockets::new(|event: CombinedStreamEvent<WebsocketEventUntag>| {
@@ -222,7 +223,7 @@ async fn combined_orderbook() {
             Ok(())
         });
 
-    web_socket.connect(&book_ticker).await.unwrap(); // check error
+    web_socket.connect_multiple(streams).await.unwrap(); // check error
     if let Err(e) = web_socket.event_loop(&keep_running).await {
         println!("Error: {}", e);
     }
