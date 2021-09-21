@@ -1,8 +1,9 @@
+use std::sync::atomic::{AtomicBool, Ordering};
+
 use binance::api::*;
 use binance::userstream::*;
 use binance::websockets::*;
-use binance::ws_model::WebsocketEvent;
-use std::sync::atomic::{AtomicBool, Ordering};
+use binance::ws_model::{CombinedStreamEvent, WebsocketEvent, WebsocketEventUntag};
 
 #[tokio::main]
 async fn main() {
@@ -12,7 +13,8 @@ async fn main() {
     //kline_websocket().await;
     //all_trades_websocket().await;
     //last_price().await;
-    book_ticker().await;
+    //book_ticker().await;
+    combined_orderbook().await;
 }
 
 #[allow(dead_code)]
@@ -73,7 +75,7 @@ async fn user_stream_websocket<F>() {
 #[allow(dead_code)]
 async fn market_websocket() {
     let keep_running = AtomicBool::new(true); // Used to control the event loop
-    let agg_trade: String = format!("{}@aggTrade", "ethbtc");
+    let agg_trade: String = agg_trade_stream("ethbtc");
     let mut web_socket: WebSockets<'_, WebsocketEvent> = WebSockets::new(|event: WebsocketEvent| {
         match event {
             WebsocketEvent::Trade(trade) => {
@@ -102,7 +104,7 @@ async fn market_websocket() {
 #[allow(dead_code)]
 async fn all_trades_websocket() {
     let keep_running = AtomicBool::new(true); // Used to control the event loop
-    let agg_trade: String = "!ticker@arr".to_string();
+    let agg_trade = all_ticker_stream();
     // NB: you may not ask for both arrays type streams and object type streams at the same time, this holds true in binance connections anyways
     // You cannot connect to multiple things for a single socket
     let mut web_socket: WebSockets<'_, Vec<WebsocketEvent>> = WebSockets::new(|events: Vec<WebsocketEvent>| {
@@ -118,7 +120,7 @@ async fn all_trades_websocket() {
         Ok(())
     });
 
-    web_socket.connect(&agg_trade).await.unwrap(); // check error
+    web_socket.connect(agg_trade).await.unwrap(); // check error
     if let Err(e) = web_socket.event_loop(&keep_running).await {
         println!("Error: {}", e);
     }
@@ -129,7 +131,7 @@ async fn all_trades_websocket() {
 #[allow(dead_code)]
 async fn kline_websocket() {
     let keep_running = AtomicBool::new(true);
-    let kline: String = "ethbtc@kline_1m".to_string();
+    let kline = kline_stream("ethbtc", "1m");
     let mut web_socket: WebSockets<'_, WebsocketEvent> = WebSockets::new(|event: WebsocketEvent| {
         if let WebsocketEvent::Kline(kline_event) = event {
             println!(
@@ -152,7 +154,7 @@ async fn kline_websocket() {
 #[allow(dead_code)]
 async fn last_price() {
     let keep_running = AtomicBool::new(true);
-    let agg_trade: String = "!ticker@arr".to_string();
+    let all_ticker = all_ticker_stream();
     let mut btcusdt: f32 = "0".parse().unwrap();
 
     let mut web_socket: WebSockets<'_, Vec<WebsocketEvent>> = WebSockets::new(|events: Vec<WebsocketEvent>| {
@@ -174,7 +176,7 @@ async fn last_price() {
         Ok(())
     });
 
-    web_socket.connect(&agg_trade).await.unwrap(); // check error
+    web_socket.connect(all_ticker).await.unwrap(); // check error
     if let Err(e) = web_socket.event_loop(&keep_running).await {
         println!("Error: {}", e);
     }
@@ -182,14 +184,40 @@ async fn last_price() {
     println!("disconnected");
 }
 
+#[allow(dead_code)]
 async fn book_ticker() {
     let keep_running = AtomicBool::new(true);
-    let book_ticker: String = "btcusdt@bookTicker".to_string();
+    let book_ticker: String = book_ticker_stream("btcusdt");
 
-    let mut web_socket: WebSockets<'_, WebsocketEvent> =
-        WebSockets::new(|events: WebsocketEvent| {
-            if let WebsocketEvent::BookTicker(tick_event) = events {
-                println!("{:?}", tick_event)
+    let mut web_socket: WebSockets<'_, WebsocketEventUntag> = WebSockets::new(|events: WebsocketEventUntag| {
+        if let WebsocketEventUntag::BookTicker(tick_event) = events {
+            println!("{:?}", tick_event)
+        }
+        Ok(())
+    });
+
+    web_socket.connect(&book_ticker).await.unwrap(); // check error
+    if let Err(e) = web_socket.event_loop(&keep_running).await {
+        println!("Error: {}", e);
+    }
+    web_socket.disconnect().await.unwrap();
+    println!("disconnected");
+}
+
+#[allow(dead_code)]
+async fn combined_orderbook() {
+    let keep_running = AtomicBool::new(true);
+    let streams: Vec<String> = vec!["btcusdt", "ethusdt"]
+        .into_iter()
+        .map(|symbol| partial_book_depth_stream(symbol, 5, 1000))
+        .collect();
+    let book_ticker: String = book_ticker_stream("btcusdt");
+
+    let mut web_socket: WebSockets<'_, CombinedStreamEvent<_>> =
+        WebSockets::new(|event: CombinedStreamEvent<WebsocketEventUntag>| {
+            let data = event.data;
+            if let WebsocketEventUntag::Orderbook(orderbook) = data {
+                println!("{:?}", orderbook)
             }
             Ok(())
         });

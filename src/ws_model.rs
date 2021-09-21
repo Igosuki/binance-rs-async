@@ -1,18 +1,27 @@
 use crate::rest_model::{string_or_float, Asks, Bids, OrderBook, OrderSide, OrderStatus, OrderType, TimeInForce};
 
 #[derive(Debug, Serialize, Deserialize)]
-#[serde(untagged)]
+#[serde(tag = "e")]
 pub enum WebsocketEvent {
+    #[serde(alias = "aggTrade")]
     AggTrade(Box<TradesEvent>),
+    #[serde(alias = "trade")]
     Trade(Box<TradeEvent>),
+    #[serde(alias = "kline")]
     Kline(Box<KlineEvent>),
+    #[serde(alias = "24hrTicker")]
     DayTicker(Box<DayTickerEvent>),
+    #[serde(alias = "24hrMiniTicker")]
     DayMiniTicker(Box<MiniDayTickerEvent>),
-    BookTicker(Box<BookTickerEvent>),
+    #[serde(alias = "depthUpdate")]
     DepthOrderBook(Box<DepthOrderBookEvent>),
+    #[serde(alias = "outboundAccountPosition")]
     AccountPositionUpdate(Box<AccountPositionUpdate>),
+    #[serde(alias = "balanceUpdate")]
     BalanceUpdate(Box<BalanceUpdate>),
+    #[serde(alias = "executionReport")]
     OrderUpdate(Box<OrderUpdate>),
+    #[serde(alias = "listStatus")]
     ListOrderUpdate(Box<OrderListUpdate>),
 }
 
@@ -25,9 +34,6 @@ pub struct QueryResult {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct TradesEvent {
-    #[serde(rename = "e", alias = "aggTrade")]
-    pub event_type: String,
-
     #[serde(rename = "E")]
     pub event_time: u64,
 
@@ -62,9 +68,6 @@ pub struct TradesEvent {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct TradeEvent {
-    #[serde(rename = "e", alias = "trade")]
-    pub event_type: String,
-
     #[serde(rename = "E")]
     pub event_time: u64,
 
@@ -99,8 +102,6 @@ pub struct TradeEvent {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct DayTickerEvent {
-    #[serde(rename = "e", alias = "24hrTicker")]
-    pub event_type: String,
     #[serde(rename = "E")]
     pub event_time: u64,
     #[serde(rename = "s")]
@@ -150,8 +151,6 @@ pub struct DayTickerEvent {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct MiniDayTickerEvent {
-    #[serde(rename = "e", alias = "24hrMiniTicker")]
-    pub event_type: String,
     #[serde(rename = "E")]
     pub event_time: u64,
     #[serde(rename = "s")]
@@ -173,8 +172,6 @@ pub struct MiniDayTickerEvent {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct KlineEvent {
-    #[serde(rename = "e", alias = "kline")]
-    pub event_type: String,
     #[serde(rename = "E")]
     pub event_time: u64,
     #[serde(rename = "s")]
@@ -225,8 +222,6 @@ pub struct Kline {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct DepthOrderBookEvent {
-    #[serde(rename = "e", alias = "depthUpdate")]
-    pub event_type: String,
     #[serde(rename = "E")]
     pub event_time: u64,
     #[serde(rename = "s")]
@@ -264,19 +259,21 @@ pub struct BookTickerEvent {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct StreamEvent {
+pub struct CombinedStreamEvent<T> {
     stream: String,
-    pub data: WebsocketEventAlt,
+    pub data: T,
 }
 
+///
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(untagged)]
-pub enum WebsocketEventAlt {
+pub enum WebsocketEventUntag {
     WebsocketEvent(WebsocketEvent),
     Orderbook(Box<OrderBook>),
+    BookTicker(Box<BookTickerEvent>),
 }
 
-impl StreamEvent {
+impl<T> CombinedStreamEvent<T> {
     /// Returns (stream_name, channel)
     pub fn parse_stream(&self) -> (String, String) {
         let mut parsed = self.stream.clone();
@@ -294,9 +291,6 @@ impl StreamEvent {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct AccountPositionUpdate {
-    #[serde(rename = "e", alias = "outboundAccountPosition")]
-    pub event_type: String,
-
     #[serde(alias = "E")]
     pub event_time: u64,
 
@@ -351,9 +345,6 @@ pub struct EventBalance {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct BalanceUpdate {
-    #[serde(rename = "e", alias = "balanceUpdate")]
-    pub event_type: String,
-
     #[serde(alias = "E")]
     pub event_time: u64,
 
@@ -371,8 +362,6 @@ pub struct BalanceUpdate {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct OrderUpdate {
-    #[serde(rename = "e", alias = "executionReport")]
-    pub event_type: String,
     #[serde(rename = "E")]
     pub event_time: u64,
     #[serde(rename = "s")]
@@ -453,8 +442,6 @@ pub struct OrderUpdate {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct OrderListUpdate {
-    #[serde(rename = "e", alias = "listStatus")]
-    pub event_type: String,
     #[serde(rename = "E")]
     pub event_time: u64,
     #[serde(rename = "S")]
