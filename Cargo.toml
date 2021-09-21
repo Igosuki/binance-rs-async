@@ -3,7 +3,7 @@ name = "binance-rs-async"
 version = "1.1.0-beta.5"
 license = "MIT OR Apache-2.0"
 authors = ["Guillaume Balaine igosuki.github@gmail.com"]
-edition = "2018"
+edition = "2021"
 
 description = "Async Rust Library for the Binance API"
 keywords = ["cryptocurrency", "trading", "binance"]
