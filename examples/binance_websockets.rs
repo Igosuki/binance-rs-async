@@ -11,7 +11,8 @@ async fn main() {
     //market_websocket().await;
     //kline_websocket().await;
     //all_trades_websocket().await;
-    last_price().await;
+    //last_price().await;
+    book_ticker().await;
 }
 
 #[allow(dead_code)]
@@ -148,6 +149,7 @@ async fn kline_websocket() {
     println!("disconnected");
 }
 
+#[allow(dead_code)]
 async fn last_price() {
     let keep_running = AtomicBool::new(true);
     let agg_trade: String = "!ticker@arr".to_string();
@@ -173,6 +175,26 @@ async fn last_price() {
     });
 
     web_socket.connect(&agg_trade).await.unwrap(); // check error
+    if let Err(e) = web_socket.event_loop(&keep_running).await {
+        println!("Error: {}", e);
+    }
+    web_socket.disconnect().await.unwrap();
+    println!("disconnected");
+}
+
+async fn book_ticker() {
+    let keep_running = AtomicBool::new(true);
+    let book_ticker: String = "btcusdt@bookTicker".to_string();
+
+    let mut web_socket: WebSockets<'_, WebsocketEvent> =
+        WebSockets::new(|events: WebsocketEvent| {
+            if let WebsocketEvent::BookTicker(tick_event) = events {
+                println!("{:?}", tick_event)
+            }
+            Ok(())
+        });
+
+    web_socket.connect(&book_ticker).await.unwrap(); // check error
     if let Err(e) = web_socket.event_loop(&keep_running).await {
         println!("Error: {}", e);
     }
