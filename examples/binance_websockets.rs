@@ -1,6 +1,10 @@
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::RwLock;
 
+use futures::stream::StreamExt;
+use serde_json::from_str;
+use tokio_tungstenite::tungstenite::Message;
+
 use binance::api::*;
 use binance::userstream::*;
 use binance::websockets::*;
@@ -213,7 +217,6 @@ async fn combined_orderbook() {
         .into_iter()
         .map(|symbol| partial_book_depth_stream(symbol, 5, 1000))
         .collect();
-
     let mut web_socket: WebSockets<'_, CombinedStreamEvent<_>> =
         WebSockets::new(|event: CombinedStreamEvent<WebsocketEventUntag>| {
             let data = event.data;
@@ -229,4 +232,41 @@ async fn combined_orderbook() {
     }
     web_socket.disconnect().await.unwrap();
     println!("disconnected");
+}
+
+#[allow(dead_code)]
+async fn custom_event_loop() {
+    let streams: Vec<String> = vec!["btcusdt", "ethusdt"]
+        .into_iter()
+        .map(|symbol| partial_book_depth_stream(symbol, 5, 1000))
+        .collect();
+    let mut web_socket: WebSockets<'_, CombinedStreamEvent<_>> =
+        WebSockets::new(|event: CombinedStreamEvent<WebsocketEventUntag>| {
+            let data = event.data;
+            if let WebsocketEventUntag::Orderbook(orderbook) = data {
+                println!("{:?}", orderbook)
+            }
+            Ok(())
+        });
+    web_socket.connect_multiple(streams).await.unwrap(); // check error
+    loop {
+        if let Some((ref mut socket, _)) = web_socket.socket {
+            if let Ok(message) = socket.next().await.unwrap() {
+                match message {
+                    Message::Text(msg) => {
+                        if msg.is_empty() {
+                            continue;
+                        }
+                        let event: CombinedStreamEvent<WebsocketEventUntag> = from_str(msg.as_str()).unwrap();
+                        eprintln!("event = {:?}", event);
+                    }
+                    Message::Ping(_) | Message::Pong(_) | Message::Binary(_) => {}
+                    Message::Close(e) => {
+                        eprintln!("closed stream = {:?}", e);
+                        break;
+                    }
+                }
+            }
+        }
+    }
 }
