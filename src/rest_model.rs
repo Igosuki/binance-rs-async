@@ -1017,7 +1017,7 @@ pub struct PriceIndex {
     pub symbol: String,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Default, Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct MarginOrderQuery {
     pub symbol: String,
@@ -1063,6 +1063,7 @@ pub struct MarginOrderState {
     pub executed_qty: f64,
     #[serde(with = "string_or_float")]
     pub iceberg_qty: f64,
+    pub is_working: bool,
     pub order_id: u64,
     #[serde(with = "string_or_float")]
     pub orig_qty: f64,
@@ -1074,12 +1075,11 @@ pub struct MarginOrderState {
     pub stop_price: f64,
     pub symbol: String,
     pub is_isolated: Option<bool>,
-    pub time: u128,
+    pub time: u64,
     pub time_in_force: TimeInForce,
     #[serde(rename(serialize = "type", deserialize = "type"))]
     pub order_type: OrderType,
-    pub update_time: u128,
-    pub is_working: bool,
+    pub update_time: u64,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
