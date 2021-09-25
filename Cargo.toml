@@ -1,6 +1,6 @@
 [package]
 name = "binance-rs-async"
-version = "1.1.0-beta.5"
+version = "1.1.0"
 license = "MIT OR Apache-2.0"
 authors = ["Guillaume Balaine igosuki.github@gmail.com"]
 edition = "2021"
@@ -34,7 +34,7 @@ tungstenite = "0.15"
 url = "2.2"
 lazy_static = "1.4"
 tokio-tungstenite = "0.15"
-tokio = { version = "1", features = ["full"] }
+tokio = { version = "1.12", features = ["full"] }
 
 [dev-dependencies]
 csv = "1.1"
