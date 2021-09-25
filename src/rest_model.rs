@@ -1318,6 +1318,13 @@ pub struct PropertyCmd {
     pub params: (String, bool),
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct IsolatedAccountLimit {
+    pub enabled_account: u64,
+    pub max_account: u64,
+}
+
 pub mod string_or_float {
     use std::fmt;
 

@@ -17,11 +17,12 @@ static SAPI_V1_MARGIN_OCO_OPEN_ORDER_LIST: &str = "/sapi/v1/margin/openOrderList
 static SAPI_V1_MARGIN_ACCOUNT: &str = "/sapi/v1/margin/account";
 static SAPI_V1_MARGIN_ISOLATED_ACCOUNT: &str = "/sapi/v1/margin/isolated/account";
 static SAPI_V1_MARGIN_PAIR: &str = "/sapi/v1/margin/pair";
-static SAPI_V1_MARGIN_ISOLATED_PAIR: &str = "/sapi/v1/margin/pair";
+static SAPI_V1_MARGIN_ISOLATED_PAIR: &str = "/sapi/v1/margin/isolated/pair";
 static SAPI_V1_MARGIN_ASSET: &str = "/sapi/v1/margin/asset";
 static SAPI_V1_MARGIN_ALL_ASSETS: &str = "/sapi/v1/margin/allAssets";
 static SAPI_V1_MARGIN_ALL_PAIRS: &str = "/sapi/v1/margin/allPairs";
 static SAPI_V1_MARGIN_ALL_ISOLATED_PAIRS: &str = "/sapi/v1/margin/isolated/allPairs";
+static SAPI_V1_MARGIN_ISOLATED_ACCOUNT_LIMIT: &str = "/sapi/v1/margin/isolated/accountLimit";
 static SAPI_V1_MARGIN_PRICE_INDEX: &str = "/sapi/v1/margin/priceIndex";
 static SAPI_V1_MARGIN_INTEREST_HISTORY: &str = "/sapi/v1/margin/interestHistory";
 static SAPI_V1_MARGIN_FORCED_LIQUIDATION_RECORD: &str = "/sapi/v1/margin/forceLiquidationRec";
@@ -943,5 +944,15 @@ impl Margin {
         let success: Success = from_str(data.as_str())?;
 
         Ok(success)
+    }
+
+    pub async fn isolated_account_limit(&self) -> Result<IsolatedAccountLimit> {
+        let q: Option<PairQuery> = None;
+
+        let data = self
+            .client
+            .get_signed_p(SAPI_V1_MARGIN_ISOLATED_ACCOUNT_LIMIT, q, self.recv_window)
+            .await?;
+        Ok(data)
     }
 }
