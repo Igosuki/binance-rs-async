@@ -20,7 +20,7 @@ async fn main() {
     Builder::new().parse_default_env().init();
     info!("running margin endpoints");
     margin_query().await;
-    // margin_post().await;
+    margin_post().await;
 }
 
 async fn margin_query() {
