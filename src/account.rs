@@ -208,6 +208,26 @@ impl Account {
         Ok(order)
     }
 
+    /// Cancels all currently open orders of specified symbol for the account
+    /// # Examples
+    /// ```rust,no_run
+    /// use binance::{api::*, account::*, config::*};
+    /// let account: Account = Binance::new_with_env(&Config::testnet());
+    /// let canceled_orders = tokio_test::block_on(account.cancel_all_open_orders());
+    /// assert!(canceled_orders.is_ok(), "{:?}", canceled_orders);
+    /// ```
+    pub async fn cancel_all_open_orders<S>(&self, symbol: S) -> Result<Vec<Order>>
+    where
+        S: Into<String>,
+    {
+        let mut params: BTreeMap<String, String> = BTreeMap::new();
+        params.insert("symbol".into(), symbol.into());
+        let request = build_signed_request(params, self.recv_window)?;
+        let data = self.client.delete_signed(API_V3_OPEN_ORDERS, &request).await?;
+        let order: Vec<Order> = from_str(data.as_str())?;
+        Ok(order)
+    }
+
     /// Check an order's status
     /// # Examples
     /// ```rust,no_run
