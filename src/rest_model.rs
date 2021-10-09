@@ -1160,7 +1160,7 @@ pub enum OrderStatus {
     /// The order has been accepted by the engine.
     New,
     /// A part of the order has been filled.
-    PartialyFilled,
+    PartiallyFilled,
     /// The order has been completely filled.
     Filled,
     /// The order has been canceled by the user.
