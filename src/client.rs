@@ -238,6 +238,7 @@ impl Client {
     }
 
     async fn handler(&self, response: Response) -> Result<String> {
+        eprintln!("response = {:?}", response);
         match response.status() {
             StatusCode::OK => {
                 let body = response.bytes().await?;

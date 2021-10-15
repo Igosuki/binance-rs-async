@@ -20,7 +20,7 @@ async fn main() {
     Builder::new().parse_default_env().init();
     info!("running margin endpoints");
     margin_query().await;
-    margin_post().await;
+    //margin_post().await;
 }
 
 async fn margin_query() {
@@ -79,8 +79,8 @@ async fn margin_query() {
     eprintln!("pair = {:?}", pair);
     let all_assets = margin.all_assets().await;
     eprintln!("all_assets = {:?}", all_assets);
-    let all_pairs = margin.all_pairs().await;
-    eprintln!("all_pairs = {:?}", all_pairs);
+    let all_isolated_pairs = margin.all_isolated_pairs().await;
+    eprintln!("all_isolated_pairs = {:?}", all_isolated_pairs);
     let price_index = margin.price_index("BTCUSDT").await;
     eprintln!("price_index = {:?}", price_index);
     let records_query = RecordsQuery {
