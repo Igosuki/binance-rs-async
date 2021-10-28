@@ -153,6 +153,7 @@ async fn margin_query() {
     eprintln!("max_transferable = {:?}", max_transferable);
 }
 
+#[allow(dead_code)]
 async fn margin_post() {
     eprintln!("----------- Margin POST queries ----------");
     let margin: Margin = Binance::new_with_env(&Config::testnet());
