@@ -337,9 +337,11 @@ pub struct EventBalance {
     #[serde(rename = "a")]
     pub asset: String,
     #[serde(rename = "f")]
-    pub free: String,
+    #[serde(with = "string_or_float")]
+    pub free: f64,
     #[serde(rename = "l")]
-    pub locked: String,
+    #[serde(with = "string_or_float")]
+    pub locked: f64,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
