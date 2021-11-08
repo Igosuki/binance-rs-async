@@ -77,6 +77,16 @@ pub enum Filters {
         #[serde(with = "string_or_float")]
         step_size: f64,
     },
+    #[serde(rename = "MARKET_LOT_SIZE")]
+    #[serde(rename_all = "camelCase")]
+    MarketLotSize {
+        #[serde(with = "string_or_float")]
+        min_qty: f64,
+        #[serde(with = "string_or_float")]
+        max_qty: f64,
+        #[serde(with = "string_or_float")]
+        step_size: f64,
+    },
     #[serde(rename = "MIN_NOTIONAL")]
     #[serde(rename_all = "camelCase")]
     MinNotional {
@@ -88,13 +98,6 @@ pub enum Filters {
     #[serde(rename = "ICEBERG_PARTS")]
     #[serde(rename_all = "camelCase")]
     IcebergParts { limit: u16 },
-    #[serde(rename = "MARKET_LOT_SIZE")]
-    #[serde(rename_all = "camelCase")]
-    MarketLotSize {
-        min_qty: String,
-        max_qty: String,
-        step_size: String,
-    },
     #[serde(rename = "MAX_NUM_ORDERS")]
     #[serde(rename_all = "camelCase")]
     MaxNumOrders { max_num_orders: u16 },
