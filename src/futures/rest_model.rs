@@ -108,9 +108,12 @@ pub enum Filters {
     #[serde(rename = "MARKET_LOT_SIZE")]
     #[serde(rename_all = "camelCase")]
     MarketLotSize {
-        min_qty: String,
-        max_qty: String,
-        step_size: String,
+        #[serde(with = "string_or_float")]
+        min_qty: f64,
+        #[serde(with = "string_or_float")]
+        max_qty: f64,
+        #[serde(with = "string_or_float")]
+        step_size: f64,
     },
     #[serde(rename = "MAX_NUM_ORDERS")]
     #[serde(rename_all = "camelCase")]
