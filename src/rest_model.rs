@@ -43,6 +43,13 @@ impl Symbol {
             .into_iter()
             .find(|filter| matches!(filter, Filters::LotSize { .. }))
     }
+
+    pub fn market_lot_size(&self) -> Option<Filters> {
+        self.filters
+            .clone()
+            .into_iter()
+            .find(|filter| matches!(filter, Filters::MarketLotSize { .. }))
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
