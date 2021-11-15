@@ -164,18 +164,13 @@ impl Client {
 
     pub async fn post(&self, endpoint: &str, symbol: Option<&str>) -> Result<String> {
         let url: String = format!("{}{}", self.host, endpoint);
-        let data: String = if let Some(symbol) = symbol {
-            format!("symbol={}", symbol)
-        } else {
-            String::new()
-        };
-
+        let data: String = symbol.map(|s| format!("symbol={}", s)).unwrap_or_else(|| String::new());
+        let url = format!("{}?{}", url, data);
         let response = self
             .inner
             .clone()
             .post(url.as_str())
             .headers(self.build_headers(false)?)
-            .body(data)
             .send()
             .await?;
 
@@ -184,38 +179,27 @@ impl Client {
 
     pub async fn put(&self, endpoint: &str, listen_key: &str, symbol: Option<&str>) -> Result<String> {
         let url: String = format!("{}{}", self.host, endpoint);
-        let data: String = if let Some(symbol) = symbol {
-            format!("listenKey={}&symbol={}", listen_key, symbol)
-        } else {
-            format!("listenKey={}", listen_key)
-        };
-
-        let response = self
-            .inner
-            .clone()
-            .put(url.as_str())
-            .headers(self.build_headers(false)?)
-            .body(data)
-            .send()
-            .await?;
+        let data: String = symbol
+            .map(|s| format!("listenKey={}&symbol={}", listen_key, s))
+            .unwrap_or_else(|| format!("listenKey={}", listen_key));
+        let headers = self.build_headers(false)?;
+        let url = format!("{}?{}", url, data);
+        let response = self.inner.clone().put(url.as_str()).headers(headers).send().await?;
 
         self.handler(response).await
     }
 
     pub async fn delete(&self, endpoint: &str, listen_key: &str, symbol: Option<&str>) -> Result<String> {
         let url: String = format!("{}{}", self.host, endpoint);
-        let data: String = if let Some(symbol) = symbol {
-            format!("listenKey={}&symbol={}", listen_key, symbol)
-        } else {
-            format!("listenKey={}", listen_key)
-        };
-
+        let data: String = symbol
+            .map(|s| format!("listenKey={}&symbol={}", listen_key, s))
+            .unwrap_or_else(|| format!("listenKey={}", listen_key));
+        let url = format!("{}?{}", url, data);
         let response = self
             .inner
             .clone()
             .delete(url.as_str())
             .headers(self.build_headers(false)?)
-            .body(data)
             .send()
             .await?;
 
