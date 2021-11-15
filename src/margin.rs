@@ -32,6 +32,7 @@ static SAPI_V1_MARGIN_MY_TRADES: &str = "/sapi/v1/margin/myTrades";
 static SAPI_V1_MARGIN_MAX_BORROWABLE: &str = "/sapi/v1/margin/maxBorrowable";
 static SAPI_V1_MARGIN_MAX_TRANSFERABLE: &str = "/sapi/v1/margin/maxTransferable";
 static SAPI_USER_DATA_STREAM: &str = "/sapi/v1/userDataStream";
+static SAPI_USER_DATA_STREAM_ISOLATED: &str = "/sapi/v1/userDataStream/isolated";
 static SAPI_V1_BNB_BURN: &str = "/sapi/v1/bnbBurn";
 static SAPI_V1_MARGIN_INTEREST_RATE_HISTORY: &str = "/sapi/v1/margin/interestRateHistory";
 
@@ -910,7 +911,7 @@ impl Margin {
         Ok(user_data_stream)
     }
 
-    /// Current open orders on a symbol
+    /// Keep the connection alive
     /// # Examples
     /// ```rust,no_run
     /// use binance::{api::*, margin::*, config::*};
@@ -940,6 +941,58 @@ impl Margin {
     /// ```
     pub async fn close(&self, listen_key: &str) -> Result<Success> {
         let data = self.client.delete(SAPI_USER_DATA_STREAM, listen_key).await?;
+
+        let success: Success = from_str(data.as_str())?;
+
+        Ok(success)
+    }
+
+    /// Start user data stream
+    /// # Examples
+    /// ```rust,no_run
+    /// use binance::{api::*, margin::*, config::*};
+    /// let margin: Margin = Binance::new_with_env(&Config::testnet());
+    /// let start = tokio_test::block_on(margin.start());
+    /// assert!(start.is_ok(), "{:?}", start);
+    /// assert!(start.unwrap().listen_key.len() > 0)
+    /// ```
+    pub async fn start_isolated(&self) -> Result<UserDataStream> {
+        let data = self.client.post(SAPI_USER_DATA_STREAM_ISOLATED).await?;
+        let user_data_stream: UserDataStream = from_str(data.as_str())?;
+
+        Ok(user_data_stream)
+    }
+
+    /// Keep the connection alive
+    /// # Examples
+    /// ```rust,no_run
+    /// use binance::{api::*, margin::*, config::*};
+    /// let margin: Margin = Binance::new_with_env(&Config::testnet());
+    /// let start = tokio_test::block_on(margin.start());
+    /// assert!(start.is_ok(), "{:?}", start);
+    /// let keep_alive = tokio_test::block_on(margin.keep_alive(&start.unwrap().listen_key));
+    /// assert!(keep_alive.is_ok())
+    /// ```
+    pub async fn keep_alive_isolated(&self, listen_key: &str) -> Result<Success> {
+        let data = self.client.put(SAPI_USER_DATA_STREAM_ISOLATED, listen_key).await?;
+
+        let success: Success = from_str(data.as_str())?;
+
+        Ok(success)
+    }
+
+    /// Close the user stream
+    /// # Examples
+    /// ```rust,no_run
+    /// use binance::{api::*, margin::*, config::*};
+    /// let margin: Margin = Binance::new_with_env(&Config::testnet());
+    /// let start = tokio_test::block_on(margin.start());
+    /// assert!(start.is_ok(), "{:?}", start);
+    /// let close = tokio_test::block_on(margin.close(&start.unwrap().listen_key));
+    /// assert!(close.is_ok())
+    /// ```
+    pub async fn close_isolated(&self, listen_key: &str) -> Result<Success> {
+        let data = self.client.delete(SAPI_USER_DATA_STREAM_ISOLATED, listen_key).await?;
 
         let success: Success = from_str(data.as_str())?;
 
