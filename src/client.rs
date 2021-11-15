@@ -164,7 +164,7 @@ impl Client {
 
     pub async fn post(&self, endpoint: &str, symbol: Option<&str>) -> Result<String> {
         let url: String = format!("{}{}", self.host, endpoint);
-        let data: String = symbol.map(|s| format!("symbol={}", s)).unwrap_or_else(|| String::new());
+        let data: String = symbol.map(|s| format!("symbol={}", s)).unwrap_or_else(String::new);
         let url = format!("{}?{}", url, data);
         let response = self
             .inner
