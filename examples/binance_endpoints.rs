@@ -206,4 +206,18 @@ async fn market_data() {
         Ok(answer) => info!("{:?}", answer),
         Err(e) => error!("Error: {}", e),
     }
+
+    // 10 latest (aggregated) trades
+    match market.get_agg_trades("BNBETH", None, None, None, Some(10)) {
+        Ok(trades) => {
+            let trade = &trades[0]; // You need to iterate over them
+            println!(
+                "{} BNB Qty: {}, Price: {}",
+                if trade.maker { "SELL" } else { "BUY" },
+                trade.qty,
+                trade.price
+            )
+        }
+        Err(e) => println!("Error: {}", e),
+    }
 }
