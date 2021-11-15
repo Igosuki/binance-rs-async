@@ -162,23 +162,33 @@ impl Client {
         self.get_p(endpoint, req.as_str()).await
     }
 
-    pub async fn post(&self, endpoint: &str) -> Result<String> {
+    pub async fn post(&self, endpoint: &str, symbol: Option<&str>) -> Result<String> {
         let url: String = format!("{}{}", self.host, endpoint);
+        let data: String = if let Some(symbol) = symbol {
+            format!("symbol={}", symbol)
+        } else {
+            String::new()
+        };
 
         let response = self
             .inner
             .clone()
             .post(url.as_str())
             .headers(self.build_headers(false)?)
+            .body(data)
             .send()
             .await?;
 
         self.handler(response).await
     }
 
-    pub async fn put(&self, endpoint: &str, listen_key: &str) -> Result<String> {
+    pub async fn put(&self, endpoint: &str, listen_key: &str, symbol: Option<&str>) -> Result<String> {
         let url: String = format!("{}{}", self.host, endpoint);
-        let data: String = format!("listenKey={}", listen_key);
+        let data: String = if let Some(symbol) = symbol {
+            format!("listenKey={}&symbol={}", listen_key, symbol)
+        } else {
+            format!("listenKey={}", listen_key)
+        };
 
         let response = self
             .inner
@@ -192,9 +202,13 @@ impl Client {
         self.handler(response).await
     }
 
-    pub async fn delete(&self, endpoint: &str, listen_key: &str) -> Result<String> {
+    pub async fn delete(&self, endpoint: &str, listen_key: &str, symbol: Option<&str>) -> Result<String> {
         let url: String = format!("{}{}", self.host, endpoint);
-        let data: String = format!("listenKey={}", listen_key);
+        let data: String = if let Some(symbol) = symbol {
+            format!("listenKey={}&symbol={}", listen_key, symbol)
+        } else {
+            format!("listenKey={}", listen_key)
+        };
 
         let response = self
             .inner

@@ -905,7 +905,7 @@ impl Margin {
     /// assert!(start.unwrap().listen_key.len() > 0)
     /// ```
     pub async fn start(&self) -> Result<UserDataStream> {
-        let data = self.client.post(SAPI_USER_DATA_STREAM).await?;
+        let data = self.client.post(SAPI_USER_DATA_STREAM, None).await?;
         let user_data_stream: UserDataStream = from_str(data.as_str())?;
 
         Ok(user_data_stream)
@@ -922,7 +922,7 @@ impl Margin {
     /// assert!(keep_alive.is_ok())
     /// ```
     pub async fn keep_alive(&self, listen_key: &str) -> Result<Success> {
-        let data = self.client.put(SAPI_USER_DATA_STREAM, listen_key).await?;
+        let data = self.client.put(SAPI_USER_DATA_STREAM, listen_key, None).await?;
 
         let success: Success = from_str(data.as_str())?;
 
@@ -940,7 +940,7 @@ impl Margin {
     /// assert!(close.is_ok())
     /// ```
     pub async fn close(&self, listen_key: &str) -> Result<Success> {
-        let data = self.client.delete(SAPI_USER_DATA_STREAM, listen_key).await?;
+        let data = self.client.delete(SAPI_USER_DATA_STREAM, listen_key, None).await?;
 
         let success: Success = from_str(data.as_str())?;
 
@@ -956,8 +956,8 @@ impl Margin {
     /// assert!(start.is_ok(), "{:?}", start);
     /// assert!(start.unwrap().listen_key.len() > 0)
     /// ```
-    pub async fn start_isolated(&self) -> Result<UserDataStream> {
-        let data = self.client.post(SAPI_USER_DATA_STREAM_ISOLATED).await?;
+    pub async fn start_isolated(&self, symbol: &str) -> Result<UserDataStream> {
+        let data = self.client.post(SAPI_USER_DATA_STREAM_ISOLATED, Some(symbol)).await?;
         let user_data_stream: UserDataStream = from_str(data.as_str())?;
 
         Ok(user_data_stream)
@@ -973,8 +973,11 @@ impl Margin {
     /// let keep_alive = tokio_test::block_on(margin.keep_alive(&start.unwrap().listen_key));
     /// assert!(keep_alive.is_ok())
     /// ```
-    pub async fn keep_alive_isolated(&self, listen_key: &str) -> Result<Success> {
-        let data = self.client.put(SAPI_USER_DATA_STREAM_ISOLATED, listen_key).await?;
+    pub async fn keep_alive_isolated(&self, listen_key: &str, symbol: &str) -> Result<Success> {
+        let data = self
+            .client
+            .put(SAPI_USER_DATA_STREAM_ISOLATED, listen_key, Some(symbol))
+            .await?;
 
         let success: Success = from_str(data.as_str())?;
 
@@ -991,8 +994,11 @@ impl Margin {
     /// let close = tokio_test::block_on(margin.close(&start.unwrap().listen_key));
     /// assert!(close.is_ok())
     /// ```
-    pub async fn close_isolated(&self, listen_key: &str) -> Result<Success> {
-        let data = self.client.delete(SAPI_USER_DATA_STREAM_ISOLATED, listen_key).await?;
+    pub async fn close_isolated(&self, listen_key: &str, symbol: &str) -> Result<Success> {
+        let data = self
+            .client
+            .delete(SAPI_USER_DATA_STREAM_ISOLATED, listen_key, Some(symbol))
+            .await?;
 
         let success: Success = from_str(data.as_str())?;
 

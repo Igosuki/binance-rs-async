@@ -1337,6 +1337,13 @@ pub struct IsolatedAccountLimit {
     pub max_account: u64,
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct IsolatedSymbol {
+    pub symbol: String,
+    pub max_account: u64,
+}
+
 pub mod string_or_float {
     use std::fmt;
 

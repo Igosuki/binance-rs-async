@@ -23,7 +23,7 @@ impl UserStream {
     /// assert!(start.unwrap().listen_key.len() > 0)
     /// ```
     pub async fn start(&self) -> Result<UserDataStream> {
-        let data = self.client.post(USER_DATA_STREAM).await?;
+        let data = self.client.post(USER_DATA_STREAM, None).await?;
         let user_data_stream: UserDataStream = from_str(data.as_str())?;
 
         Ok(user_data_stream)
@@ -40,7 +40,7 @@ impl UserStream {
     /// assert!(keep_alive.is_ok())
     /// ```
     pub async fn keep_alive(&self, listen_key: &str) -> Result<Success> {
-        let data = self.client.put(USER_DATA_STREAM, listen_key).await?;
+        let data = self.client.put(USER_DATA_STREAM, listen_key, None).await?;
 
         let success: Success = from_str(data.as_str())?;
 
@@ -58,7 +58,7 @@ impl UserStream {
     /// assert!(close.is_ok())
     /// ```
     pub async fn close(&self, listen_key: &str) -> Result<Success> {
-        let data = self.client.delete(USER_DATA_STREAM, listen_key).await?;
+        let data = self.client.delete(USER_DATA_STREAM, listen_key, None).await?;
 
         let success: Success = from_str(data.as_str())?;
 
