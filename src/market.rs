@@ -10,6 +10,7 @@ static API_V3_TICKER_PRICE: &str = "/api/v3/ticker/price";
 static API_V3_AVG_PRICE: &str = "/api/v3/avgPrice";
 static API_V3_BOOK_TICKER: &str = "/api/v3/ticker/bookTicker";
 static API_V3_24H_TICKER: &str = "/api/v3/ticker/24hr";
+static API_V3_AGG_TRADES: &str = "/api/v3/aggTrades";
 static API_V3_KLINES: &str = "/api/v3/klines";
 
 #[derive(Clone)]
@@ -183,6 +184,50 @@ impl Market {
         let stats: PriceStats = from_str(data.as_str())?;
 
         Ok(stats)
+    }
+
+
+    /// Get aggregated historical trades.
+    /// If you provide start_time, you also need to provide end_time.
+    /// If from_id, start_time and end_time are omitted, the most recent trades are fetched.
+    /// # Examples
+    /// ```rust
+    /// use binance::{api::*, market::*, config::*};
+    /// let market: Market = Binance::new_with_env(&Config::default());
+    /// let agg_trades = tokio_test::block_on(market.get_agg_trades("BNBETH", None, None, None, Some(10)));
+    /// assert!(agg_trades.is_ok(), "{:?}", agg_trades);
+    /// ```
+    pub async fn get_agg_trades<S1, S2, S3, S4, S5>(
+        &self, symbol: S1, from_id: S2, start_time: S3, end_time: S4, limit: S5,
+    ) -> Result<Vec<AggTrade>>
+        where
+            S1: Into<String>,
+            S2: Into<Option<u64>>,
+            S3: Into<Option<u64>>,
+            S4: Into<Option<u64>>,
+            S5: Into<Option<u16>>,
+    {
+        let mut parameters: BTreeMap<String, String> = BTreeMap::new();
+
+        parameters.insert("symbol".into(), symbol.into());
+
+        // Add three optional parameters
+        if let Some(lt) = limit.into() {
+            parameters.insert("limit".into(), format!("{}", lt));
+        }
+        if let Some(st) = start_time.into() {
+            parameters.insert("startTime".into(), format!("{}", st));
+        }
+        if let Some(et) = end_time.into() {
+            parameters.insert("endTime".into(), format!("{}", et));
+        }
+        if let Some(fi) = from_id.into() {
+            parameters.insert("fromId".into(), format!("{}", fi));
+        }
+
+        let request = build_request(&parameters);
+
+        self.client.get_p(API_V3_AGG_TRADES, &request).await
     }
 
     /// Returns up to 'limit' klines for given symbol and interval ("1m", "5m", ...)
