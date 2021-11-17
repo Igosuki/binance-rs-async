@@ -208,7 +208,7 @@ async fn market_data() {
     }
 
     // 10 latest (aggregated) trades
-    match market.get_agg_trades("BNBETH", None, None, None, Some(10)) {
+    match market.get_agg_trades("BNBETH", None, None, None, Some(10)).await {
         Ok(trades) => {
             let trade = &trades[0]; // You need to iterate over them
             println!(
