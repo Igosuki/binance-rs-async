@@ -186,7 +186,6 @@ impl Market {
         Ok(stats)
     }
 
-
     /// Get aggregated historical trades.
     /// If you provide start_time, you also need to provide end_time.
     /// If from_id, start_time and end_time are omitted, the most recent trades are fetched.
@@ -198,14 +197,19 @@ impl Market {
     /// assert!(agg_trades.is_ok(), "{:?}", agg_trades);
     /// ```
     pub async fn get_agg_trades<S1, S2, S3, S4, S5>(
-        &self, symbol: S1, from_id: S2, start_time: S3, end_time: S4, limit: S5,
+        &self,
+        symbol: S1,
+        from_id: S2,
+        start_time: S3,
+        end_time: S4,
+        limit: S5,
     ) -> Result<Vec<AggTrade>>
-        where
-            S1: Into<String>,
-            S2: Into<Option<u64>>,
-            S3: Into<Option<u64>>,
-            S4: Into<Option<u64>>,
-            S5: Into<Option<u16>>,
+    where
+        S1: Into<String>,
+        S2: Into<Option<u64>>,
+        S3: Into<Option<u64>>,
+        S4: Into<Option<u64>>,
+        S5: Into<Option<u16>>,
     {
         let mut parameters: BTreeMap<String, String> = BTreeMap::new();
 
