@@ -39,5 +39,5 @@ tokio = { version = "1.12", features = ["full"] }
 [dev-dependencies]
 csv = "1.1"
 env_logger = "0.9"
-log = "0.4"
+tracing = { version = "0.1", features = ["release_max_level_debug", "log"] }
 tokio-test = "0.4"
