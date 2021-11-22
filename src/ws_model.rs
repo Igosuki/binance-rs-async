@@ -195,26 +195,34 @@ pub struct Kline {
     pub first_trade_id: i64,
     #[serde(rename = "L")]
     pub last_trade_id: i64,
+    #[serde(with = "string_or_float")]
     #[serde(rename = "o")]
-    pub open: String,
+    pub open: f64,
+    #[serde(with = "string_or_float")]
     #[serde(rename = "c")]
-    pub close: String,
+    pub close: f64,
+    #[serde(with = "string_or_float")]
     #[serde(rename = "h")]
-    pub high: String,
+    pub high: f64,
+    #[serde(with = "string_or_float")]
     #[serde(rename = "l")]
-    pub low: String,
+    pub low: f64,
+    #[serde(with = "string_or_float")]
     #[serde(rename = "v")]
-    pub volume: String,
+    pub volume: f64,
     #[serde(rename = "n")]
     pub number_of_trades: i64,
     #[serde(rename = "x")]
     pub is_final_bar: bool,
+    #[serde(with = "string_or_float")]
     #[serde(rename = "q")]
-    pub quote_volume: String,
+    pub quote_volume: f64,
+    #[serde(with = "string_or_float")]
     #[serde(rename = "V")]
-    pub active_buy_volume: String,
+    pub active_buy_volume: f64,
+    #[serde(with = "string_or_float")]
     #[serde(rename = "Q")]
-    pub active_volume_buy_quote: String,
+    pub active_volume_buy_quote: f64,
     #[serde(skip, rename = "B")]
     pub ignore_me: String,
 }
