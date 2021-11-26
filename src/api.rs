@@ -1,13 +1,8 @@
 use crate::account::*;
 use crate::client::*;
 use crate::config::Config;
-use crate::futures::account::FuturesAccount;
-use crate::futures::general::FuturesGeneral;
-use crate::futures::market::FuturesMarket;
 use crate::general::*;
-use crate::margin::Margin;
 use crate::market::*;
-use crate::savings::Savings;
 use crate::userstream::*;
 
 pub trait Binance: Sized {
@@ -44,7 +39,8 @@ impl Binance for Account {
     }
 }
 
-impl Binance for Savings {
+#[cfg(feature = "savings_api")]
+impl Binance for crate::savings::Savings {
     fn new_with_config(api_key: Option<String>, secret_key: Option<String>, config: &Config) -> Self {
         Self {
             client: Client::new(api_key, secret_key, config.rest_api_endpoint.clone()),
@@ -71,24 +67,17 @@ impl Binance for UserStream {
     }
 }
 
-impl Binance for FuturesGeneral {
-    fn new_with_config(api_key: Option<String>, secret_key: Option<String>, config: &Config) -> FuturesGeneral {
-        FuturesGeneral {
+#[cfg(feature = "futures_api")]
+impl Binance for crate::futures::general::FuturesGeneral {
+    fn new_with_config(api_key: Option<String>, secret_key: Option<String>, config: &Config) -> Self {
+        Self {
             client: Client::new(api_key, secret_key, config.futures_rest_api_endpoint.clone()),
         }
     }
 }
 
-impl Binance for FuturesMarket {
-    fn new_with_config(api_key: Option<String>, secret_key: Option<String>, config: &Config) -> FuturesMarket {
-        FuturesMarket {
-            client: Client::new(api_key, secret_key, config.futures_rest_api_endpoint.clone()),
-            recv_window: config.recv_window,
-        }
-    }
-}
-
-impl Binance for FuturesAccount {
+#[cfg(feature = "futures_api")]
+impl Binance for crate::futures::market::FuturesMarket {
     fn new_with_config(api_key: Option<String>, secret_key: Option<String>, config: &Config) -> Self {
         Self {
             client: Client::new(api_key, secret_key, config.futures_rest_api_endpoint.clone()),
@@ -97,7 +86,18 @@ impl Binance for FuturesAccount {
     }
 }
 
-impl Binance for Margin {
+#[cfg(feature = "futures_api")]
+impl Binance for crate::futures::account::FuturesAccount {
+    fn new_with_config(api_key: Option<String>, secret_key: Option<String>, config: &Config) -> Self {
+        Self {
+            client: Client::new(api_key, secret_key, config.futures_rest_api_endpoint.clone()),
+            recv_window: config.recv_window,
+        }
+    }
+}
+
+#[cfg(feature = "margin_api")]
+impl Binance for crate::margin::Margin {
     fn new_with_config(api_key: Option<String>, secret_key: Option<String>, config: &Config) -> Self {
         Self {
             client: Client::new(api_key, secret_key, config.rest_api_endpoint.clone()),

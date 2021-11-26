@@ -5,10 +5,9 @@ use binance::account::*;
 use binance::api::*;
 use binance::config::Config;
 use binance::errors::Error as BinanceLibError;
-use binance::futures::rest_model::SymbolPrice;
 use binance::general::*;
 use binance::market::*;
-use binance::rest_model::{OrderSide, OrderType, TimeInForce};
+use binance::rest_model::{OrderSide, OrderType, SymbolPrice, TimeInForce};
 use env_logger::Builder;
 
 #[tokio::main]

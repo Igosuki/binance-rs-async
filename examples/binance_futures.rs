@@ -1,21 +1,25 @@
+#[cfg(feature = "futures_api")]
 #[macro_use]
 extern crate tracing;
 
-use binance::api::*;
-use binance::errors::Error as BinanceLibError;
-use binance::futures::general::*;
-use binance::futures::market::*;
-use binance::futures::rest_model::*;
 use env_logger::Builder;
 
 #[tokio::main]
 async fn main() {
     Builder::new().parse_default_env().init();
+    #[cfg(feature = "futures_api")]
     general().await;
+    #[cfg(feature = "futures_api")]
     market_data().await;
 }
 
+#[cfg(feature = "futures_api")]
 async fn general() {
+    use binance::api::*;
+    use binance::errors::Error as BinanceLibError;
+    use binance::futures::general::*;
+    use binance::futures::rest_model::*;
+
     let general: FuturesGeneral = Binance::new(None, None);
 
     match general.ping().await {
@@ -48,7 +52,13 @@ async fn general() {
     }
 }
 
+#[cfg(feature = "futures_api")]
 async fn market_data() {
+    use binance::api::*;
+    use binance::errors::Error as BinanceLibError;
+    use binance::futures::market::*;
+    use binance::futures::rest_model::*;
+
     let market: FuturesMarket = Binance::new(None, None);
 
     match market.get_depth("btcusdt").await {

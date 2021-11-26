@@ -1,29 +1,28 @@
 #[macro_use]
 extern crate tracing;
 
-use std::ops::Sub;
-
-use chrono::{Duration, Utc};
 use env_logger::Builder;
-
-use binance::api::*;
-use binance::bool_to_string_some;
-use binance::config::Config;
-use binance::margin::Margin;
-use binance::rest_model::{BnbBurnQuery, InterestRateHistoryQuery, IsolatedMarginTransferType, IsolatedTransfersQuery,
-                          MarginOCOOrderQuery, MarginOrder, MarginOrderQuery, MarginOrdersQuery, MarginOwnTradesQuery,
-                          MarginTransferType, OCORecordsQuery, OrderResponse, OrderSide, OrderType, RecordsQuery,
-                          SideEffectType, TimeInForce, TransferType};
 
 #[tokio::main]
 async fn main() {
     Builder::new().parse_default_env().init();
     info!("running margin endpoints");
+    #[cfg(feature = "margin_api")]
     margin_query().await;
+    //#[cfg(feature = "margin_api")]
     //margin_post().await;
 }
 
+#[cfg(feature = "margin_api")]
 async fn margin_query() {
+    use binance::api::*;
+    use binance::bool_to_string_some;
+    use binance::config::Config;
+    use binance::margin::Margin;
+    use binance::rest_model::*;
+    use chrono::{Duration, Utc};
+    use std::ops::Sub;
+
     eprintln!("----------- Margin GET queries ----------");
     let margin: Margin = Binance::new_with_env(&Config::default());
     let yesterday = Utc::now().sub(Duration::days(1));
@@ -154,7 +153,13 @@ async fn margin_query() {
 }
 
 #[allow(dead_code)]
+#[cfg(feature = "margin_api")]
 async fn margin_post() {
+    use binance::api::*;
+    use binance::config::Config;
+    use binance::margin::Margin;
+    use binance::rest_model::*;
+
     eprintln!("----------- Margin POST queries ----------");
     let margin: Margin = Binance::new_with_env(&Config::testnet());
 
