@@ -3,10 +3,10 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use futures::StreamExt;
 use serde_json::from_str;
 use tokio::net::TcpStream;
+use tokio_tungstenite::tungstenite::handshake::client::Response;
 use tokio_tungstenite::tungstenite::Message;
 use tokio_tungstenite::WebSocketStream;
 use tokio_tungstenite::{connect_async, MaybeTlsStream};
-use tungstenite::handshake::client::Response;
 use url::Url;
 
 use crate::config::Config;
