@@ -15,7 +15,7 @@ Add this to your Cargo.toml
 
 ```toml
 [dependencies]
-binance-rs-async = "1.1.0"
+binance-rs-async = "1.1.5"
 ```
 
 ## Roadmap
