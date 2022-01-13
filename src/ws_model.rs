@@ -1,6 +1,6 @@
 use crate::rest_model::{string_or_float, Asks, Bids, OrderBook, OrderSide, OrderStatus, OrderType, TimeInForce};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "e")]
 pub enum WebsocketEvent {
     #[serde(alias = "aggTrade")]
@@ -266,14 +266,14 @@ pub struct BookTickerEvent {
     pub best_ask_qty: f64,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CombinedStreamEvent<T> {
     stream: String,
     pub data: T,
 }
 
 ///
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum WebsocketEventUntag {
     WebsocketEvent(WebsocketEvent),

@@ -1,25 +1,56 @@
-use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::RwLock;
-
-use futures::stream::StreamExt;
-use serde_json::from_str;
-use tokio_tungstenite::tungstenite::Message;
+#[macro_use]
+extern crate tokio;
 
 use binance::api::*;
 use binance::userstream::*;
 use binance::websockets::*;
 use binance::ws_model::{CombinedStreamEvent, WebsocketEvent, WebsocketEventUntag};
+use futures::future::BoxFuture;
+use futures::stream::StreamExt;
+use serde_json::from_str;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::RwLock;
+use tokio::sync::mpsc::UnboundedSender;
+use tokio_tungstenite::tungstenite::Message;
 
 #[tokio::main]
 async fn main() {
+    let (logger_tx, mut logger_rx) = tokio::sync::mpsc::unbounded_channel::<WebsocketEvent>();
+    let (close_tx, mut close_rx) = tokio::sync::mpsc::unbounded_channel::<bool>();
+    let wait_loop = tokio::spawn(async move {
+        'hello: loop {
+            select! {
+                event = logger_rx.recv() => println!("{:?}", event),
+                _ = close_rx.recv() => break 'hello
+            }
+        }
+    });
+    // private api
     //user_stream().await;
     //user_stream_websocket().await;
-    //market_websocket().await;
-    //kline_websocket().await;
-    //all_trades_websocket().await;
-    //last_price().await;
-    //book_ticker().await;
-    combined_orderbook().await;
+    // public api
+    let streams: Vec<BoxFuture<'static, ()>> = vec![
+        Box::pin(market_websocket(logger_tx.clone())),
+        Box::pin(kline_websocket(logger_tx.clone())),
+        Box::pin(all_trades_websocket(logger_tx.clone())),
+        Box::pin(last_price(logger_tx.clone())),
+        Box::pin(book_ticker(logger_tx.clone())),
+        Box::pin(combined_orderbook(logger_tx.clone())),
+        Box::pin(custom_event_loop(logger_tx)),
+    ];
+
+    for stream in streams {
+        tokio::spawn(stream);
+    }
+
+    select! {
+        _ = wait_loop => { println!("Finished!") }
+        _ = tokio::signal::ctrl_c() => {
+            println!("Closing websocket stream...");
+            close_tx.send(true).unwrap();
+            tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
+        }
+    }
 }
 
 #[allow(dead_code)]
@@ -46,7 +77,7 @@ async fn user_stream() {
 }
 
 #[allow(dead_code)]
-async fn user_stream_websocket<F>() {
+async fn user_stream_websocket() {
     let keep_running = AtomicBool::new(true); // Used to control the event loop
     let api_key_user = Some("YOUR_KEY".into());
     let user_stream: UserStream = Binance::new(api_key_user, None);
@@ -78,10 +109,11 @@ async fn user_stream_websocket<F>() {
 }
 
 #[allow(dead_code)]
-async fn market_websocket() {
+async fn market_websocket(logger_tx: UnboundedSender<WebsocketEvent>) {
     let keep_running = AtomicBool::new(true); // Used to control the event loop
     let agg_trade: String = agg_trade_stream("ethbtc");
     let mut web_socket: WebSockets<'_, WebsocketEvent> = WebSockets::new(|event: WebsocketEvent| {
+        logger_tx.send(event.clone()).unwrap();
         match event {
             WebsocketEvent::Trade(trade) => {
                 println!("Symbol: {}, price: {}, qty: {}", trade.symbol, trade.price, trade.qty);
@@ -107,13 +139,14 @@ async fn market_websocket() {
 }
 
 #[allow(dead_code)]
-async fn all_trades_websocket() {
+async fn all_trades_websocket(logger_tx: UnboundedSender<WebsocketEvent>) {
     let keep_running = AtomicBool::new(true); // Used to control the event loop
     let agg_trade = all_ticker_stream();
     // NB: you may not ask for both arrays type streams and object type streams at the same time, this holds true in binance connections anyways
     // You cannot connect to multiple things for a single socket
     let mut web_socket: WebSockets<'_, Vec<WebsocketEvent>> = WebSockets::new(|events: Vec<WebsocketEvent>| {
         for tick_events in events {
+            logger_tx.send(tick_events.clone()).unwrap();
             if let WebsocketEvent::DayTicker(tick_event) = tick_events {
                 println!(
                     "Symbol: {}, price: {}, qty: {}",
@@ -134,10 +167,11 @@ async fn all_trades_websocket() {
 }
 
 #[allow(dead_code)]
-async fn kline_websocket() {
+async fn kline_websocket(logger_tx: UnboundedSender<WebsocketEvent>) {
     let keep_running = AtomicBool::new(true);
     let kline = kline_stream("ethbtc", "1m");
     let mut web_socket: WebSockets<'_, WebsocketEvent> = WebSockets::new(|event: WebsocketEvent| {
+        logger_tx.send(event.clone()).unwrap();
         if let WebsocketEvent::Kline(kline_event) = event {
             println!(
                 "Symbol: {}, high: {}, low: {}",
@@ -157,13 +191,14 @@ async fn kline_websocket() {
 }
 
 #[allow(dead_code)]
-async fn last_price() {
+async fn last_price(logger_tx: UnboundedSender<WebsocketEvent>) {
     let keep_running = AtomicBool::new(true);
     let all_ticker = all_ticker_stream();
     let btcusdt: RwLock<f32> = RwLock::new("0".parse().unwrap());
 
     let mut web_socket: WebSockets<'_, Vec<WebsocketEvent>> = WebSockets::new(|events: Vec<WebsocketEvent>| {
         for tick_events in events {
+            logger_tx.send(tick_events.clone()).unwrap();
             if let WebsocketEvent::DayTicker(tick_event) = tick_events {
                 if tick_event.symbol == "BTCUSDT" {
                     let mut btcusdt = btcusdt.write().unwrap();
@@ -191,11 +226,14 @@ async fn last_price() {
 }
 
 #[allow(dead_code)]
-async fn book_ticker() {
+async fn book_ticker(logger_tx: UnboundedSender<WebsocketEvent>) {
     let keep_running = AtomicBool::new(true);
     let book_ticker: String = book_ticker_stream("btcusdt");
 
     let mut web_socket: WebSockets<'_, WebsocketEventUntag> = WebSockets::new(|events: WebsocketEventUntag| {
+        if let WebsocketEventUntag::WebsocketEvent(we) = &events {
+            logger_tx.send(we.clone()).unwrap();
+        }
         if let WebsocketEventUntag::BookTicker(tick_event) = events {
             println!("{:?}", tick_event)
         }
@@ -211,7 +249,7 @@ async fn book_ticker() {
 }
 
 #[allow(dead_code)]
-async fn combined_orderbook() {
+async fn combined_orderbook(logger_tx: UnboundedSender<WebsocketEvent>) {
     let keep_running = AtomicBool::new(true);
     let streams: Vec<String> = vec!["btcusdt", "ethusdt"]
         .into_iter()
@@ -219,6 +257,9 @@ async fn combined_orderbook() {
         .collect();
     let mut web_socket: WebSockets<'_, CombinedStreamEvent<_>> =
         WebSockets::new(|event: CombinedStreamEvent<WebsocketEventUntag>| {
+            if let WebsocketEventUntag::WebsocketEvent(we) = &event.data {
+                logger_tx.send(we.clone()).unwrap();
+            }
             let data = event.data;
             if let WebsocketEventUntag::Orderbook(orderbook) = data {
                 println!("{:?}", orderbook)
@@ -235,13 +276,16 @@ async fn combined_orderbook() {
 }
 
 #[allow(dead_code)]
-async fn custom_event_loop() {
+async fn custom_event_loop(logger_tx: UnboundedSender<WebsocketEvent>) {
     let streams: Vec<String> = vec!["btcusdt", "ethusdt"]
         .into_iter()
         .map(|symbol| partial_book_depth_stream(symbol, 5, 1000))
         .collect();
     let mut web_socket: WebSockets<'_, CombinedStreamEvent<_>> =
         WebSockets::new(|event: CombinedStreamEvent<WebsocketEventUntag>| {
+            if let WebsocketEventUntag::WebsocketEvent(we) = &event.data {
+                logger_tx.send(we.clone()).unwrap();
+            }
             let data = event.data;
             if let WebsocketEventUntag::Orderbook(orderbook) = data {
                 println!("{:?}", orderbook)
