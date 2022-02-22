@@ -454,7 +454,7 @@ pub struct OrderUpdate {
 pub struct OrderListUpdate {
     #[serde(rename = "E")]
     pub event_time: u64,
-    #[serde(rename = "S")]
+    #[serde(rename = "s")]
     pub symbol: String,
     #[serde(rename = "g")]
     order_list_id: i64,
@@ -477,10 +477,10 @@ pub struct OrderListUpdate {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct OrderListTransaction {
-    #[serde(rename = "S")]
+    #[serde(rename = "s")]
     pub symbol: String,
     #[serde(rename = "i")]
     pub order_id: i64,
     #[serde(rename = "c")]
-    pub client_order_id: i64,
+    pub client_order_id: String,
 }
