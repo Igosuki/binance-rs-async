@@ -326,7 +326,7 @@ pub enum BookTickers {
     AllBookTickers(Vec<Tickers>),
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum KlineSummaries {
     AllKlineSummaries(Vec<KlineSummary>),
 }
@@ -1328,7 +1328,8 @@ pub struct InterestRateAssetHistory {
 
 pub type InterestRateHistory = Vec<InterestRateAssetHistory>;
 
-#[derive(Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct KlineSummary {
     pub open_time: i64,
     pub open: f64,
