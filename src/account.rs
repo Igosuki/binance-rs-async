@@ -213,7 +213,7 @@ impl Account {
     /// ```rust,no_run
     /// use binance::{api::*, account::*, config::*};
     /// let account: Account = Binance::new_with_env(&Config::testnet());
-    /// let canceled_orders = tokio_test::block_on(account.cancel_all_open_orders());
+    /// let canceled_orders = tokio_test::block_on(account.cancel_all_open_orders("ETHBTC"));
     /// assert!(canceled_orders.is_ok(), "{:?}", canceled_orders);
     /// ```
     pub async fn cancel_all_open_orders<S>(&self, symbol: S) -> Result<Vec<Order>>
