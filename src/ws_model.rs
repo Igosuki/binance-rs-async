@@ -377,7 +377,7 @@ pub struct OrderUpdate {
     #[serde(rename = "s")]
     pub symbol: String,
     #[serde(rename = "c")]
-    pub client_order_id: String,
+    pub client_order_id: Option<String>,
     #[serde(rename = "S")]
     pub side: OrderSide,
     #[serde(rename = "o")]
