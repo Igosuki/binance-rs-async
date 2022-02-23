@@ -1,6 +1,6 @@
 [package]
 name = "binance-rs-async"
-version = "1.1.6"
+version = "1.1.7"
 license = "MIT OR Apache-2.0"
 authors = ["Guillaume Balaine igosuki.github@gmail.com"]
 edition = "2021"
