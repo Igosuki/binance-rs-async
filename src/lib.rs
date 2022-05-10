@@ -77,6 +77,8 @@ pub mod util;
 pub mod account;
 pub mod api;
 pub mod config;
+#[cfg(feature = "delivery_api")]
+pub mod delivery;
 #[cfg(feature = "futures_api")]
 pub mod futures;
 pub mod general;
