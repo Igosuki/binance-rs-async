@@ -4,7 +4,6 @@ use crate::errors::*;
 use crate::futures::rest_model::{Transaction, OrderType, CanceledOrder};
 use crate::rest_model::{OrderSide, TimeInForce, PairQuery};
 use crate::futures::account::OrderRequest;
-use crate::util::*;
 
 
 #[derive(Clone)]
