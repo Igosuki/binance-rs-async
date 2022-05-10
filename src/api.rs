@@ -100,7 +100,7 @@ impl Binance for crate::futures::account::FuturesAccount {
 impl Binance for crate::delivery::account::DeliveryAccount {
     fn new_with_config(api_key: Option<String>, secret_key: Option<String>, config: &Config) -> Self {
         Self {
-            client: Client::new(api_key, secret_key, config.futures_rest_api_endpoint.clone()),
+            client: Client::new(api_key, secret_key, config.delivery_rest_api_endpoint.clone()),
             recv_window: config.recv_window,
         }
     }
