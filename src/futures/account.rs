@@ -57,7 +57,7 @@ where
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
-struct OrderRequest {
+pub struct OrderRequest {
     pub symbol: String,
     pub side: OrderSide,
     pub position_side: Option<PositionSide>,

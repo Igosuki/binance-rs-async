@@ -1,9 +1,9 @@
 use crate::account::OrderCancellation;
 use crate::client::Client;
 use crate::errors::*;
-use crate::futures::{OrderRequest, OrderSide, OrderType, TimeInForce, PairQuery, rest_model::Transaction};
-use crate::rest_model::{OrderSide, TimeInForce, PairAndWindowQuery, PairQuery};
-use crate::futures::rest_model::{AccountBalance, CanceledOrder, ChangeLeverageResponse, OrderType, Position, Transaction};
+use crate::futures::rest_model::{Transaction, OrderType, CanceledOrder};
+use crate::rest_model::{OrderSide, TimeInForce, PairQuery};
+use crate::futures::account::OrderRequest;
 
 
 #[derive(Clone)]
