@@ -44,7 +44,7 @@ where
 }
 
 /// Serialize opt bool as str
-fn serialize_opt_as_uppercase<S, T>(t: &Option<T>, serializer: S) -> std::result::Result<S::Ok, S::Error>
+pub fn serialize_opt_as_uppercase<S, T>(t: &Option<T>, serializer: S) -> std::result::Result<S::Ok, S::Error>
 where
     S: Serializer,
     T: ToString,

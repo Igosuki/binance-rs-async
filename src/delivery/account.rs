@@ -3,13 +3,35 @@ use crate::client::Client;
 use crate::errors::*;
 use crate::futures::rest_model::{Transaction, OrderType, CanceledOrder};
 use crate::rest_model::{OrderSide, TimeInForce, PairQuery};
-use crate::futures::account::OrderRequest;
+use crate::futures::account::{PositionSide, WorkingType, serialize_opt_as_uppercase};
 
 
 #[derive(Clone)]
 pub struct DeliveryAccount {
     pub client: Client,
     pub recv_window: u64,
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct OrderRequest {
+    pub symbol: String,
+    pub side: OrderSide,
+    pub position_side: Option<PositionSide>,
+    #[serde(rename = "type")]
+    pub order_type: OrderType,
+    pub time_in_force: Option<TimeInForce>,
+    #[serde(rename = "quantity")]
+    pub qty: Option<i32>,
+    pub reduce_only: Option<bool>,
+    pub price: Option<f64>,
+    pub stop_price: Option<f64>,
+    pub close_position: Option<bool>,
+    pub activation_price: Option<f64>,
+    pub callback_rate: Option<f64>,
+    pub working_type: Option<WorkingType>,
+    #[serde(serialize_with = "serialize_opt_as_uppercase")]
+    pub price_protect: Option<bool>,
 }
 
 
@@ -23,7 +45,7 @@ impl DeliveryAccount {
     pub async fn limit_buy(
         &self,
         symbol: impl Into<String>,
-        qty: impl Into<f64>,
+        qty: impl Into<i32>,
         price: f64,
         time_in_force: TimeInForce,
     ) -> Result<Transaction> {
@@ -49,7 +71,7 @@ impl DeliveryAccount {
     pub async fn limit_sell(
         &self,
         symbol: impl Into<String>,
-        qty: impl Into<f64>,
+        qty: impl Into<i32>,
         price: f64,
         time_in_force: TimeInForce,
     ) -> Result<Transaction> {
