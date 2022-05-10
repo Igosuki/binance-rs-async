@@ -357,8 +357,6 @@ pub struct CanceledOrder {
     #[serde(with = "string_or_float")]
     pub cum_qty: f64,
     #[serde(with = "string_or_float")]
-    pub cum_quote: f64,
-    #[serde(with = "string_or_float")]
     pub executed_qty: f64,
     pub order_id: u64,
     #[serde(with = "string_or_float")]
