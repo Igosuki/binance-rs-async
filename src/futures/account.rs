@@ -6,11 +6,10 @@ use serde::Serializer;
 use crate::account::OrderCancellation;
 use crate::client::Client;
 use crate::errors::*;
-use crate::rest_model::{OrderSide, TimeInForce};
-use crate::rest_model::{PairAndWindowQuery, PairQuery};
+use crate::futures::rest_model::{AccountBalance, CanceledOrder, ChangeLeverageResponse, OrderType, Position, Transaction};
+use crate::rest_model::{OrderSide, TimeInForce, PairAndWindowQuery, PairQuery};
 use crate::util::*;
 
-use super::rest_model::{AccountBalance, CanceledOrder, ChangeLeverageResponse, OrderType, Position, Transaction};
 
 #[derive(Clone)]
 pub struct FuturesAccount {
