@@ -322,8 +322,6 @@ pub struct Transaction {
     pub client_order_id: String,
     #[serde(with = "string_or_float")]
     pub cum_qty: f64,
-    #[serde(with = "string_or_float_opt")]
-    pub cum_quote: Option<f64>,
     #[serde(with = "string_or_float")]
     pub executed_qty: f64,
     pub order_id: u64,
@@ -339,7 +337,6 @@ pub struct Transaction {
     pub stop_price: f64,
     pub close_position: bool,
     pub symbol: String,
-    pub pair: Option<String>,
     pub time_in_force: String,
     #[serde(rename = "type")]
     pub type_name: String,
