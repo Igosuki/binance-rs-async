@@ -32,6 +32,7 @@ pub struct OrderRequest {
     pub working_type: Option<WorkingType>,
     #[serde(serialize_with = "serialize_opt_as_uppercase")]
     pub price_protect: Option<bool>,
+    pub new_client_order_id: Option<String>,
 }
 
 
@@ -48,6 +49,7 @@ impl DeliveryAccount {
         qty: impl Into<i32>,
         price: f64,
         time_in_force: TimeInForce,
+        client_order_id: impl Into<String>,
     ) -> Result<Transaction> {
         let order = OrderRequest {
             symbol: symbol.into(),
@@ -64,6 +66,7 @@ impl DeliveryAccount {
             callback_rate: None,
             working_type: None,
             price_protect: None,
+            new_client_order_id: Some(client_order_id.into())
         };
         self.post_order(order).await
     }
@@ -74,6 +77,7 @@ impl DeliveryAccount {
         qty: impl Into<i32>,
         price: f64,
         time_in_force: TimeInForce,
+        client_order_id: impl Into<String>,
     ) -> Result<Transaction> {
         let order = OrderRequest {
             symbol: symbol.into(),
@@ -90,6 +94,7 @@ impl DeliveryAccount {
             callback_rate: None,
             working_type: None,
             price_protect: None,
+            new_client_order_id: Some(client_order_id.into())
         };
         self.post_order(order).await
     }
