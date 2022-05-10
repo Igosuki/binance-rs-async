@@ -1,7 +1,7 @@
 use crate::account::OrderCancellation;
 use crate::client::Client;
 use crate::errors::*;
-use crate::futures::{OrderRequest, OrderSide, OrderType, TimeInForce, PairQuery};
+use crate::futures::{OrderRequest, OrderSide, OrderType, TimeInForce, PairQuery, rest_model::Transaction};
 use crate::util::*;
 
 
