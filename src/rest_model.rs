@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct ServerTime {
@@ -1652,8 +1654,8 @@ pub struct UniversalTransferHistoryQuery {
     pub current: Option<u64>,
     /// Default 10, Max 100
     pub size: Option<u64>,
-    pub from_symbol: String,
-    pub to_symbol: String,
+    pub from_symbol: Option<String>,
+    pub to_symbol: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -1695,7 +1697,7 @@ pub struct ApiTradingStatusData {
     /// API trading function is locked or not
     pub is_locked: bool,
     /// If API trading function is locked, this is the planned recover time
-    pub planned_recovery_time: u64
+    pub planned_recovery_time: u64,
     pub trigger_condition: ApiTradingStatusTriggerCondition,
     pub update_time: u64,
 }
@@ -1779,6 +1781,125 @@ pub struct ConvertibleAssetDetails {
     pub to_bnb_off_exchange: f64,
     #[serde(with = "string_or_float")]
     pub exchange: f64,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct DustTransfer {
+    #[serde(with = "string_or_float")]
+    pub total_service_charge: f64,
+    #[serde(with = "string_or_float")]
+    pub total_transferred: f64,
+    pub transfer_result: Vec<DustTransferResult>
+}
+
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct DustTransferResult {
+    #[serde(with = "string_or_float")]
+    pub amount: f64,
+    pub from_asset: String,
+    pub operate_time: u64,
+    #[serde(with = "string_or_float")]
+    pub service_charge_amount: f64,
+    pub tran_id: u64,
+    #[serde(with = "string_or_float")]
+    pub transfered_amount: f64,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct AssetDividend {
+    pub id: u64,
+    #[serde(with = "string_or_float")]
+    pub amount: f64,
+    pub asset: String,
+    pub div_time: u64,
+    pub en_info: String,
+    pub tran_id: u64,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct AssetDividendQuery {
+    pub asset: Option<String>,
+    pub start_time: Option<u64>,
+    pub end_time: Option<u64>,
+    /// Default 20, max 500
+    pub limit: Option<u64>,
+}
+
+pub type SupportedAssetDetails = HashMap<String, SupportedAssetDetail>;
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct SupportedAssetDetail {
+    /// min withdraw amount
+    #[serde(with = "string_or_float")]
+    pub min_withdrawal_amount: f64,
+    /// deposit status (false if ALL of networks' are false)
+    pub deposit_status:bool,
+    /// withdraw fee
+    pub withdraw_fee: f64,
+    /// withdraw status (false if ALL of networks' are false)
+    pub withdraw_status: bool,
+    /// reason
+    pub deposit_tip: String,
+}
+
+pub type TradeFees = Vec<TradeFee>;
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct TradeFee {
+    pub symbol: String,
+    #[serde(with = "string_or_float")]
+    pub maker_commission: f64,
+    #[serde(with = "string_or_float")]
+    pub taker_commission: f64,
+}
+
+pub type WalletFundings = Vec<WalletFunding>;
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct WalletFunding {
+    pub asset: String,
+    #[serde(with = "string_or_float")]
+    pub free: f64,
+    #[serde(with = "string_or_float")]
+    pub locked: f64,
+    #[serde(with = "string_or_float")]
+    pub freeze: f64,
+    #[serde(with = "string_or_float")]
+    pub withdrawing: f64,
+    #[serde(with = "string_or_float")]
+    pub btc_valuation: f64,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct ApiKeyPermissions {
+    ip_restrict:bool,
+    create_time: u64,
+    /// This option allows you to withdraw via API. You must apply the IP Access Restriction filter in order to enable withdrawals
+    enable_withdrawals: bool,
+    /// This option authorizes this key to transfer funds between your master account and your sub account instantly
+    enable_internal_transfer: bool,
+    /// Authorizes this key to be used for a dedicated universal transfer API to transfer multiple supported currencies. Each business's own transfer API rights are not affected by this authorization
+    permits_universal_transfer: bool,
+    ///  Authorizes this key to Vanilla options trading
+    enable_vanilla_options: bool,
+    enable_reading: bool,
+    ///  API Key created before your futures account opened does not support futures API service
+    enable_futures: bool,
+    ///  This option can be adjusted after the Cross Margin account transfer is completed
+    enable_margin: bool,
+    /// Spot and margin trading
+    enable_spot_and_margin_trading: bool,
+    /// Expiration time for spot and margin trading permission
+    trading_authority_expiration_time: u64,
 }
 
 pub mod string_or_float {

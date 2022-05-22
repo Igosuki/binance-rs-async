@@ -41,12 +41,8 @@ impl Wallet {
     /// let system_status = tokio_test::block_on(wallet.system_status());
     /// assert!(system_status.is_ok(), "{:?}", system_status);
     /// ```
-    pub async fn system_status<S, F>(&self) -> Result<SystemStatus>
-        where
-            S: Into<String>,
-            F: Into<f64>,
+    pub async fn system_status(&self) -> Result<SystemStatus>
     {
-
         self.client
             .get_p(SAPI_V1_SYSTEM_STATUS, "")
             .await
@@ -221,7 +217,7 @@ impl Wallet {
     /// ```rust,no_run
     /// use binance::{api::*, wallet::*, config::*, rest_model::*};
     /// let wallet: Wallet = Binance::new_with_env(&Config::testnet());
-    /// let query: UniversalTransferHistoryQuery = UniversalTransferHistoryQuery::default();
+    /// let query: UniversalTransferHistoryQuery = UniversalTransferHistoryQuery { start_time: None, end_time: None, transfer_type: UniversalTransferType::FundingMain, current: None, from_symbol: None, to_symbol: None, size: None };
     /// let records = tokio_test::block_on(wallet.universal_transfer_history(query));
     /// assert!(records.is_ok(), "{:?}", records);
     /// ```
@@ -243,7 +239,7 @@ impl Wallet {
     /// let records = tokio_test::block_on(wallet.account_status());
     /// assert!(records.is_ok(), "{:?}", records);
     /// ```
-    pub async fn account_status(&self) -> Result<ÅccountStatus> {
+    pub async fn account_status(&self) -> Result<AccountStatus> {
         self.client
             .get_signed_p(SAPI_V1_ACCOUNT_STATUS, Option::<String>::None, self.recv_window)
             .await
@@ -270,7 +266,7 @@ impl Wallet {
     /// ```rust,no_run
     /// use binance::{api::*, wallet::*, config::*, rest_model::*};
     /// let wallet: Wallet = Binance::new_with_env(&Config::testnet());
-    /// let records = tokio_test::block_on(wallet.dust_log());
+    /// let records = tokio_test::block_on(wallet.dust_log(None, None));
     /// assert!(records.is_ok(), "{:?}", records);
     /// ```
     pub async fn dust_log(&self, start_time: Option<u64>, end_time: Option<u64>) -> Result<DustLog> {
@@ -294,6 +290,91 @@ impl Wallet {
     pub async fn convertible_assets(&self) -> Result<ConvertibleAssets> {
         self.client
             .get_signed_p(SAPI_V1_ASSET_DUSTBTC, Option::<String>::None, self.recv_window)
+            .await
+    }
+
+    /// Dust Transfer
+    ///
+    /// Convert dust assets to bnb
+    ///
+    /// # Examples
+    /// ```rust,no_run
+    /// use binance::{api::*, wallet::*, config::*, rest_model::*};
+    /// let wallet: Wallet = Binance::new_with_env(&Config::testnet());
+    /// let records = tokio_test::block_on(wallet.dust_transfer(vec!["BTC".to_string()]));
+    /// assert!(records.is_ok(), "{:?}", records);
+    /// ```
+    pub async fn dust_transfer(&self, assets: Vec<String>) -> Result<DustTransfer> {
+        let mut params = HashMap::new();
+        params.insert("assets", assets);
+        self.client
+            .post_signed_p(SAPI_V1_ASSET_DUST, Some(params), self.recv_window)
+            .await
+    }
+
+    /// Asset Dividend Record
+    ///
+    /// # Examples
+    /// ```rust,no_run
+    /// use binance::{api::*, wallet::*, config::*, rest_model::*};
+    /// let wallet: Wallet = Binance::new_with_env(&Config::testnet());
+    /// let records = tokio_test::block_on(wallet.asset_dividends(AssetDividendQuery::default()));
+    /// assert!(records.is_ok(), "{:?}", records);
+    /// ```
+    pub async fn asset_dividends(&self, query: AssetDividendQuery) -> Result<RecordsQueryResult<AssetDividend>> {
+        self.client
+            .get_signed_p(SAPI_V1_ASSET_ASSETDIVIDEND, Some(query), self.recv_window)
+            .await
+    }
+
+    /// Trade Fees
+    ///
+    /// # Examples
+    /// ```rust,no_run
+    /// use binance::{api::*, wallet::*, config::*, rest_model::*};
+    /// let wallet: Wallet = Binance::new_with_env(&Config::testnet());
+    /// let records = tokio_test::block_on(wallet.trade_fees(None));
+    /// assert!(records.is_ok(), "{:?}", records);
+    /// ```
+    pub async fn trade_fees(&self, symbol: Option<String>) -> Result<TradeFees> {
+        let mut query = HashMap::new();
+        query.insert("symbol", symbol);
+        self.client
+            .get_signed_p(SAPI_V1_ASSET_TRADEFEE, Some(query), self.recv_window)
+            .await
+    }
+
+    /// Funding Wallet
+    ///
+    /// Currently supports querying the following business assets：Binance Pay, Binance Card, Binance Gift Card, Stock Token
+    /// # Examples
+    /// ```rust,no_run
+    /// use binance::{api::*, wallet::*, config::*, rest_model::*};
+    /// let wallet: Wallet = Binance::new_with_env(&Config::testnet());
+    /// let records = tokio_test::block_on(wallet.funding_wallet(None, None));
+    /// assert!(records.is_ok(), "{:?}", records);
+    /// ```
+    pub async fn funding_wallet(&self, asset: Option<String>, need_btc_valuation: Option<bool>) -> Result<WalletFundings> {
+        let mut query = HashMap::new();
+        query.insert("asset", asset);
+        query.insert("need_btc_valuation", need_btc_valuation.map(|b| format!("{}", b)));
+        self.client
+            .post_signed_p(SAPI_V1_ASSET_GETFUNDINGASSET, Some(query), self.recv_window)
+            .await
+    }
+
+    /// Api Key Permissions
+    ///
+    /// # Examples
+    /// ```rust,no_run
+    /// use binance::{api::*, wallet::*, config::*, rest_model::*};
+    /// let wallet: Wallet = Binance::new_with_env(&Config::testnet());
+    /// let records = tokio_test::block_on(wallet.api_key_permissions());
+    /// assert!(records.is_ok(), "{:?}", records);
+    /// ```
+    pub async fn api_key_permissions(&self) -> Result<ApiKeyPermissions> {
+        self.client
+            .post_signed_p(SAPI_V1_ASSET_APIRESTRICTIONS, Option::<String>::None, self.recv_window)
             .await
     }
 }
