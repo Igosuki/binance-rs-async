@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use crate::client::*;
 use crate::errors::*;
 use crate::rest_model::*;
@@ -61,7 +62,7 @@ impl Wallet {
     /// ```
     pub async fn all_coin_info(&self) -> Result<WalletCoinInfo> {
         self.client
-            .get_signed_p(SAPI_V1_CAPITAL_CONFIG_GETALL, None, self.recv_window)
+            .get_signed_p(SAPI_V1_CAPITAL_CONFIG_GETALL, Option::<String>::None, self.recv_window)
             .await
     }
 
@@ -95,7 +96,7 @@ impl Wallet {
     /// ```
     pub async fn disable_fast_withdraw_switch(&self) -> Result<()> {
         self.client
-            .post_signed_p(SAPI_V1_ACCOUNT_DISABLEFASTWITHDRAWSWITCH, None, self.recv_window)
+            .post_signed_p(SAPI_V1_ACCOUNT_DISABLEFASTWITHDRAWSWITCH, Option::<String>::None, self.recv_window)
             .await
     }
 
@@ -110,7 +111,7 @@ impl Wallet {
     /// ```
     pub async fn enable_fast_withdraw_switch(&self) -> Result<()> {
         self.client
-            .post_signed_p(SAPI_V1_ACCOUNT_ENABLEFASTWITHDRAWSWITCH, None, self.recv_window)
+            .post_signed_p(SAPI_V1_ACCOUNT_ENABLEFASTWITHDRAWSWITCH, Option::<String>::None, self.recv_window)
             .await
     }
 
@@ -152,17 +153,17 @@ impl Wallet {
     /// ```rust,no_run
     /// use binance::{api::*, wallet::*, config::*, rest_model::*};
     /// let wallet: Wallet = Binance::new_with_env(&Config::testnet());
-    /// let query: WithdrawHistoryQuery = WithdrawHistoryQuery::default();
+    /// let query: WithdrawalHistoryQuery = WithdrawalHistoryQuery::default();
     /// let records = tokio_test::block_on(wallet.withdraw_history(query));
     /// assert!(records.is_ok(), "{:?}", records);
     /// ```
-    pub async fn withdraw_history(&self, query: WithdrawHistoryQuery) -> Result<Vec<WithdrawRecord>> {
+    pub async fn withdraw_history(&self, query: WithdrawalHistoryQuery) -> Result<Vec<WithdrawalRecord>> {
         self.client
             .get_signed_p(SAPI_V1_CAPITAL_WITHDRAW_HISTORY, Some(query), self.recv_window)
             .await
     }
 
-    /// Withdraw History
+    /// Deposit address
     ///
     /// # Examples
     /// ```rust,no_run
@@ -175,6 +176,124 @@ impl Wallet {
     pub async fn deposit_address(&self, query: DepositAddressQuery) -> Result<DepositAddress> {
         self.client
             .get_signed_p(SAPI_V1_CAPITAL_DEPOSIT_ADDRESS, Some(query), self.recv_window)
+            .await
+    }
+
+    /// Universal Transfer
+    ///
+    /// from_symbol must be sent when transfer_type are IsolatedmarginMargin and IsolatedmarginIsolatedmargin
+    /// to_symbol must be sent when transfer_type are MarginIsolatedmargin and IsolatedmarginIsolatedmargin
+    ///
+    /// # Examples
+    /// ```rust,no_run
+    /// use binance::{api::*, wallet::*, config::*, rest_model::*};
+    /// let wallet: Wallet = Binance::new_with_env(&Config::testnet());
+    /// let records = tokio_test::block_on(wallet.universal_transfer("BTC".to_string(), 1.0, None, None, UniversalTransferType::FundingMain));
+    /// assert!(records.is_ok(), "{:?}", records);
+    /// ```
+    pub async fn universal_transfer(
+        &self,
+        asset: String,
+        amount: f64,
+        from_symbol: Option<String>,
+        to_symbol: Option<String>,
+        transfer_type: UniversalTransferType,
+    ) -> Result<TransactionId> {
+        let transfer = UniversalTransfer {
+            asset: asset.into(),
+            amount: amount.into(),
+            from_symbol: from_symbol.map(Into::<String>::into),
+            to_symbol: to_symbol.map(Into::<String>::into),
+            transfer_type,
+        };
+        self.client
+            .post_signed_p(SAPI_V1_ASSET_TRANSFER, transfer, self.recv_window)
+            .await
+    }
+
+    /// Universal Transfer
+    ///
+    /// from_symbol must be sent when transfer_type are IsolatedmarginMargin and IsolatedmarginIsolatedmargin
+    /// to_symbol must be sent when transfer_type are MarginIsolatedmargin and IsolatedmarginIsolatedmargin
+    /// Support query within the last 6 months only
+    /// If query.start_time and query.end_time not sent, return records of the last 7 days by default
+    /// # Examples
+    /// ```rust,no_run
+    /// use binance::{api::*, wallet::*, config::*, rest_model::*};
+    /// let wallet: Wallet = Binance::new_with_env(&Config::testnet());
+    /// let query: UniversalTransferHistoryQuery = UniversalTransferHistoryQuery::default();
+    /// let records = tokio_test::block_on(wallet.universal_transfer_history(query));
+    /// assert!(records.is_ok(), "{:?}", records);
+    /// ```
+    pub async fn universal_transfer_history(
+        &self,
+        query: UniversalTransferHistoryQuery,
+    ) -> Result<RecordsQueryResult<UniversalTransferRecord>> {
+        self.client
+            .get_signed_p(SAPI_V1_ASSET_TRANSFER, Some(query), self.recv_window)
+            .await
+    }
+
+    /// Current account status
+    ///
+    /// # Examples
+    /// ```rust,no_run
+    /// use binance::{api::*, wallet::*, config::*, rest_model::*};
+    /// let wallet: Wallet = Binance::new_with_env(&Config::testnet());
+    /// let records = tokio_test::block_on(wallet.account_status());
+    /// assert!(records.is_ok(), "{:?}", records);
+    /// ```
+    pub async fn account_status(&self) -> Result<ÅccountStatus> {
+        self.client
+            .get_signed_p(SAPI_V1_ACCOUNT_STATUS, Option::<String>::None, self.recv_window)
+            .await
+    }
+
+    /// Current api trading status
+    ///
+    /// # Examples
+    /// ```rust,no_run
+    /// use binance::{api::*, wallet::*, config::*, rest_model::*};
+    /// let wallet: Wallet = Binance::new_with_env(&Config::testnet());
+    /// let records = tokio_test::block_on(wallet.api_trading_status());
+    /// assert!(records.is_ok(), "{:?}", records);
+    /// ```
+    pub async fn api_trading_status(&self) -> Result<ApiTradingStatus> {
+        self.client
+            .get_signed_p(SAPI_V1_ACCOUNT_APITRADINGSTATUS, Option::<String>::None, self.recv_window)
+            .await
+    }
+
+    /// Dust Log
+    ///
+    /// # Examples
+    /// ```rust,no_run
+    /// use binance::{api::*, wallet::*, config::*, rest_model::*};
+    /// let wallet: Wallet = Binance::new_with_env(&Config::testnet());
+    /// let records = tokio_test::block_on(wallet.dust_log());
+    /// assert!(records.is_ok(), "{:?}", records);
+    /// ```
+    pub async fn dust_log(&self, start_time: Option<u64>, end_time: Option<u64>) -> Result<DustLog> {
+        let mut query = HashMap::new();
+        query.insert("start_time", start_time);
+        query.insert("end_time", end_time);
+        self.client
+            .get_signed_p(SAPI_V1_ASSET_DRIBBLET, Some(query), self.recv_window)
+            .await
+    }
+
+    /// Assets convertible to BNB
+    ///
+    /// # Examples
+    /// ```rust,no_run
+    /// use binance::{api::*, wallet::*, config::*, rest_model::*};
+    /// let wallet: Wallet = Binance::new_with_env(&Config::testnet());
+    /// let records = tokio_test::block_on(wallet.convertible_assets());
+    /// assert!(records.is_ok(), "{:?}", records);
+    /// ```
+    pub async fn convertible_assets(&self) -> Result<ConvertibleAssets> {
+        self.client
+            .get_signed_p(SAPI_V1_ASSET_DUSTBTC, Option::<String>::None, self.recv_window)
             .await
     }
 }

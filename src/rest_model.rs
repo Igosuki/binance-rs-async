@@ -1582,6 +1582,204 @@ pub struct DepositAddress {
     pub url: Option<String>,
 }
 
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum UniversalTransferType {
+    /// Spot account transfer to USDⓈ-M Futures account
+    MainUmfuture,
+    /// Spot account transfer to COIN-M Futures account
+    MainCmfuture,
+    /// Spot account transfer to Margin (cross) account
+    MainMargin,
+    /// USDⓈ-M Futures account transfer to Spot account
+    UmfutureMain,
+    /// USDⓈ-M Futures account transfer to Margin (cross) account
+    UmFutureMargin,
+    /// COIN-M Futures account transfer to Spot account
+    CmfutureMain,
+    /// COIN-M Futures account transfer to Margin(cross) account
+    CmfutureMargin,
+    /// Margin（cross）account transfer to Spot account
+    MarginMain,
+    /// Margin (cross) account transfer to USDⓈ-M Futures
+    MarginUmfuture,
+    /// Margin (cross) account transfer to COIN-M Futures
+    MarginCmfuture,
+    /// Isolated margin account transfer to Margin (cross) account
+    IsolatedmarginMargin,
+    /// Margin (cross) account transfer to Isolated margin account
+    MarginIsolatedmargin,
+    /// Isolated margin account transfer to Isolated margin account
+    IsolatedmarginIsolatedmargin,
+    /// Spot account transfer to Funding account
+    MainFunding,
+    /// Funding account transfer to Spot account
+    FundingMain,
+    /// Funding account transfer to UMFUTURE account
+    FundingUmfuture,
+    /// UMFUTURE account transfer to Funding account
+    UmfutureFunding,
+    /// MARGIN account transfer to Funding account
+    MarginFunding,
+    /// Funding account transfer to Margin account
+    FundingMargin,
+    /// Funding account transfer to CMFUTURE account
+    FundingCmfuture,
+    /// CMFUTURE account transfer to Funding account
+    CmfutureFunding,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct UniversalTransfer {
+    pub asset: String,
+    pub amount: f64,
+    pub from_symbol: Option<String>,
+    pub to_symbol: Option<String>,
+    #[serde(rename(serialize = "type", deserialize = "type"))]
+    pub transfer_type: UniversalTransferType,
+}
+
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct UniversalTransferHistoryQuery {
+    #[serde(rename(serialize = "type", deserialize = "type"))]
+    pub transfer_type: UniversalTransferType,
+    pub start_time: Option<u64>,
+    pub end_time: Option<u64>,
+    /// Default : 1
+    pub current: Option<u64>,
+    /// Default 10, Max 100
+    pub size: Option<u64>,
+    pub from_symbol: String,
+    pub to_symbol: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum UniversalTransferStatus {
+    Confirmed,
+    Pending,
+    Failed
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct UniversalTransferRecord {
+    pub asset: String,
+    #[serde(with = "string_or_float")]
+    pub amount: f64,
+    #[serde(rename(serialize = "type", deserialize = "type"))]
+    pub transfer_type: UniversalTransferType,
+    pub status: UniversalTransferStatus,
+    pub tran_id: u64,
+    pub timestamp: u64,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct AccountStatus {
+    pub data: String
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct ApiTradingStatus {
+    pub data: ApiTradingStatusData,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct ApiTradingStatusData {
+    /// API trading function is locked or not
+    pub is_locked: bool,
+    /// If API trading function is locked, this is the planned recover time
+    pub planned_recovery_time: u64
+    pub trigger_condition: ApiTradingStatusTriggerCondition,
+    pub update_time: u64,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub struct ApiTradingStatusTriggerCondition {
+    /// Number of GTC orders
+    pub gcr: bool,
+    /// Number of FOK/IOC orders
+    pub ifer: bool,
+    /// Number of orders
+    pub ufr: bool,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct DustLog {
+    /// Total counts of exchange
+    pub total: u64,
+    pub user_asset_dribblets: Vec<UserAssetDribblet>
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct UserAssetDribblet {
+    pub operate_time: u64,
+    /// Total transfered BNB amount for this exchange.
+    #[serde(with = "string_or_float")]
+    pub total_transfered_amount: f64,
+    ///Total service charge amount for this exchange.
+    #[serde(with = "string_or_float")]
+    pub total_service_charge_amount: f64,
+    pub trans_id: u64,
+    pub user_asset_dribblet_details: Vec<UserAssetDribbletDetail>
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct UserAssetDribbletDetail {
+    pub trans_id: u64,
+    #[serde(with = "string_or_float")]
+    pub amount: f64,
+    #[serde(with = "string_or_float")]
+    pub transfered_amount: f64,
+    #[serde(with = "string_or_float")]
+    pub service_charge_amount: f64,
+    pub operate_time: u64,
+    pub from_asset: String
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct ConvertibleAssets {
+    pub details: Vec<ConvertibleAssetDetails>,
+    #[serde(with = "string_or_float")]
+    #[serde(rename = "totalTransferBtc")]
+    pub total_transfer_btc: f64,
+    #[serde(with = "string_or_float")]
+    #[serde(rename = "totalTransferBNB")]
+    pub total_transfer_bnb: f64,
+    #[serde(with = "string_or_float")]
+    pub driblet_percentage: f64,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct ConvertibleAssetDetails {
+    pub asset: String,
+    pub asset_full_name: String,
+    #[serde(with = "string_or_float")]
+    pub amount_free: f64,
+    #[serde(with = "string_or_float")]
+    #[serde(rename = "toBNB")]
+    pub to_bnb: f64,
+    #[serde(with = "string_or_float")]
+    #[serde(rename = "toBTC")]
+    pub to_btc: f64,
+    #[serde(with = "string_or_float")]
+    #[serde(rename = "toBNBOffExchange")]
+    pub to_bnb_off_exchange: f64,
+    #[serde(with = "string_or_float")]
+    pub exchange: f64,
+}
 
 pub mod string_or_float {
     use std::fmt;
