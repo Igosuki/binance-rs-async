@@ -89,3 +89,5 @@ pub mod savings;
 pub mod userstream;
 pub mod websockets;
 pub mod ws_model;
+#[cfg(feature = "wallet_api")]
+pub mod wallet;
