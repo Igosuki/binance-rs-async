@@ -2,7 +2,7 @@
 
 Unofficial Rust Library for the [Binance API](https://github.com/binance-exchange/binance-official-api-docs)
 
-This is a fully async api using [async-std](https://docs.rs/async-std/1.5.0/async_std/).
+This is a fully async api using [tokio](https://tokio.rs/).
 
 ## Current state
 

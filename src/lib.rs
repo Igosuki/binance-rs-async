@@ -7,7 +7,7 @@
 //! <br>
 //!
 //! This library provides access to all of Binance's APIs using .
-//! [`async/std`]: https://docs.rs/async-std/1.9.0/async_std/
+//! [`tokio`]: https://docs.rs/tokio/latest/tokio/
 //!
 //! <br>
 //!
