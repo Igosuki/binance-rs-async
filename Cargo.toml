@@ -22,7 +22,8 @@ default = ["native-tls"]
 futures_api = []
 margin_api = []
 savings_api = []
-all_apis = ["futures_api", "margin_api", "savings_api"]
+wallet_api = []
+all_apis = ["futures_api", "margin_api", "savings_api", "wallet_api"]
 
 [dependencies]
 chrono = "0.4"

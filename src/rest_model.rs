@@ -1344,7 +1344,7 @@ pub struct KlineSummary {
     pub taker_buy_quote_asset_volume: f64,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct PropertyCmd {
     pub id: i32,
     pub method: String,
@@ -1364,6 +1364,224 @@ pub struct IsolatedSymbol {
     pub symbol: String,
     pub max_account: u64,
 }
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct SystemStatus {
+    pub status: u64,
+    pub msg: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct WalletCoinInfo {
+    pub coin: String,
+    pub deposit_all_enable: bool,
+    #[serde(with = "string_or_float")]
+    pub free: f64,
+    #[serde(with = "string_or_float")]
+    pub freeze: f64,
+    #[serde(with = "string_or_float")]
+    pub ipoable: f64,
+    #[serde(with = "string_or_float")]
+    pub ipoing: f64,
+    pub is_legal_money: bool,
+    #[serde(with = "string_or_float")]
+    pub locked: f64,
+    pub name: String,
+    pub network_list: Vec<CoinNetwork>,
+    #[serde(with = "string_or_float")]
+    pub storage: f64,
+    pub trading: bool,
+    pub withdraw_all_enable: bool,
+    #[serde(with = "string_or_float")]
+    pub withdrawing: f64,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct CoinNetwork {
+    pub address_regex: String,
+    pub coin: String,
+    pub deposit_desc: String,
+    pub deposit_enable: bool,
+    pub is_default: bool,
+    pub memo_regex: String,
+    pub min_confirm: u32,
+    pub name: String,
+    pub network: String,
+    pub reset_address_status: bool,
+    pub special_tips: String,
+    pub un_lock_confirm: u32,
+    pub withdraw_desc: String,
+    pub withdraw_enable: bool,
+    #[serde(with = "string_or_float")]
+    pub withdraw_fee: f64,
+    #[serde(with = "string_or_float")]
+    pub withdraw_integer_multiple: f64,
+    #[serde(with = "string_or_float")]
+    pub withdraw_max: f64,
+    #[serde(with = "string_or_float")]
+    pub withdraw_min: f64,
+    pub same_address: bool
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct AccountSnapshot {
+    pub code: u32,
+    pub msg: String,
+    pub snapshot_vos: Vec<SnapshotVos>
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct SnapshotVos {
+    pub data: SnapshotVosData,
+    #[serde(rename = "type")]
+    pub snapshot_type: String,
+    pub update_time: u64,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct SnapshotVosData {
+    pub balances: Vec<Balance>,
+    #[serde(with = "string_or_float")]
+    pub total_asset_of_btc: f64
+}
+
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum AccountSnapshotType {
+    Spot,
+    Margin,
+    Futures,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct AccountSnapshotQuery {
+    pub account_type: AccountSnapshotType,
+    pub start_time: Option<u64>,
+    pub end_time: Option<u64>,
+    pub limit: Option<u64>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct CoinWithdrawalQuery {
+    pub coin: String,
+    /// client id for withdraw
+    pub withdraw_order_id: Option<String>,
+    pub network: Option<String>,
+    pub address: String,
+    /// Secondary address identifier for coins like XRP,XMR etc.
+    pub address_tag: Option<String>,
+    pub amount: f64,
+    /// When making internal transfer, true for returning the fee to the destination account; false for returning the fee back to the departure account. Default false.
+    pub transaction_fee_flag: Option<bool>,
+    /// Description of the address. Space in name should be encoded into %20.
+    pub name: Option<String>,
+    /// The wallet type for withdraw，0: spot wallet. 1: funding wallet. Default:  spot wallet
+    pub wallet_type: u8
+}
+
+
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct DepositHistoryQuery {
+    pub coin: Option<String>,
+    /// 0(0:pending,6: credited but cannot withdraw, 1:success)
+    pub status: Option<u16>,
+    /// Default: 90 days from current timestamp
+    pub start_time: Option<u64>,
+    /// Default: present timestamp
+    pub end_time: Option<u64>,
+    /// Default:1000, Max:1000
+    pub limit: Option<u64>,
+    /// Default: present timestamp
+    pub offset: Option<u64>,
+}
+
+
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct DepositRecord {
+    pub coin: String,
+    #[serde(with = "string_or_float")]
+    pub amount: f64,
+    pub network: String,
+    pub status: u8,
+    pub address: String,
+    pub address_tag: Option<String>,
+    pub tx_id: String,
+    pub insert_time: Option<u64>,
+    pub transfer_type: u8,
+    pub unlock_confirm: String,
+    pub confirm_times: String,
+}
+
+
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct WithdrawalHistoryQuery {
+    pub coin: Option<String>,
+    pub withdraw_order_id: Option<String>,
+    /// 0(0:Email Sent,1:Cancelled 2:Awaiting Approval 3:Rejected 4:Processing 5:Failure 6:Completed)
+    pub status: Option<u16>,
+    /// Default: 90 days from current timestamp
+    pub start_time: Option<u64>,
+    /// Default: present timestamp
+    pub end_time: Option<u64>,
+    /// Default:1000, Max:1000
+    pub limit: Option<u64>,
+    /// Default: present timestamp
+    pub offset: Option<u64>,
+}
+
+
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct WithdrawalRecord {
+    pub address: String,
+    #[serde(with = "string_or_float")]
+    pub amount: f64,
+    pub apply_time: String,
+    pub coin: String,
+    pub id: String,
+    /// // will not be returned if there's no withdrawOrderId for this withdraw.
+    pub withdraw_order_id: Option<String>,
+    pub network: String,
+    /// 1 for internal transfer, 0 for external transfer
+    pub transfer_type: u8,
+    pub status: u8,
+    #[serde(with = "string_or_float")]
+    pub transaction_fee: f64,
+    /// // confirm times for withdraw
+    pub confirm_no: u64,
+    pub info: String,
+    pub tx_id: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct DepositAddressQuery {
+    pub coin: String,
+    /// If network is not send, return with default network of the coin.
+    /// You can get network and isDefault in networkList in the response [`Wallet::all_coin_info`]
+    pub network: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct DepositAddress {
+    pub coin: String,
+    pub address: String,
+    pub tag: Option<String>,
+    pub url: Option<String>,
+}
+
 
 pub mod string_or_float {
     use std::fmt;
