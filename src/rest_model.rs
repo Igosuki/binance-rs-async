@@ -1464,6 +1464,7 @@ pub enum AccountSnapshotType {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct AccountSnapshotQuery {
+    #[serde(rename = "type")] // fix requset field name
     pub account_type: AccountSnapshotType,
     pub start_time: Option<u64>,
     pub end_time: Option<u64>,
