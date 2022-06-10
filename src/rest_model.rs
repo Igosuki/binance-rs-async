@@ -1437,6 +1437,14 @@ pub struct AccountSnapshot {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
+pub struct SnapshotVosReply {
+    pub code: u32,
+    pub msg: String,
+    pub snapshotVos: Vec<SnapshotVos>, // fix response format
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct SnapshotVos {
     pub data: SnapshotVosData,
     #[serde(rename = "type")]
