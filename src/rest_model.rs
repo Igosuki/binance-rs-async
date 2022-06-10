@@ -1469,6 +1469,27 @@ pub enum AccountSnapshotType {
     Futures,
 }
 
+impl AccountSnapshotType {
+    // for match type in response
+    pub fn from_str(s: &str) -> Self {
+        // fix for response format(is lowercase))
+        match s.to_uppercase().as_str() {
+            "SPOT" => AccountSnapshotType::Spot,
+            "MARGIN" => AccountSnapshotType::Margin,
+            "FUTURES" => AccountSnapshotType::Futures,
+            _ => panic!("Unknown AccountSnapshotType: {}", s),
+        }
+    }
+
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            AccountSnapshotType::Spot => "SPOT",
+            AccountSnapshotType::Margin => "MARGIN",
+            AccountSnapshotType::Futures => "FUTURES",
+        }
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct AccountSnapshotQuery {
