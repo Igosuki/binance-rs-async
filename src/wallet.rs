@@ -75,7 +75,7 @@ impl Wallet {
     /// let records = tokio_test::block_on(wallet.daily_account_snapshot(query));
     /// assert!(records.is_ok(), "{:?}", records);
     /// ```
-    pub async fn daily_account_snapshot(&self, query: AccountSnapshotQuery) -> Result<SnapshotVos> {
+    pub async fn daily_account_snapshot(&self, query: AccountSnapshotQuery) -> Result<SnapshotVosReply> {
         self.client
             .get_signed_p(SAPI_V1_ACCOUNTSNAPSHOT, Some(query), self.recv_window)
             .await
