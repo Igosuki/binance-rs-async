@@ -1591,8 +1591,8 @@ pub struct WithdrawalRecord {
     #[serde(with = "string_or_float")]
     pub transaction_fee: f64,
     /// // confirm times for withdraw
-    pub confirm_no: u64,
-    pub info: String,
+    pub confirm_no: Option<u64>,
+    pub info: Option<String>,
     pub tx_id: String,
 }
 
