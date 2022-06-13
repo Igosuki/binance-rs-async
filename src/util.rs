@@ -1,6 +1,7 @@
 use std::collections::BTreeMap;
 
-use chrono::Utc;
+#[allow(unused_imports)]
+use chrono::{Duration, TimeZone, Utc};
 use serde_json::Value;
 
 use crate::errors::*;
@@ -73,11 +74,36 @@ where
     }
 }
 
-pub fn to_i64(v: &Value) -> i64 { v.as_i64().unwrap() }
+pub fn to_i64(v: &Value) -> i64 {
+    v.as_i64().unwrap()
+}
 
-pub fn to_f64(v: &Value) -> f64 { v.as_str().unwrap().parse().unwrap() }
+pub fn to_f64(v: &Value) -> f64 {
+    v.as_str().unwrap().parse().unwrap()
+}
 
-pub fn get_timestamp() -> Result<u64> { Ok(Utc::now().timestamp_millis() as u64) }
+pub fn get_timestamp() -> Result<u64> {
+    Ok(Utc::now().timestamp_millis() as u64)
+}
+
+// for query deposit/withdrawal history, default range = 90 days
+pub fn duration_by(days: Option<i64>) -> i64 {
+    // default = 90 days
+    Duration::days(days.unwrap_or(90)).num_milliseconds()
+}
+
+// for easy query deposit/withdrawal history
+pub fn ago_by(start_at: Option<i64>, years: Option<i64>, months: Option<i64>, days: Option<i64>) -> i64 {
+    let start = start_at.unwrap_or(Utc::now().timestamp_millis());
+
+    // default = 2years
+    let duration = Duration::days(days.unwrap_or(0))
+        + Duration::days(12 * months.unwrap_or(0))
+        + Duration::days(365 * years.unwrap_or(2));
+
+    // default = 2years ago
+    start - duration.num_milliseconds()
+}
 
 lazy_static! {
     static ref TRUE: String = "TRUE".to_string();
@@ -94,4 +120,33 @@ pub fn bool_to_string(b: bool) -> String {
     }
 }
 
-pub fn bool_to_string_some(b: bool) -> Option<String> { Some(bool_to_string(b)) }
+pub fn bool_to_string_some(b: bool) -> Option<String> {
+    Some(bool_to_string(b))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_duration_by() {
+        let now_at = Utc::now().timestamp_millis();
+        let before_at = now_at - duration_by(None);
+        let now = Utc.timestamp_millis(now_at).to_rfc3339();
+        let before = Utc.timestamp_millis(before_at).to_rfc3339();
+        println!("now: {}, before: {}", now, before);
+        assert_eq!(duration_by(None), 7776000000);
+    }
+
+    #[test]
+    fn test_ago_by() {
+        let ago_at = ago_by(None, None, None, None);
+        let ago = Utc.timestamp_millis(ago_at).to_rfc3339();
+
+        let ago_5years_at = ago_by(None, Some(5), None, None);
+        let ago_5years = Utc.timestamp_millis(ago_5years_at).to_rfc3339();
+
+        println!("ago: {}", ago);
+        println!("ago_5years: {}", ago_5years);
+    }
+}
