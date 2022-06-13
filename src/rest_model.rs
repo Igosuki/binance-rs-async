@@ -497,7 +497,9 @@ pub enum OrderSide {
 
 /// By default, buy
 impl Default for OrderSide {
-    fn default() -> Self { Self::Buy }
+    fn default() -> Self {
+        Self::Buy
+    }
 }
 
 /// Order types, the following restrictions apply
@@ -524,7 +526,9 @@ pub enum OrderType {
 
 /// By default, use market orders
 impl Default for OrderType {
-    fn default() -> Self { Self::Market }
+    fn default() -> Self {
+        Self::Market
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -1424,7 +1428,7 @@ pub struct CoinNetwork {
     pub withdraw_max: f64,
     #[serde(with = "string_or_float")]
     pub withdraw_min: f64,
-    pub same_address: bool
+    pub same_address: bool,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -1432,7 +1436,7 @@ pub struct CoinNetwork {
 pub struct AccountSnapshot {
     pub code: u32,
     pub msg: String,
-    pub snapshot_vos: Vec<SnapshotVos>
+    pub snapshot_vos: Vec<SnapshotVos>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -1440,7 +1444,7 @@ pub struct AccountSnapshot {
 pub struct SnapshotVosReply {
     pub code: u32,
     pub msg: String,
-    pub snapshotVos: Vec<SnapshotVos>, // fix response format
+    pub snapshot_vos: Vec<SnapshotVos>, // fix response format
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -1457,9 +1461,8 @@ pub struct SnapshotVos {
 pub struct SnapshotVosData {
     pub balances: Vec<Balance>,
     #[serde(with = "string_or_float")]
-    pub total_asset_of_btc: f64
+    pub total_asset_of_btc: f64,
 }
-
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
@@ -1516,9 +1519,8 @@ pub struct CoinWithdrawalQuery {
     /// Description of the address. Space in name should be encoded into %20.
     pub name: Option<String>,
     /// The wallet type for withdraw，0: spot wallet. 1: funding wallet. Default:  spot wallet
-    pub wallet_type: u8
+    pub wallet_type: u8,
 }
-
 
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
 #[serde(rename_all = "camelCase")]
@@ -1565,7 +1567,6 @@ pub struct DepositRecord {
     pub wallet_type: Option<u32>,
 }
 
-
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct WithdrawalHistoryQuery {
@@ -1582,7 +1583,6 @@ pub struct WithdrawalHistoryQuery {
     /// Default: present timestamp
     pub offset: Option<u64>,
 }
-
 
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
 #[serde(rename_all = "camelCase")]
@@ -1683,7 +1683,6 @@ pub struct UniversalTransfer {
     pub transfer_type: UniversalTransferType,
 }
 
-
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct UniversalTransferHistoryQuery {
@@ -1704,7 +1703,7 @@ pub struct UniversalTransferHistoryQuery {
 pub enum UniversalTransferStatus {
     Confirmed,
     Pending,
-    Failed
+    Failed,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -1723,7 +1722,7 @@ pub struct UniversalTransferRecord {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct AccountStatus {
-    pub data: String
+    pub data: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -1759,7 +1758,7 @@ pub struct ApiTradingStatusTriggerCondition {
 pub struct DustLog {
     /// Total counts of exchange
     pub total: u64,
-    pub user_asset_dribblets: Vec<UserAssetDribblet>
+    pub user_asset_dribblets: Vec<UserAssetDribblet>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -1773,7 +1772,7 @@ pub struct UserAssetDribblet {
     #[serde(with = "string_or_float")]
     pub total_service_charge_amount: f64,
     pub trans_id: u64,
-    pub user_asset_dribblet_details: Vec<UserAssetDribbletDetail>
+    pub user_asset_dribblet_details: Vec<UserAssetDribbletDetail>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -1787,7 +1786,7 @@ pub struct UserAssetDribbletDetail {
     #[serde(with = "string_or_float")]
     pub service_charge_amount: f64,
     pub operate_time: u64,
-    pub from_asset: String
+    pub from_asset: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -1831,9 +1830,8 @@ pub struct DustTransfer {
     pub total_service_charge: f64,
     #[serde(with = "string_or_float")]
     pub total_transferred: f64,
-    pub transfer_result: Vec<DustTransferResult>
+    pub transfer_result: Vec<DustTransferResult>,
 }
-
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -1880,7 +1878,7 @@ pub struct SupportedAssetDetail {
     #[serde(with = "string_or_float")]
     pub min_withdrawal_amount: f64,
     /// deposit status (false if ALL of networks' are false)
-    pub deposit_status:bool,
+    pub deposit_status: bool,
     /// withdraw fee
     pub withdraw_fee: f64,
     /// withdraw status (false if ALL of networks' are false)
@@ -1922,7 +1920,7 @@ pub struct WalletFunding {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct ApiKeyPermissions {
-    ip_restrict:bool,
+    ip_restrict: bool,
     create_time: u64,
     /// This option allows you to withdraw via API. You must apply the IP Access Restriction filter in order to enable withdrawals
     enable_withdrawals: bool,
