@@ -1536,6 +1536,16 @@ pub struct DepositHistoryQuery {
     pub offset: Option<u64>,
 }
 
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct DepositRecords {
+    // range = 90 days
+    pub start_at: Option<i64>,
+    pub end_at: Option<i64>,
+
+    // auto query by steps:
+    pub records: Vec<DepositRecord>,
+}
 
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
 #[serde(rename_all = "camelCase")]

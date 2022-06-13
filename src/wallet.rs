@@ -2,6 +2,10 @@ use std::collections::HashMap;
 use crate::client::*;
 use crate::errors::*;
 use crate::rest_model::*;
+use crate::util::*;
+#[allow(unused_imports)]
+use chrono::{Duration, TimeZone, Utc};
+use std::collections::HashMap;
 
 static SAPI_V1_SYSTEM_STATUS: &str = "/sapi/v1/system/status";
 static SAPI_V1_CAPITAL_CONFIG_GETALL: &str = "/sapi/v1/capital/config/getall";
@@ -134,13 +138,69 @@ impl Wallet {
     /// use binance::{api::*, wallet::*, config::*, rest_model::*};
     /// let wallet: Wallet = Binance::new_with_env(&Config::testnet());
     /// let query: DepositHistoryQuery = DepositHistoryQuery::default();
-    /// let records = tokio_test::block_on(wallet.deposit_history(query));
+    /// let records = tokio_test::block_on(wallet.deposit_history(&query));
     /// assert!(records.is_ok(), "{:?}", records);
     /// ```
-    pub async fn deposit_history(&self, query: DepositHistoryQuery) -> Result<Vec<DepositRecord>> {
+    pub async fn deposit_history(&self, query: &DepositHistoryQuery) -> Result<Vec<DepositRecord>> {
         self.client
             .get_signed_p(SAPI_V1_CAPITAL_DEPOSIT_HISREC, Some(query), self.recv_window)
             .await
+    }
+
+    /// Auto Query Deposit History By Years/Months/Days
+    ///
+    /// # Examples
+    /// ```rust,no_run
+    /// use binance::{api::*, wallet::*, config::*, rest_model::*};
+    /// let wallet: Wallet = Binance::new_with_env(&Config::testnet());
+    /// let query: DepositHistoryQuery = DepositHistoryQuery::default();
+    /// let records = tokio_test::block_on(wallet.deposit_history_quick(&query, None, Some(5), None, None));
+    /// assert!(records.is_ok(), "{:?}", records);
+    pub async fn deposit_history_quick(
+        &self,
+        mut query: DepositHistoryQuery,
+        start_at: Option<i64>,
+        years: Option<i64>,
+        months: Option<i64>,
+        days: Option<i64>,
+    ) -> Result<Vec<DepositRecords>> {
+        let mut results: Vec<DepositRecords> = Vec::new();
+
+        let start = start_at.unwrap_or(Utc::now().timestamp_millis());
+
+        // 90 days
+        let duration = duration_by(None);
+
+        let ago_at = ago_by(Some(start), years, months, days);
+
+        // query range:
+        let mut step_start = start - duration;
+        let mut step_end = start;
+
+        // auto query by step:
+        while step_start > ago_at {
+            // modify query duration:
+            query.start_time = Some(step_start as u64);
+            query.end_time = Some(step_end as u64);
+
+            // eprintln!("query: {:?}", query);
+            let records = self.deposit_history(&query).await?;
+
+            if !records.is_empty() {
+                let item = DepositRecords {
+                    start_at: Some(step_start),
+                    end_at: Some(step_end),
+                    records,
+                };
+                results.push(item);
+            }
+
+            // next step
+            step_start -= duration;
+            step_end -= duration;
+        }
+
+        Ok(results)
     }
 
     /// Withdraw History
