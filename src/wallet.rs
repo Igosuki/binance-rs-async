@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use crate::client::*;
 use crate::errors::*;
 use crate::rest_model::*;
@@ -45,11 +44,8 @@ impl Wallet {
     /// let system_status = tokio_test::block_on(wallet.system_status());
     /// assert!(system_status.is_ok(), "{:?}", system_status);
     /// ```
-    pub async fn system_status(&self) -> Result<SystemStatus>
-    {
-        self.client
-            .get_p(SAPI_V1_SYSTEM_STATUS, "")
-            .await
+    pub async fn system_status(&self) -> Result<SystemStatus> {
+        self.client.get_p(SAPI_V1_SYSTEM_STATUS, "").await
     }
 
     /// Get information of coins (available for deposit and withdraw) for user.
@@ -96,7 +92,11 @@ impl Wallet {
     /// ```
     pub async fn disable_fast_withdraw_switch(&self) -> Result<()> {
         self.client
-            .post_signed_p(SAPI_V1_ACCOUNT_DISABLEFASTWITHDRAWSWITCH, Option::<String>::None, self.recv_window)
+            .post_signed_p(
+                SAPI_V1_ACCOUNT_DISABLEFASTWITHDRAWSWITCH,
+                Option::<String>::None,
+                self.recv_window,
+            )
             .await
     }
 
@@ -111,7 +111,11 @@ impl Wallet {
     /// ```
     pub async fn enable_fast_withdraw_switch(&self) -> Result<()> {
         self.client
-            .post_signed_p(SAPI_V1_ACCOUNT_ENABLEFASTWITHDRAWSWITCH, Option::<String>::None, self.recv_window)
+            .post_signed_p(
+                SAPI_V1_ACCOUNT_ENABLEFASTWITHDRAWSWITCH,
+                Option::<String>::None,
+                self.recv_window,
+            )
             .await
     }
 
@@ -316,7 +320,11 @@ impl Wallet {
     /// ```
     pub async fn api_trading_status(&self) -> Result<ApiTradingStatus> {
         self.client
-            .get_signed_p(SAPI_V1_ACCOUNT_APITRADINGSTATUS, Option::<String>::None, self.recv_window)
+            .get_signed_p(
+                SAPI_V1_ACCOUNT_APITRADINGSTATUS,
+                Option::<String>::None,
+                self.recv_window,
+            )
             .await
     }
 
@@ -414,7 +422,11 @@ impl Wallet {
     /// let records = tokio_test::block_on(wallet.funding_wallet(None, None));
     /// assert!(records.is_ok(), "{:?}", records);
     /// ```
-    pub async fn funding_wallet(&self, asset: Option<String>, need_btc_valuation: Option<bool>) -> Result<WalletFundings> {
+    pub async fn funding_wallet(
+        &self,
+        asset: Option<String>,
+        need_btc_valuation: Option<bool>,
+    ) -> Result<WalletFundings> {
         let mut query = HashMap::new();
         query.insert("asset", asset);
         query.insert("need_btc_valuation", need_btc_valuation.map(|b| format!("{}", b)));
@@ -438,4 +450,3 @@ impl Wallet {
             .await
     }
 }
-
