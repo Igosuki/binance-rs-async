@@ -464,7 +464,16 @@ impl HistoryQuery {
     }
 }
 
-#[derive(Deserialize)]
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub(crate) struct FundingQuery {
+    pub symbol: String,
+    pub start_time: Option<u64>,
+    pub end_time: Option<u64>,
+    pub limit: Option<u16>,
+}
+
+#[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct FundingRate {
     pub symbol: String,
