@@ -95,30 +95,27 @@ impl FuturesMarket {
     }
 
     /// Get funding rate history
-    pub async fn get_funding_rate<S1, S2, S3, S4, S5>(
+    pub async fn get_funding_rate<S1, S2, S3, S4>(
         &self,
         symbol: S1,
-        start_time: S3,
-        end_time: S4,
-        limit: S5,
+        start_time: S2,
+        end_time: S3,
+        limit: S4,
     ) -> Result<Vec<FundingRate>>
     where
         S1: Into<String>,
+        S2: Into<Option<u64>>,
         S3: Into<Option<u64>>,
-        S4: Into<Option<u64>>,
-        S5: Into<u16>,
+        S4: Into<Option<u16>>,
     {
         self.client
             .get_signed_p(
                 "/fapi/v1/fundingRate",
-                Some(HistoryQuery {
+                Some(FundingQuery {
+                    symbol: symbol.into(),
                     start_time: start_time.into(),
                     end_time: end_time.into(),
                     limit: limit.into(),
-                    symbol: symbol.into(),
-                    from_id: None,
-                    interval: None,
-                    period: None,
                 }),
                 self.recv_window,
             )
