@@ -151,7 +151,7 @@ impl Wallet {
             .await
     }
 
-    /// Auto Query Deposit History By Years/Months/Days
+    /// Auto Query Deposit History: auto query range > 90days.
     ///
     /// # Examples
     /// ```rust,no_run
@@ -168,7 +168,7 @@ impl Wallet {
         months: Option<i64>,
         days: Option<i64>,
     ) -> Result<Vec<DepositRecords>> {
-        let mut results: Vec<DepositRecords> = Vec::new();
+        let mut result: Vec<DepositRecords> = Vec::new();
 
         let start = start_at.unwrap_or(Utc::now().timestamp_millis());
 
@@ -196,7 +196,7 @@ impl Wallet {
                     end_at: Some(step_end),
                     records,
                 };
-                results.push(item);
+                result.push(item);
             }
 
             // next step
@@ -204,7 +204,7 @@ impl Wallet {
             step_end -= duration;
         }
 
-        Ok(results)
+        Ok(result)
     }
 
     /// Withdraw History
@@ -214,13 +214,70 @@ impl Wallet {
     /// use binance::{api::*, wallet::*, config::*, rest_model::*};
     /// let wallet: Wallet = Binance::new_with_env(&Config::testnet());
     /// let query: WithdrawalHistoryQuery = WithdrawalHistoryQuery::default();
-    /// let records = tokio_test::block_on(wallet.withdraw_history(query));
+    /// let records = tokio_test::block_on(wallet.withdraw_history(&query));
     /// assert!(records.is_ok(), "{:?}", records);
     /// ```
-    pub async fn withdraw_history(&self, query: WithdrawalHistoryQuery) -> Result<Vec<WithdrawalRecord>> {
+    pub async fn withdraw_history(&self, query: &WithdrawalHistoryQuery) -> Result<Vec<WithdrawalRecord>> {
         self.client
             .get_signed_p(SAPI_V1_CAPITAL_WITHDRAW_HISTORY, Some(query), self.recv_window)
             .await
+    }
+
+    /// Auto Withdraw History: auto query range > 90days.
+    ///
+    /// # Examples
+    /// ```rust,no_run
+    /// use binance::{api::*, wallet::*, config::*, rest_model::*};
+    /// let wallet: Wallet = Binance::new_with_env(&Config::testnet());
+    /// let query: WithdrawalHistoryQuery = WithdrawalHistoryQuery::default();
+    /// let records = tokio_test::block_on(wallet.withdraw_history_quick(&query, None, Some(5), None, None));
+    /// assert!(records.is_ok(), "{:?}", records);
+    /// ```
+    pub async fn withdraw_history_quick(
+        &self,
+        mut query: WithdrawalHistoryQuery,
+        start_at: Option<i64>,
+        years: Option<i64>,
+        months: Option<i64>,
+        days: Option<i64>,
+    ) -> Result<Vec<WithdrawalRecords>> {
+        let mut result: Vec<WithdrawalRecords> = Vec::new();
+
+        let start = start_at.unwrap_or(Utc::now().timestamp_millis());
+
+        // 90 days
+        let duration = duration_by(None);
+
+        let ago_at = ago_by(Some(start), years, months, days);
+
+        // query range:
+        let mut step_start = start - duration;
+        let mut step_end = start;
+
+        // auto query by step:
+        while step_start > ago_at {
+            // modify query duration:
+            query.start_time = Some(step_start as u64);
+            query.end_time = Some(step_end as u64);
+
+            // eprintln!("query: {:?}", query);
+            let records = self.withdraw_history(&query).await?;
+
+            if !records.is_empty() {
+                let item = WithdrawalRecords {
+                    start_at: Some(step_start),
+                    end_at: Some(step_end),
+                    records,
+                };
+                result.push(item);
+            }
+
+            // next step
+            step_start -= duration;
+            step_end -= duration;
+        }
+
+        Ok(result)
     }
 
     /// Deposit address
