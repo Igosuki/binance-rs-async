@@ -1949,7 +1949,7 @@ pub struct ApiKeyPermissions {
     /// Spot and margin trading
     enable_spot_and_margin_trading: bool,
     /// Expiration time for spot and margin trading permission
-    trading_authority_expiration_time: u64,
+    trading_authority_expiration_time: Option<u64>,
 }
 
 pub mod string_or_float {

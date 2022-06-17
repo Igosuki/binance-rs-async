@@ -503,7 +503,7 @@ impl Wallet {
     /// ```
     pub async fn api_key_permissions(&self) -> Result<ApiKeyPermissions> {
         self.client
-            .post_signed_p(SAPI_V1_ASSET_APIRESTRICTIONS, Option::<String>::None, self.recv_window)
+            .get_signed_p(SAPI_V1_ASSET_APIRESTRICTIONS, Option::<String>::None, self.recv_window)
             .await
     }
 }
