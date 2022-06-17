@@ -1586,6 +1586,17 @@ pub struct WithdrawalHistoryQuery {
 
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
 #[serde(rename_all = "camelCase")]
+pub struct WithdrawalRecords {
+    // range = 90 days
+    pub start_at: Option<i64>,
+    pub end_at: Option<i64>,
+
+    // auto query by steps:
+    pub records: Vec<WithdrawalRecord>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
+#[serde(rename_all = "camelCase")]
 pub struct WithdrawalRecord {
     pub address: String,
     #[serde(with = "string_or_float")]
