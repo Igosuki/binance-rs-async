@@ -86,23 +86,37 @@ pub fn get_timestamp() -> Result<u64> {
     Ok(Utc::now().timestamp_millis() as u64)
 }
 
-// for query deposit/withdrawal history, default range = 90 days
-pub fn duration_by(days: Option<i64>) -> i64 {
+/// a duration of some days:
+///     defaut Sum(days) = 90 days = 7776000000
+///
+/// # Examples
+/// ```
+/// let sum = duration_by(Some(90));
+/// assert!(true, "= 90days duration: {:?}", sum);
+/// ```
+pub fn duration_of(days: Option<i64>) -> i64 {
     // default = 90 days
     Duration::days(days.unwrap_or(90)).num_milliseconds()
 }
 
-// for easy query deposit/withdrawal history
-pub fn ago_by(start_at: Option<i64>, years: Option<i64>, months: Option<i64>, days: Option<i64>) -> i64 {
+/// a timestamp: before some days.
+///     like: a timestamp 5 years ago.
+/// # Examples
+/// ```
+/// use binance::util::ago_from;
+/// let ago_at = ago_from(None, Some(5*360));
+/// assert!(true, "≈ 5 year ago, timestamp: {:?}", ago_at);
+/// ```
+pub fn ago_from(start_at: Option<i64>, days: Option<i64>) -> i64 {
+    // default = from now
     let start = start_at.unwrap_or(Utc::now().timestamp_millis());
 
-    // default = 2years
-    let duration = Duration::days(days.unwrap_or(0))
-        + Duration::days(12 * months.unwrap_or(0))
-        + Duration::days(365 * years.unwrap_or(2));
+    // default ≈ 2years
+    let duration = Duration::days(days.unwrap_or(360 * 2));
 
-    // default = 2years ago
-    start - duration.num_milliseconds()
+    // default ≈ 2years ago
+    let ago_at = start - duration.num_milliseconds();
+    ago_at
 }
 
 lazy_static! {
@@ -130,23 +144,28 @@ mod tests {
 
     #[test]
     fn test_duration_by() {
-        let now_at = Utc::now().timestamp_millis();
-        let before_at = now_at - duration_by(None);
-        let now = Utc.timestamp_millis(now_at).to_rfc3339();
-        let before = Utc.timestamp_millis(before_at).to_rfc3339();
-        println!("now: {}, before: {}", now, before);
-        assert_eq!(duration_by(None), 7776000000);
+        let ts_90_days = duration_of(Some(90 as i64));
+        let ts_365days = duration_of(Some(365 as i64));
+
+        // 90 days duration timestamp: 7776000000
+        assert_eq!(duration_of(None), 7776000000);
+        assert_eq!(ts_90_days, 7776000000);
+
+        // 365 days duration timestamp: 31536000000
+        assert_eq!(ts_365days, 31536000000);
     }
 
     #[test]
     fn test_ago_by() {
-        let ago_at = ago_by(None, None, None, None);
-        let ago = Utc.timestamp_millis(ago_at).to_rfc3339();
+        // default = from now, ≈ 2 years ago
+        let ago_at = ago_from(None, None);
+        let ago_2years = Utc.timestamp_millis(ago_at).to_rfc3339();
 
-        let ago_5years_at = ago_by(None, Some(5), None, None);
+        // from now, ≈ 5 years ago
+        let ago_5years_at = ago_from(None, Some(5 * 360));
         let ago_5years = Utc.timestamp_millis(ago_5years_at).to_rfc3339();
 
-        println!("ago: {}", ago);
-        println!("ago_5years: {}", ago_5years);
+        println!("≈ 2 years ago: {}, ts={}", ago_2years, ago_at);
+        println!("≈ 5 years ago: {}, ts={}", ago_5years, ago_5years_at);
     }
 }

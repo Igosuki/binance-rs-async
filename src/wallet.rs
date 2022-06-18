@@ -158,14 +158,12 @@ impl Wallet {
     /// use binance::{api::*, wallet::*, config::*, rest_model::*};
     /// let wallet: Wallet = Binance::new_with_env(&Config::testnet());
     /// let query: DepositHistoryQuery = DepositHistoryQuery::default();
-    /// let records = tokio_test::block_on(wallet.deposit_history_quick(&query, None, Some(5), None, None));
+    /// let records = tokio_test::block_on(wallet.deposit_history_quick(query, None, Some(5*360)));
     /// assert!(records.is_ok(), "{:?}", records);
     pub async fn deposit_history_quick(
         &self,
         mut query: DepositHistoryQuery,
         start_at: Option<i64>,
-        years: Option<i64>,
-        months: Option<i64>,
         days: Option<i64>,
     ) -> Result<Vec<DepositRecords>> {
         let mut result: Vec<DepositRecords> = Vec::new();
@@ -173,9 +171,9 @@ impl Wallet {
         let start = start_at.unwrap_or(Utc::now().timestamp_millis());
 
         // 90 days
-        let duration = duration_by(None);
+        let duration = duration_of(None);
 
-        let ago_at = ago_by(Some(start), years, months, days);
+        let ago_at = ago_from(Some(start), days);
 
         // query range:
         let mut step_start = start - duration;
@@ -230,15 +228,13 @@ impl Wallet {
     /// use binance::{api::*, wallet::*, config::*, rest_model::*};
     /// let wallet: Wallet = Binance::new_with_env(&Config::testnet());
     /// let query: WithdrawalHistoryQuery = WithdrawalHistoryQuery::default();
-    /// let records = tokio_test::block_on(wallet.withdraw_history_quick(&query, None, Some(5), None, None));
+    /// let records = tokio_test::block_on(wallet.withdraw_history_quick(query, None, Some(5*360)));
     /// assert!(records.is_ok(), "{:?}", records);
     /// ```
     pub async fn withdraw_history_quick(
         &self,
         mut query: WithdrawalHistoryQuery,
         start_at: Option<i64>,
-        years: Option<i64>,
-        months: Option<i64>,
         days: Option<i64>,
     ) -> Result<Vec<WithdrawalRecords>> {
         let mut result: Vec<WithdrawalRecords> = Vec::new();
@@ -246,9 +242,9 @@ impl Wallet {
         let start = start_at.unwrap_or(Utc::now().timestamp_millis());
 
         // 90 days
-        let duration = duration_by(None);
+        let duration = duration_of(None);
 
-        let ago_at = ago_by(Some(start), years, months, days);
+        let ago_at = ago_from(Some(start), days);
 
         // query range:
         let mut step_start = start - duration;
