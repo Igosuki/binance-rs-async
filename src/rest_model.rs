@@ -858,7 +858,7 @@ pub struct ForcedLiquidationState {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct RecordsQueryResult<R> {
-    pub rows: Vec<R>,
+    pub rows: Option<Vec<R>>,
     pub total: u64,
 }
 
@@ -1748,20 +1748,20 @@ pub struct ApiTradingStatusData {
     /// API trading function is locked or not
     pub is_locked: bool,
     /// If API trading function is locked, this is the planned recover time
-    pub planned_recovery_time: u64,
+    pub planned_recovery_time: Option<u64>,
     pub trigger_condition: ApiTradingStatusTriggerCondition,
-    pub update_time: u64,
+    pub update_time: Option<u64>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub struct ApiTradingStatusTriggerCondition {
     /// Number of GTC orders
-    pub gcr: bool,
+    pub gcr: i64,
     /// Number of FOK/IOC orders
-    pub ifer: bool,
+    pub ifer: i64,
     /// Number of orders
-    pub ufr: bool,
+    pub ufr: i64,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -1810,8 +1810,8 @@ pub struct ConvertibleAssets {
     #[serde(with = "string_or_float")]
     #[serde(rename = "totalTransferBNB")]
     pub total_transfer_bnb: f64,
-    #[serde(with = "string_or_float")]
-    pub driblet_percentage: f64,
+    #[serde(with = "string_or_float_opt", default)]
+    pub driblet_percentage: Option<f64>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -1886,16 +1886,18 @@ pub type SupportedAssetDetails = HashMap<String, SupportedAssetDetail>;
 #[serde(rename_all = "camelCase")]
 pub struct SupportedAssetDetail {
     /// min withdraw amount
-    #[serde(with = "string_or_float")]
-    pub min_withdrawal_amount: f64,
+    #[serde(with = "string_or_float_opt")]
+    #[serde(rename = "minWithdrawAmount")]
+    pub min_withdrawal_amount: Option<f64>,
     /// deposit status (false if ALL of networks' are false)
     pub deposit_status: bool,
     /// withdraw fee
-    pub withdraw_fee: f64,
+    #[serde(with = "string_or_float_opt")]
+    pub withdraw_fee: Option<f64>,
     /// withdraw status (false if ALL of networks' are false)
     pub withdraw_status: bool,
     /// reason
-    pub deposit_tip: String,
+    pub deposit_tip: Option<String>,
 }
 
 pub type TradeFees = Vec<TradeFee>;

@@ -410,7 +410,7 @@ impl Wallet {
     /// ```
     pub async fn convertible_assets(&self) -> Result<ConvertibleAssets> {
         self.client
-            .get_signed_p(SAPI_V1_ASSET_DUSTBTC, Option::<String>::None, self.recv_window)
+            .post_signed_p(SAPI_V1_ASSET_DUSTBTC, Option::<String>::None, self.recv_window)
             .await
     }
 
@@ -445,6 +445,21 @@ impl Wallet {
     pub async fn asset_dividends(&self, query: AssetDividendQuery) -> Result<RecordsQueryResult<AssetDividend>> {
         self.client
             .get_signed_p(SAPI_V1_ASSET_ASSETDIVIDEND, Some(query), self.recv_window)
+            .await
+    }
+
+    /// Asset Details
+    ///
+    /// # Examples
+    /// ```rust,no_run
+    /// use binance::{api::*, wallet::*, config::*, rest_model::*};
+    /// let wallet: Wallet = Binance::new_with_env(&Config::testnet());
+    /// let records = tokio_test::block_on(wallet.asset_detail(None));
+    /// assert!(records.is_ok(), "{:?}", records);
+    /// ```
+    pub async fn asset_detail(&self, asset: Option<String>) -> Result<SupportedAssetDetails> {
+        self.client
+            .get_signed_p(SAPI_V1_ASSET_ASSETDETAIL, asset, self.recv_window)
             .await
     }
 
