@@ -1416,7 +1416,7 @@ pub struct CoinNetwork {
     pub name: String,
     pub network: String,
     pub reset_address_status: bool,
-    pub special_tips: String,
+    pub special_tips: Option<String>,
     pub un_lock_confirm: u32,
     pub withdraw_desc: String,
     pub withdraw_enable: bool,
