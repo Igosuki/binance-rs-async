@@ -56,7 +56,7 @@ impl Wallet {
     /// let records = tokio_test::block_on(wallet.all_coin_info());
     /// assert!(records.is_ok(), "{:?}", records);
     /// ```
-    pub async fn all_coin_info(&self) -> Result<WalletCoinInfo> {
+    pub async fn all_coin_info(&self) -> Result<Vec<WalletCoinInfo>> {
         self.client
             .get_signed_p(SAPI_V1_CAPITAL_CONFIG_GETALL, Option::<String>::None, self.recv_window)
             .await
