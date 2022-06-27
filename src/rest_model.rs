@@ -500,6 +500,18 @@ impl Default for OrderSide {
     fn default() -> Self { Self::Buy }
 }
 
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum CancelReplaceMode {
+    STOP_ON_FAILURE,
+    ALLOW_FAILURES,
+}  
+
+/// By default, buy
+impl Default for CancelReplaceMode {
+    fn default() -> Self { Self::STOP_ON_FAILURE }
+}
+
 /// Order types, the following restrictions apply
 /// LIMIT_MAKER are LIMIT orders that will be rejected if they would immediately match and trade as a taker.
 /// STOP_LOSS and TAKE_PROFIT will execute a MARKET order when the stopPrice is reached.
