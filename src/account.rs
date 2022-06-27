@@ -385,6 +385,16 @@ impl Account {
     /// let canceled = tokio_test::block_on(account.cancel_order(query));
     /// assert!(canceled.is_ok(), "{:?}", canceled);
     /// ```
+    
+    pub async fn cancel_replace_order(&self, o: CancelReplace) -> Result<OrderCanceledReplaced> {
+        let recv_window = o.recv_window.unwrap_or(self.recv_window);
+        let request = build_signed_request_p(o, recv_window)?;
+        let data = self.client.delete_signed(API_V3_REPLACE, &request).await?;
+        let order_canceled_replaced: OrderCanceledReplaced = from_str(data.as_str())?;
+        
+        Ok(order_canceled_replaced)
+    }
+    
     pub async fn cancel_order(&self, o: OrderCancellation) -> Result<OrderCanceled> {
         let recv_window = o.recv_window.unwrap_or(self.recv_window);
         let request = build_signed_request_p(o, recv_window)?;
