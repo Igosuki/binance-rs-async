@@ -12,7 +12,7 @@ repository = "https://github.com/Igosuki/binance-rs-async"
 readme = "README.md"
 
 [lib]
-name = "binance_async"
+name = "binance"
 path = "src/lib.rs"
 
 [features]
