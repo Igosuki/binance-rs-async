@@ -74,6 +74,30 @@ pub struct OrderCancellation {
     pub recv_window: Option<u64>,
 }
 
+// Cancels order and replaces it with a new one.
+#[derive(Default, Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct CancelReplace {
+    pub symbol: String,
+    pub side: OrderSide,
+    #[serde(rename = "type")]
+    pub order_type: OrderType,
+    pub cancel_replace_mode: CancelReplaceMode,
+    pub time_in_force: Option<TimeInForce>,
+    pub quantity: Option<f64>,
+    pub quote_order_qty: Option<f64>,
+    pub price: Option<f64>,
+    pub cancel_new_client_order_id: Option<String>,
+    pub cancel_orig_client_order_id: Option<String>,
+    pub cancel_order_id: Option<u64>,
+    pub new_client_order_id: Option<u64>,
+    pub stop_price: Option<f64>,
+    pub iceberg_qty: Option<f64>,
+    pub new_order_resp_type: Option<OrderResponse>,
+    /// Cannot be greater than 60000
+    pub recv_window: Option<u64>,
+}
+
 /// Order Status Request
 /// perform an order status request for the account
 #[derive(Default, Debug, Serialize, Deserialize, Clone)]
