@@ -10,6 +10,7 @@ static API_V3_OPEN_ORDERS: &str = "/api/v3/openOrders";
 static API_V3_ALL_ORDERS: &str = "/api/v3/allOrders";
 static API_V3_MYTRADES: &str = "/api/v3/myTrades";
 static API_V3_ORDER: &str = "/api/v3/order";
+static API_V3_REPLACE: &str = "/api/v3/order/cancelReplace";
 /// Endpoint for test orders.
 /// Orders issued to this endpoint are validated, but not sent into the matching engine.
 static API_V3_ORDER_TEST: &str = "/api/v3/order/test";
