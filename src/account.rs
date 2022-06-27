@@ -98,6 +98,17 @@ pub struct CancelReplace {
     pub recv_window: Option<u64>,
 }
 
+impl CancelReplace {
+    fn valid(&self) -> Result<()> {
+        if self.iceberg_qty.is_some() && self.time_in_force != Some(TimeInForce::GTC) {
+            return Err(Error::InvalidOrderError {
+                msg: "Time in force has to be GTC for iceberg orders".to_string(),
+            });
+        }
+        Ok(())
+    }
+}
+
 /// Order Status Request
 /// perform an order status request for the account
 #[derive(Default, Debug, Serialize, Deserialize, Clone)]
