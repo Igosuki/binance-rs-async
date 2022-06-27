@@ -220,6 +220,15 @@ pub struct OrderCanceled {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
+pub struct OrderCanceledReplaced {
+    pub cancel_result: String,
+    pub new_order_result: String,
+    pub cancel_response: OrderCanceled,
+    pub new_order_response: Transaction,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct Fill {
     #[serde(with = "string_or_float")]
     pub price: f64,
