@@ -2,9 +2,10 @@ use crate::client::*;
 use crate::errors::*;
 use crate::rest_model::*;
 use crate::util::*;
-#[allow(unused_imports)]
-use chrono::{Duration, TimeZone, Utc};
+use chrono::DateTime;
+use chrono::{Duration, Utc};
 use std::collections::HashMap;
+use std::ops::Sub;
 
 static SAPI_V1_SYSTEM_STATUS: &str = "/sapi/v1/system/status";
 static SAPI_V1_CAPITAL_CONFIG_GETALL: &str = "/sapi/v1/capital/config/getall";
@@ -26,6 +27,7 @@ static SAPI_V1_ASSET_TRADEFEE: &str = "/sapi/v1/asset/tradeFee";
 static SAPI_V1_ASSET_TRANSFER: &str = "/sapi/v1/asset/transfer";
 static SAPI_V1_ASSET_GETFUNDINGASSET: &str = "/sapi/v1/asset/get-funding-asset";
 static SAPI_V1_ASSET_APIRESTRICTIONS: &str = "/sapi/v1/account/apiRestrictions";
+static DEFAULT_WALLET_HISTORY_QUERY_INTERVAL_DAYS: i64 = 90;
 
 /// This struct acts as a gateway for all wallet endpoints.
 /// Preferably use the trait [`Binance`] to get an instance.
@@ -63,7 +65,7 @@ impl Wallet {
     /// Daily account snapshot
     /// The query time period must be less then 30 days
     /// Support query within the last one month only
-    /// If startTimeand endTime not sent, return records of the last 7 days by default
+    /// If startTime and endTime not sent, return records of the last 7 days by default
     ///
     /// # Examples
     /// ```rust,no_run
@@ -73,7 +75,7 @@ impl Wallet {
     /// let records = tokio_test::block_on(wallet.daily_account_snapshot(query));
     /// assert!(records.is_ok(), "{:?}", records);
     /// ```
-    pub async fn daily_account_snapshot(&self, query: AccountSnapshotQuery) -> Result<SnapshotVosReply> {
+    pub async fn daily_account_snapshot(&self, query: AccountSnapshotQuery) -> Result<AccountSnapshot> {
         self.client
             .get_signed_p(SAPI_V1_ACCOUNTSNAPSHOT, Some(query), self.recv_window)
             .await
@@ -140,64 +142,58 @@ impl Wallet {
     /// use binance::{api::*, wallet::*, config::*, rest_model::*};
     /// let wallet: Wallet = Binance::new_with_env(&Config::testnet());
     /// let query: DepositHistoryQuery = DepositHistoryQuery::default();
-    /// let records = tokio_test::block_on(wallet.deposit_history(&query));
+    /// let records = tokio_test::block_on(wallet.deposit_history(query));
     /// assert!(records.is_ok(), "{:?}", records);
     /// ```
-    pub async fn deposit_history(&self, query: &DepositHistoryQuery) -> Result<Vec<DepositRecord>> {
+    pub async fn deposit_history(&self, query: DepositHistoryQuery) -> Result<Vec<DepositRecord>> {
         self.client
             .get_signed_p(SAPI_V1_CAPITAL_DEPOSIT_HISREC, Some(query), self.recv_window)
             .await
     }
 
-    /// Auto Query Deposit History: auto query range > 90days.
+    /// Withdraw History starting at start_from (defaults to now), ranging total_duration (defaults to 90 days), with intervals of 90 days.
     ///
     /// # Examples
     /// ```rust,no_run
     /// use binance::{api::*, wallet::*, config::*, rest_model::*};
     /// let wallet: Wallet = Binance::new_with_env(&Config::testnet());
     /// let query: DepositHistoryQuery = DepositHistoryQuery::default();
-    /// let records = tokio_test::block_on(wallet.deposit_history_quick(query, None, Some(5*360)));
+    /// let records = tokio_test::block_on(wallet.deposit_history_quick(query, None, None));
     /// assert!(records.is_ok(), "{:?}", records);
     pub async fn deposit_history_quick(
         &self,
         mut query: DepositHistoryQuery,
-        start_at: Option<i64>,
-        days: Option<i64>,
-    ) -> Result<Vec<DepositRecords>> {
-        let mut result: Vec<DepositRecords> = Vec::new();
+        start_from: Option<DateTime<Utc>>,
+        total_duration: Option<Duration>,
+    ) -> Result<Vec<RecordHistory<DepositRecord>>> {
+        let mut result = vec![];
 
-        let start = start_at.unwrap_or(Utc::now().timestamp_millis());
-
-        // 90 days
-        let duration = duration_of(None);
-
-        let ago_at = ago_from(Some(start), days);
-
-        // query range:
-        let mut step_start = start - duration;
-        let mut step_end = start;
+        let total_duration = total_duration.unwrap_or(Duration::days(DEFAULT_WALLET_HISTORY_QUERY_INTERVAL_DAYS));
+        let interval_duration = Duration::days(DEFAULT_WALLET_HISTORY_QUERY_INTERVAL_DAYS);
+        let mut current_period_end: DateTime<Utc> = start_from.unwrap_or(Utc::now());
+        let end_at = current_period_end.sub(total_duration);
+        let mut current_period_start: DateTime<Utc> = start_from.sub(interval_duration);
 
         // auto query by step:
-        while step_start > ago_at {
+        while current_period_end > end_at {
             // modify query duration:
-            query.start_time = Some(step_start as u64);
-            query.end_time = Some(step_end as u64);
+            query.start_time = Some(current_period_start.timestamp_millis() as u64);
+            query.end_time = Some(current_period_end.timestamp_millis() as u64);
 
             // eprintln!("query: {:?}", query);
             let records = self.deposit_history(&query).await?;
 
             if !records.is_empty() {
-                let item = DepositRecords {
-                    start_at: Some(step_start),
-                    end_at: Some(step_end),
+                let item = RecordHistory::<DepositRecord> {
+                    start_at: current_period_start,
+                    end_at: current_period_end,
                     records,
                 };
                 result.push(item);
             }
 
-            // next step
-            step_start -= duration;
-            step_end -= duration;
+            current_period_start -= interval_duration;
+            current_period_end -= interval_duration;
         }
 
         Ok(result)
@@ -210,65 +206,60 @@ impl Wallet {
     /// use binance::{api::*, wallet::*, config::*, rest_model::*};
     /// let wallet: Wallet = Binance::new_with_env(&Config::testnet());
     /// let query: WithdrawalHistoryQuery = WithdrawalHistoryQuery::default();
-    /// let records = tokio_test::block_on(wallet.withdraw_history(&query));
+    /// let records = tokio_test::block_on(wallet.withdraw_history(query));
     /// assert!(records.is_ok(), "{:?}", records);
     /// ```
-    pub async fn withdraw_history(&self, query: &WithdrawalHistoryQuery) -> Result<Vec<WithdrawalRecord>> {
+    pub async fn withdraw_history(&self, query: WithdrawalHistoryQuery) -> Result<Vec<WithdrawalRecord>> {
         self.client
             .get_signed_p(SAPI_V1_CAPITAL_WITHDRAW_HISTORY, Some(query), self.recv_window)
             .await
     }
 
-    /// Auto Withdraw History: auto query range > 90days.
+    /// Withdraw History starting at start_from (defaults to now), ranging total_duration (defaults to 90 days), with intervals of 90 days.
     ///
     /// # Examples
     /// ```rust,no_run
+    /// use chrono::Duration;
     /// use binance::{api::*, wallet::*, config::*, rest_model::*};
     /// let wallet: Wallet = Binance::new_with_env(&Config::testnet());
     /// let query: WithdrawalHistoryQuery = WithdrawalHistoryQuery::default();
-    /// let records = tokio_test::block_on(wallet.withdraw_history_quick(query, None, Some(5*360)));
+    /// let records = tokio_test::block_on(wallet.withdraw_history_quick(query, None, Some(Duration::weeks( 52 * 5))));
     /// assert!(records.is_ok(), "{:?}", records);
     /// ```
     pub async fn withdraw_history_quick(
         &self,
         mut query: WithdrawalHistoryQuery,
-        start_at: Option<i64>,
-        days: Option<i64>,
-    ) -> Result<Vec<WithdrawalRecords>> {
-        let mut result: Vec<WithdrawalRecords> = Vec::new();
+        start_from: Option<DateTime<Utc>>,
+        total_duration: Option<Duration>,
+    ) -> Result<Vec<RecordHistory<WithdrawalRecord>>> {
+        let mut result = vec![];
 
-        let start = start_at.unwrap_or(Utc::now().timestamp_millis());
-
-        // 90 days
-        let duration = duration_of(None);
-
-        let ago_at = ago_from(Some(start), days);
-
-        // query range:
-        let mut step_start = start - duration;
-        let mut step_end = start;
+        let total_duration = total_duration.unwrap_or(Duration::days(DEFAULT_WALLET_HISTORY_QUERY_INTERVAL_DAYS));
+        let interval_duration = Duration::days(DEFAULT_WALLET_HISTORY_QUERY_INTERVAL_DAYS);
+        let mut current_period_end: DateTime<Utc> = start_from.unwrap_or(Utc::now());
+        let end_at = current_period_end.sub(total_duration);
+        let mut current_period_start: DateTime<Utc> = start_from.sub(interval_duration);
 
         // auto query by step:
-        while step_start > ago_at {
+        while current_period_end > end_at {
             // modify query duration:
-            query.start_time = Some(step_start as u64);
-            query.end_time = Some(step_end as u64);
+            query.start_time = Some(current_period_start.timestamp_millis() as u64);
+            query.end_time = Some(current_period_end.timestamp_millis() as u64);
 
             // eprintln!("query: {:?}", query);
             let records = self.withdraw_history(&query).await?;
 
             if !records.is_empty() {
-                let item = WithdrawalRecords {
-                    start_at: Some(step_start),
-                    end_at: Some(step_end),
+                let item = RecordHistory::<WithdrawalRecord> {
+                    start_at: current_period_start,
+                    end_at: current_period_end,
                     records,
                 };
                 result.push(item);
             }
 
-            // next step
-            step_start -= duration;
-            step_end -= duration;
+            current_period_start -= interval_duration;
+            current_period_end -= interval_duration;
         }
 
         Ok(result)
