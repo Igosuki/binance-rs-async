@@ -1,7 +1,6 @@
 use std::collections::BTreeMap;
 
-#[allow(unused_imports)]
-use chrono::{Duration, TimeZone, Utc};
+use chrono::{Duration, Utc};
 use serde_json::Value;
 
 use crate::errors::*;
@@ -80,38 +79,8 @@ pub fn to_f64(v: &Value) -> f64 { v.as_str().unwrap().parse().unwrap() }
 
 pub fn get_timestamp() -> Result<u64> { Ok(Utc::now().timestamp_millis() as u64) }
 
-/// a duration of some days:
-///     defaut Sum(days) = 90 days = 7776000000
-///
-/// # Examples
-/// ```
-/// let sum = duration_by(Some(90));
-/// assert!(true, "= 90days duration: {:?}", sum);
-/// ```
-pub fn duration_of(days: Option<i64>) -> i64 {
-    // default = 90 days
-    Duration::days(days.unwrap_or(90)).num_milliseconds()
-}
-
-/// a timestamp: before some days.
-///     like: a timestamp 5 years ago.
-/// # Examples
-/// ```
-/// use binance::util::ago_from;
-/// let ago_at = ago_from(None, Some(5*360));
-/// assert!(true, "≈ 5 year ago, timestamp: {:?}", ago_at);
-/// ```
-pub fn ago_from(start_at: Option<i64>, days: Option<i64>) -> i64 {
-    // default = from now
-    let start = start_at.unwrap_or(Utc::now().timestamp_millis());
-
-    // default ≈ 2years
-    let duration = Duration::days(days.unwrap_or(360 * 2));
-
-    // default ≈ 2years ago
-    let ago_at = start - duration.num_milliseconds();
-    ago_at
-}
+/// Returns a duration in milliseconds for the `days`
+pub fn days_millis(days: i64) -> i64 { Duration::days(days).num_milliseconds() }
 
 lazy_static! {
     static ref TRUE: String = "TRUE".to_string();
@@ -129,35 +98,3 @@ pub fn bool_to_string(b: bool) -> String {
 }
 
 pub fn bool_to_string_some(b: bool) -> Option<String> { Some(bool_to_string(b)) }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_duration_by() {
-        let ts_90_days = duration_of(Some(90 as i64));
-        let ts_365days = duration_of(Some(365 as i64));
-
-        // 90 days duration timestamp: 7776000000
-        assert_eq!(duration_of(None), 7776000000);
-        assert_eq!(ts_90_days, 7776000000);
-
-        // 365 days duration timestamp: 31536000000
-        assert_eq!(ts_365days, 31536000000);
-    }
-
-    #[test]
-    fn test_ago_by() {
-        // default = from now, ≈ 2 years ago
-        let ago_at = ago_from(None, None);
-        let ago_2years = Utc.timestamp_millis(ago_at).to_rfc3339();
-
-        // from now, ≈ 5 years ago
-        let ago_5years_at = ago_from(None, Some(5 * 360));
-        let ago_5years = Utc.timestamp_millis(ago_5years_at).to_rfc3339();
-
-        println!("≈ 2 years ago: {}, ts={}", ago_2years, ago_at);
-        println!("≈ 5 years ago: {}, ts={}", ago_5years, ago_5years_at);
-    }
-}

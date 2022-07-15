@@ -1,3 +1,4 @@
+use chrono::{DateTime, Utc};
 use std::collections::HashMap;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -1437,14 +1438,6 @@ pub struct AccountSnapshot {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
-pub struct SnapshotVosReply {
-    pub code: u32,
-    pub msg: String,
-    pub snapshot_vos: Vec<SnapshotVos>, // fix response format
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-#[serde(rename_all = "camelCase")]
 pub struct SnapshotVos {
     pub data: SnapshotVosData,
     #[serde(rename = "type")]
@@ -1468,31 +1461,10 @@ pub enum AccountSnapshotType {
     Futures,
 }
 
-impl AccountSnapshotType {
-    // for match type in response
-    pub fn from_str(s: &str) -> Self {
-        // fix for response format(is lowercase))
-        match s.to_uppercase().as_str() {
-            "SPOT" => AccountSnapshotType::Spot,
-            "MARGIN" => AccountSnapshotType::Margin,
-            "FUTURES" => AccountSnapshotType::Futures,
-            _ => panic!("Unknown AccountSnapshotType: {}", s),
-        }
-    }
-
-    pub fn as_str(&self) -> &'static str {
-        match self {
-            AccountSnapshotType::Spot => "SPOT",
-            AccountSnapshotType::Margin => "MARGIN",
-            AccountSnapshotType::Futures => "FUTURES",
-        }
-    }
-}
-
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct AccountSnapshotQuery {
-    #[serde(rename = "type")] // fix requset field name
+    #[serde(rename = "type")]
     pub account_type: AccountSnapshotType,
     pub start_time: Option<u64>,
     pub end_time: Option<u64>,
@@ -1536,17 +1508,6 @@ pub struct DepositHistoryQuery {
 
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
 #[serde(rename_all = "camelCase")]
-pub struct DepositRecords {
-    // range = 90 days
-    pub start_at: Option<i64>,
-    pub end_at: Option<i64>,
-
-    // auto query by steps:
-    pub records: Vec<DepositRecord>,
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone, Default)]
-#[serde(rename_all = "camelCase")]
 pub struct DepositRecord {
     pub coin: String,
     #[serde(with = "string_or_float")]
@@ -1580,15 +1541,12 @@ pub struct WithdrawalHistoryQuery {
     pub offset: Option<u64>,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, Default)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
-pub struct WithdrawalRecords {
-    // range = 90 days
-    pub start_at: Option<i64>,
-    pub end_at: Option<i64>,
-
-    // auto query by steps:
-    pub records: Vec<WithdrawalRecord>,
+pub struct RecordHistory<T> {
+    pub start_at: DateTime<Utc>,
+    pub end_at: DateTime<Utc>,
+    pub records: Vec<T>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
