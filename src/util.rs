@@ -74,17 +74,11 @@ where
     }
 }
 
-pub fn to_i64(v: &Value) -> i64 {
-    v.as_i64().unwrap()
-}
+pub fn to_i64(v: &Value) -> i64 { v.as_i64().unwrap() }
 
-pub fn to_f64(v: &Value) -> f64 {
-    v.as_str().unwrap().parse().unwrap()
-}
+pub fn to_f64(v: &Value) -> f64 { v.as_str().unwrap().parse().unwrap() }
 
-pub fn get_timestamp() -> Result<u64> {
-    Ok(Utc::now().timestamp_millis() as u64)
-}
+pub fn get_timestamp() -> Result<u64> { Ok(Utc::now().timestamp_millis() as u64) }
 
 /// a duration of some days:
 ///     defaut Sum(days) = 90 days = 7776000000
@@ -134,9 +128,7 @@ pub fn bool_to_string(b: bool) -> String {
     }
 }
 
-pub fn bool_to_string_some(b: bool) -> Option<String> {
-    Some(bool_to_string(b))
-}
+pub fn bool_to_string_some(b: bool) -> Option<String> { Some(bool_to_string(b)) }
 
 #[cfg(test)]
 mod tests {
