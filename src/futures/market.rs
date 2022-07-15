@@ -533,10 +533,6 @@ impl FuturesMarket {
 
     pub async fn get_mark_prices(&self) -> Result<MarkPrices> { self.client.get_p("/fapi/v1/premiumIndex", "").await }
 
-    pub async fn get_all_liquidation_orders(&self) -> Result<LiquidationOrders> {
-        self.client.get_p("/fapi/v1/allForceOrders", "").await
-    }
-
     pub async fn open_interest<S>(&self, symbol: S) -> Result<OpenInterest>
     where
         S: Into<String>,
