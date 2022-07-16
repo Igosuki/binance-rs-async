@@ -5,7 +5,7 @@ use thiserror::Error;
 #[derive(Debug, Deserialize, Error)]
 #[error("code: {code}, msg: {msg}")]
 pub struct BinanceContentError {
-    pub code: i16,
+    pub code: i32,
     pub msg: String,
 
     #[serde(flatten)]

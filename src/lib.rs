@@ -36,7 +36,7 @@
 //!         Err(err) => {
 //!             match err {
 //!                 BinanceLibError::BinanceError { response } => match response.code {
-//!                     -1000_i16 => println!("An unknown error occured while processing the request"),
+//!                     -1000_i32 => println!("An unknown error occured while processing the request"),
 //!                     _ => println!("Unknown code {}: {}", response.code, response.msg),
 //!                 },
 //!                 _ => println!("Other errors: {}.", err),
