@@ -1,6 +1,6 @@
 use std::collections::BTreeMap;
 
-use chrono::Utc;
+use chrono::{Duration, Utc};
 use serde_json::Value;
 
 use crate::errors::*;
@@ -78,6 +78,9 @@ pub fn to_i64(v: &Value) -> i64 { v.as_i64().unwrap() }
 pub fn to_f64(v: &Value) -> f64 { v.as_str().unwrap().parse().unwrap() }
 
 pub fn get_timestamp() -> Result<u64> { Ok(Utc::now().timestamp_millis() as u64) }
+
+/// Returns a duration in milliseconds for the `days`
+pub fn days_millis(days: i64) -> i64 { Duration::days(days).num_milliseconds() }
 
 lazy_static! {
     static ref TRUE: String = "TRUE".to_string();

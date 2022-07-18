@@ -1,7 +1,11 @@
-use std::collections::HashMap;
 use crate::client::*;
 use crate::errors::*;
 use crate::rest_model::*;
+use crate::util::*;
+use chrono::DateTime;
+use chrono::{Duration, Utc};
+use std::collections::HashMap;
+use std::ops::Sub;
 
 static SAPI_V1_SYSTEM_STATUS: &str = "/sapi/v1/system/status";
 static SAPI_V1_CAPITAL_CONFIG_GETALL: &str = "/sapi/v1/capital/config/getall";
@@ -23,6 +27,7 @@ static SAPI_V1_ASSET_TRADEFEE: &str = "/sapi/v1/asset/tradeFee";
 static SAPI_V1_ASSET_TRANSFER: &str = "/sapi/v1/asset/transfer";
 static SAPI_V1_ASSET_GETFUNDINGASSET: &str = "/sapi/v1/asset/get-funding-asset";
 static SAPI_V1_ASSET_APIRESTRICTIONS: &str = "/sapi/v1/account/apiRestrictions";
+static DEFAULT_WALLET_HISTORY_QUERY_INTERVAL_DAYS: i64 = 90;
 
 /// This struct acts as a gateway for all wallet endpoints.
 /// Preferably use the trait [`Binance`] to get an instance.
@@ -41,12 +46,7 @@ impl Wallet {
     /// let system_status = tokio_test::block_on(wallet.system_status());
     /// assert!(system_status.is_ok(), "{:?}", system_status);
     /// ```
-    pub async fn system_status(&self) -> Result<SystemStatus>
-    {
-        self.client
-            .get_p(SAPI_V1_SYSTEM_STATUS, "")
-            .await
-    }
+    pub async fn system_status(&self) -> Result<SystemStatus> { self.client.get_p(SAPI_V1_SYSTEM_STATUS, "").await }
 
     /// Get information of coins (available for deposit and withdraw) for user.
     /// # Examples
@@ -56,7 +56,7 @@ impl Wallet {
     /// let records = tokio_test::block_on(wallet.all_coin_info());
     /// assert!(records.is_ok(), "{:?}", records);
     /// ```
-    pub async fn all_coin_info(&self) -> Result<WalletCoinInfo> {
+    pub async fn all_coin_info(&self) -> Result<Vec<WalletCoinInfo>> {
         self.client
             .get_signed_p(SAPI_V1_CAPITAL_CONFIG_GETALL, Option::<String>::None, self.recv_window)
             .await
@@ -65,7 +65,7 @@ impl Wallet {
     /// Daily account snapshot
     /// The query time period must be less then 30 days
     /// Support query within the last one month only
-    /// If startTimeand endTime not sent, return records of the last 7 days by default
+    /// If startTime and endTime not sent, return records of the last 7 days by default
     ///
     /// # Examples
     /// ```rust,no_run
@@ -75,7 +75,7 @@ impl Wallet {
     /// let records = tokio_test::block_on(wallet.daily_account_snapshot(query));
     /// assert!(records.is_ok(), "{:?}", records);
     /// ```
-    pub async fn daily_account_snapshot(&self, query: AccountSnapshotQuery) -> Result<SnapshotVos> {
+    pub async fn daily_account_snapshot(&self, query: AccountSnapshotQuery) -> Result<AccountSnapshot> {
         self.client
             .get_signed_p(SAPI_V1_ACCOUNTSNAPSHOT, Some(query), self.recv_window)
             .await
@@ -92,7 +92,11 @@ impl Wallet {
     /// ```
     pub async fn disable_fast_withdraw_switch(&self) -> Result<()> {
         self.client
-            .post_signed_p(SAPI_V1_ACCOUNT_DISABLEFASTWITHDRAWSWITCH, Option::<String>::None, self.recv_window)
+            .post_signed_p(
+                SAPI_V1_ACCOUNT_DISABLEFASTWITHDRAWSWITCH,
+                Option::<String>::None,
+                self.recv_window,
+            )
             .await
     }
 
@@ -107,7 +111,11 @@ impl Wallet {
     /// ```
     pub async fn enable_fast_withdraw_switch(&self) -> Result<()> {
         self.client
-            .post_signed_p(SAPI_V1_ACCOUNT_ENABLEFASTWITHDRAWSWITCH, Option::<String>::None, self.recv_window)
+            .post_signed_p(
+                SAPI_V1_ACCOUNT_ENABLEFASTWITHDRAWSWITCH,
+                Option::<String>::None,
+                self.recv_window,
+            )
             .await
     }
 
@@ -143,6 +151,54 @@ impl Wallet {
             .await
     }
 
+    /// Withdraw History starting at start_from (defaults to now), ranging total_duration (defaults to 90 days), with intervals of 90 days.
+    ///
+    /// # Examples
+    /// ```rust,no_run
+    /// use binance::{api::*, wallet::*, config::*, rest_model::*};
+    /// let wallet: Wallet = Binance::new_with_env(&Config::testnet());
+    /// let query: DepositHistoryQuery = DepositHistoryQuery::default();
+    /// let records = tokio_test::block_on(wallet.deposit_history_quick(query, None, None));
+    /// assert!(records.is_ok(), "{:?}", records);
+    pub async fn deposit_history_quick(
+        &self,
+        mut query: DepositHistoryQuery,
+        start_from: Option<DateTime<Utc>>,
+        total_duration: Option<Duration>,
+    ) -> Result<Vec<RecordHistory<DepositRecord>>> {
+        let mut result = vec![];
+
+        let total_duration = total_duration.unwrap_or(Duration::days(DEFAULT_WALLET_HISTORY_QUERY_INTERVAL_DAYS));
+        let interval_duration = Duration::days(DEFAULT_WALLET_HISTORY_QUERY_INTERVAL_DAYS);
+        let mut current_period_end: DateTime<Utc> = start_from.unwrap_or(Utc::now());
+        let end_at = current_period_end.sub(total_duration);
+        let mut current_period_start: DateTime<Utc> = start_from.sub(interval_duration);
+
+        // auto query by step:
+        while current_period_end > end_at {
+            // modify query duration:
+            query.start_time = Some(current_period_start.timestamp_millis() as u64);
+            query.end_time = Some(current_period_end.timestamp_millis() as u64);
+
+            // eprintln!("query: {:?}", query);
+            let records = self.deposit_history(&query).await?;
+
+            if !records.is_empty() {
+                let item = RecordHistory::<DepositRecord> {
+                    start_at: current_period_start,
+                    end_at: current_period_end,
+                    records,
+                };
+                result.push(item);
+            }
+
+            current_period_start -= interval_duration;
+            current_period_end -= interval_duration;
+        }
+
+        Ok(result)
+    }
+
     /// Withdraw History
     ///
     /// # Examples
@@ -157,6 +213,56 @@ impl Wallet {
         self.client
             .get_signed_p(SAPI_V1_CAPITAL_WITHDRAW_HISTORY, Some(query), self.recv_window)
             .await
+    }
+
+    /// Withdraw History starting at start_from (defaults to now), ranging total_duration (defaults to 90 days), with intervals of 90 days.
+    ///
+    /// # Examples
+    /// ```rust,no_run
+    /// use chrono::Duration;
+    /// use binance::{api::*, wallet::*, config::*, rest_model::*};
+    /// let wallet: Wallet = Binance::new_with_env(&Config::testnet());
+    /// let query: WithdrawalHistoryQuery = WithdrawalHistoryQuery::default();
+    /// let records = tokio_test::block_on(wallet.withdraw_history_quick(query, None, Some(Duration::weeks( 52 * 5))));
+    /// assert!(records.is_ok(), "{:?}", records);
+    /// ```
+    pub async fn withdraw_history_quick(
+        &self,
+        mut query: WithdrawalHistoryQuery,
+        start_from: Option<DateTime<Utc>>,
+        total_duration: Option<Duration>,
+    ) -> Result<Vec<RecordHistory<WithdrawalRecord>>> {
+        let mut result = vec![];
+
+        let total_duration = total_duration.unwrap_or(Duration::days(DEFAULT_WALLET_HISTORY_QUERY_INTERVAL_DAYS));
+        let interval_duration = Duration::days(DEFAULT_WALLET_HISTORY_QUERY_INTERVAL_DAYS);
+        let mut current_period_end: DateTime<Utc> = start_from.unwrap_or(Utc::now());
+        let end_at = current_period_end.sub(total_duration);
+        let mut current_period_start: DateTime<Utc> = start_from.sub(interval_duration);
+
+        // auto query by step:
+        while current_period_end > end_at {
+            // modify query duration:
+            query.start_time = Some(current_period_start.timestamp_millis() as u64);
+            query.end_time = Some(current_period_end.timestamp_millis() as u64);
+
+            // eprintln!("query: {:?}", query);
+            let records = self.withdraw_history(&query).await?;
+
+            if !records.is_empty() {
+                let item = RecordHistory::<WithdrawalRecord> {
+                    start_at: current_period_start,
+                    end_at: current_period_end,
+                    records,
+                };
+                result.push(item);
+            }
+
+            current_period_start -= interval_duration;
+            current_period_end -= interval_duration;
+        }
+
+        Ok(result)
     }
 
     /// Deposit address
@@ -256,7 +362,11 @@ impl Wallet {
     /// ```
     pub async fn api_trading_status(&self) -> Result<ApiTradingStatus> {
         self.client
-            .get_signed_p(SAPI_V1_ACCOUNT_APITRADINGSTATUS, Option::<String>::None, self.recv_window)
+            .get_signed_p(
+                SAPI_V1_ACCOUNT_APITRADINGSTATUS,
+                Option::<String>::None,
+                self.recv_window,
+            )
             .await
     }
 
@@ -289,7 +399,7 @@ impl Wallet {
     /// ```
     pub async fn convertible_assets(&self) -> Result<ConvertibleAssets> {
         self.client
-            .get_signed_p(SAPI_V1_ASSET_DUSTBTC, Option::<String>::None, self.recv_window)
+            .post_signed_p(SAPI_V1_ASSET_DUSTBTC, Option::<String>::None, self.recv_window)
             .await
     }
 
@@ -327,6 +437,21 @@ impl Wallet {
             .await
     }
 
+    /// Asset Details
+    ///
+    /// # Examples
+    /// ```rust,no_run
+    /// use binance::{api::*, wallet::*, config::*, rest_model::*};
+    /// let wallet: Wallet = Binance::new_with_env(&Config::testnet());
+    /// let records = tokio_test::block_on(wallet.asset_detail(None));
+    /// assert!(records.is_ok(), "{:?}", records);
+    /// ```
+    pub async fn asset_detail(&self, asset: Option<String>) -> Result<SupportedAssetDetails> {
+        self.client
+            .get_signed_p(SAPI_V1_ASSET_ASSETDETAIL, asset, self.recv_window)
+            .await
+    }
+
     /// Trade Fees
     ///
     /// # Examples
@@ -354,7 +479,11 @@ impl Wallet {
     /// let records = tokio_test::block_on(wallet.funding_wallet(None, None));
     /// assert!(records.is_ok(), "{:?}", records);
     /// ```
-    pub async fn funding_wallet(&self, asset: Option<String>, need_btc_valuation: Option<bool>) -> Result<WalletFundings> {
+    pub async fn funding_wallet(
+        &self,
+        asset: Option<String>,
+        need_btc_valuation: Option<bool>,
+    ) -> Result<WalletFundings> {
         let mut query = HashMap::new();
         query.insert("asset", asset);
         query.insert("need_btc_valuation", need_btc_valuation.map(|b| format!("{}", b)));
@@ -374,8 +503,7 @@ impl Wallet {
     /// ```
     pub async fn api_key_permissions(&self) -> Result<ApiKeyPermissions> {
         self.client
-            .post_signed_p(SAPI_V1_ASSET_APIRESTRICTIONS, Option::<String>::None, self.recv_window)
+            .get_signed_p(SAPI_V1_ASSET_APIRESTRICTIONS, Option::<String>::None, self.recv_window)
             .await
     }
 }
-

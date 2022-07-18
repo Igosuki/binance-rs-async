@@ -26,7 +26,7 @@ async fn general() {
         Err(err) => {
             match err {
                 BinanceLibError::BinanceError { response } => match response.code {
-                    -1000_i16 => error!("An unknown error occured while processing the request"),
+                    -1000_i32 => error!("An unknown error occured while processing the request"),
                     _ => error!("Uncaught code {}: {}", response.code, response.msg),
                 },
                 BinanceLibError::Msg(msg) => error!("Binancelib error msg: {}", msg),
@@ -102,13 +102,6 @@ async fn market_data() {
     match market.get_mark_prices().await {
         Ok(MarkPrices::AllMarkPrices(answer)) => info!("First mark Prices: {:?}", answer[0]),
         Err(e) => info!("Error: {:?}", e),
-    }
-
-    match market.get_all_liquidation_orders().await {
-        Ok(LiquidationOrders::AllLiquidationOrders(answer)) => {
-            info!("First liquidation order: {:?}", answer[0])
-        }
-        Err(e) => error!("Error: {:?}", e),
     }
 
     match market.open_interest("btcusdt").await {

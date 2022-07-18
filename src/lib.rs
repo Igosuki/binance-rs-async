@@ -36,7 +36,7 @@
 //!         Err(err) => {
 //!             match err {
 //!                 BinanceLibError::BinanceError { response } => match response.code {
-//!                     -1000_i16 => println!("An unknown error occured while processing the request"),
+//!                     -1000_i32 => println!("An unknown error occured while processing the request"),
 //!                     _ => println!("Unknown code {}: {}", response.code, response.msg),
 //!                 },
 //!                 _ => println!("Other errors: {}.", err),
@@ -87,7 +87,7 @@ pub mod rest_model;
 #[cfg(feature = "savings_api")]
 pub mod savings;
 pub mod userstream;
-pub mod websockets;
-pub mod ws_model;
 #[cfg(feature = "wallet_api")]
 pub mod wallet;
+pub mod websockets;
+pub mod ws_model;
