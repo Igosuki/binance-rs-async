@@ -99,7 +99,7 @@ pub struct CancelReplace {
 }
 
 impl CancelReplace {
-    fn valid(&self) -> Result<()> {
+    fn _valid(&self) -> Result<()> {
         if self.iceberg_qty.is_some() && self.time_in_force != Some(TimeInForce::GTC) {
             return Err(Error::InvalidOrderError {
                 msg: "Time in force has to be GTC for iceberg orders".to_string(),
