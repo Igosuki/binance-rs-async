@@ -1,5 +1,6 @@
 use chrono::{DateTime, Utc};
 use std::collections::HashMap;
+use rust_decimal::prelude::Decimal;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -288,17 +289,17 @@ pub struct OrderBook {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Bids {
     #[serde(with = "string_or_float")]
-    pub price: f64,
+    pub price: Decimal,
     #[serde(with = "string_or_float")]
-    pub qty: f64,
+    pub qty: Decimal,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Asks {
     #[serde(with = "string_or_float")]
-    pub price: f64,
+    pub price: Decimal,
     #[serde(with = "string_or_float")]
-    pub qty: f64,
+    pub qty: Decimal,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
