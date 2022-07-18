@@ -1,6 +1,6 @@
 use chrono::{DateTime, Utc};
 use std::collections::HashMap;
-use rust_decimal::prelude::Decimal;
+use rust_decimal::Decimal;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -288,17 +288,17 @@ pub struct OrderBook {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Bids {
-    #[serde(with = "string_or_float")]
+    #[serde(with = "string_or_decimal")]
     pub price: Decimal,
-    #[serde(with = "string_or_float")]
+    #[serde(with = "string_or_decimal")]
     pub qty: Decimal,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Asks {
-    #[serde(with = "string_or_float")]
+    #[serde(with = "string_or_decimal")]
     pub price: Decimal,
-    #[serde(with = "string_or_float")]
+    #[serde(with = "string_or_decimal")]
     pub qty: Decimal,
 }
 
@@ -1989,6 +1989,70 @@ pub(crate) mod string_or_float_opt {
         }
 
         Ok(Some(crate::rest_model::string_or_float::deserialize(deserializer)?))
+    }
+}
+
+pub mod string_or_decimal {
+    use std::fmt;
+
+    use serde::{de, Deserialize, Deserializer, Serializer};
+    use rust_decimal::Decimal;
+
+    pub fn serialize<T, S>(value: &T, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        T: fmt::Display,
+        S: Serializer,
+    {
+        serializer.collect_str(value)
+    }
+
+    pub fn deserialize<'de, D>(deserializer: D) -> Result<Decimal, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        #[derive(Deserialize)]
+        #[serde(untagged)]
+        enum StringOrDecimal {
+            String(String),
+            Decimal(Decimal),
+        }
+
+        match StringOrDecimal::deserialize(deserializer)? {
+            StringOrDecimal::String(s) => s.parse().map_err(de::Error::custom),
+            StringOrDecimal::Decimal(i) => Ok(i),
+        }
+    }
+}
+
+pub(crate) mod string_or_decimal_opt {
+    use std::fmt;
+
+    use serde::{Deserialize, Deserializer, Serializer};
+    use rust_decimal::Decimal;
+
+    pub fn serialize<T, S>(value: &Option<T>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        T: fmt::Display,
+        S: Serializer,
+    {
+        match value {
+            Some(v) => crate::rest_model::string_or_decimal::serialize(v, serializer),
+            None => serializer.serialize_none(),
+        }
+    }
+
+    pub fn deserialize<'de, D>(deserializer: D) -> Result<Option<Decimal>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        #[derive(Deserialize)]
+        #[serde(untagged)]
+        enum StringOrDecimal {
+            String(String),
+            Decimal(Decimal),
+        }
+
+        Ok(Some(crate::rest_model::string_or_decimal::deserialize(deserializer)?))
     }
 }
 
