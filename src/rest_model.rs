@@ -668,7 +668,7 @@ pub struct OCOOrderReport {
     #[serde(rename = "type")]
     pub order_type: OrderType,
     pub side: OrderSide,
-    #[serde(with = "string_or_float")]
+    #[serde(with = "string_or_float_opt")]
     pub stop_price: f64,
 }
 
