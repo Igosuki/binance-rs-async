@@ -667,7 +667,6 @@ pub struct OCOOrderReport {
     pub time_in_force: TimeInForce,
     #[serde(rename = "type")]
     pub order_type: OrderType,
-    #[serde(rename = "type")]
     pub side: OrderSide,
     #[serde(with = "string_or_float")]
     pub stop_price: f64,
