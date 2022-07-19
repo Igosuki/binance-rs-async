@@ -669,7 +669,7 @@ pub struct OCOOrderReport {
     pub order_type: OrderType,
     pub side: OrderSide,
     #[serde(with = "string_or_float_opt")]
-    pub stop_price: f64,
+    pub stop_price: Option<f64>,
 }
 
 /// archived and is_isolated are only applicable to certain endpoints
