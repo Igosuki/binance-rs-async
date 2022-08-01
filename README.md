@@ -15,14 +15,15 @@ Add this to your Cargo.toml
 
 ```toml
 [dependencies]
-binance-rs-async = "1.1.10"
+binance-rs-async = "1.1.11"
 ```
 
 ## Roadmap
 
 - 1.0.0 Completely tested margin sapi endpoints
-- 1.0.1 Changelog check to detect binance API changes
-- 1.1.0 Complete tested futures (m-coin and usd-m futures)
+- 1.0.* Changelog check to detect binance API changes
+- 1.1.* Wallet API
+- 1.2.* Complete tested futures (m-coin and usd-m futures)
 
 ## Risk Warning
 
