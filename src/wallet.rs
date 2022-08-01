@@ -1,7 +1,6 @@
 use crate::client::*;
 use crate::errors::*;
 use crate::rest_model::*;
-use crate::util::*;
 use chrono::DateTime;
 use chrono::{Duration, Utc};
 use std::collections::HashMap;
@@ -172,7 +171,7 @@ impl Wallet {
         let interval_duration = Duration::days(DEFAULT_WALLET_HISTORY_QUERY_INTERVAL_DAYS);
         let mut current_period_end: DateTime<Utc> = start_from.unwrap_or(Utc::now());
         let end_at = current_period_end.sub(total_duration);
-        let mut current_period_start: DateTime<Utc> = start_from.sub(interval_duration);
+        let mut current_period_start: DateTime<Utc> = current_period_end.sub(interval_duration);
 
         // auto query by step:
         while current_period_end > end_at {
@@ -181,7 +180,7 @@ impl Wallet {
             query.end_time = Some(current_period_end.timestamp_millis() as u64);
 
             // eprintln!("query: {:?}", query);
-            let records = self.deposit_history(&query).await?;
+            let records = self.deposit_history(query.clone()).await?;
 
             if !records.is_empty() {
                 let item = RecordHistory::<DepositRecord> {
@@ -192,8 +191,8 @@ impl Wallet {
                 result.push(item);
             }
 
-            current_period_start -= interval_duration;
-            current_period_end -= interval_duration;
+            current_period_start = current_period_start.sub(interval_duration);
+            current_period_end = current_period_end.sub(interval_duration);
         }
 
         Ok(result)
@@ -238,16 +237,14 @@ impl Wallet {
         let interval_duration = Duration::days(DEFAULT_WALLET_HISTORY_QUERY_INTERVAL_DAYS);
         let mut current_period_end: DateTime<Utc> = start_from.unwrap_or(Utc::now());
         let end_at = current_period_end.sub(total_duration);
-        let mut current_period_start: DateTime<Utc> = start_from.sub(interval_duration);
+        let mut current_period_start: DateTime<Utc> = current_period_end.sub(interval_duration);
 
         // auto query by step:
         while current_period_end > end_at {
-            // modify query duration:
             query.start_time = Some(current_period_start.timestamp_millis() as u64);
             query.end_time = Some(current_period_end.timestamp_millis() as u64);
 
-            // eprintln!("query: {:?}", query);
-            let records = self.withdraw_history(&query).await?;
+            let records = self.withdraw_history(query.clone()).await?;
 
             if !records.is_empty() {
                 let item = RecordHistory::<WithdrawalRecord> {
@@ -258,8 +255,8 @@ impl Wallet {
                 result.push(item);
             }
 
-            current_period_start -= interval_duration;
-            current_period_end -= interval_duration;
+            current_period_start = current_period_start.sub(interval_duration);
+            current_period_end = current_period_end.sub(interval_duration);
         }
 
         Ok(result)
