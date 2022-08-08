@@ -689,10 +689,9 @@ pub struct OCOOrderReport {
     pub time_in_force: TimeInForce,
     #[serde(rename = "type")]
     pub order_type: OrderType,
-    #[serde(rename = "type")]
     pub side: OrderSide,
-    #[serde(with = "string_or_float")]
-    pub stop_price: f64,
+    #[serde(default, with = "string_or_float_opt")]
+    pub stop_price: Option<f64>,
 }
 
 /// archived and is_isolated are only applicable to certain endpoints
