@@ -288,7 +288,7 @@ impl<T> CombinedStreamEvent<T> {
         if let Some(0) = parsed.find('!') {
             parsed.remove(0);
         }
-        let split = parsed.split_once("@").unwrap_or((&parsed, ""));
+        let split = parsed.split_once('@').unwrap_or((&parsed, ""));
         (split.0.to_string(), split.1.to_string())
     }
 }

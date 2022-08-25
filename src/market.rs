@@ -44,7 +44,7 @@ impl Market {
         S: Into<String>,
     {
         let request = self.symbol_request(symbol);
-        let data = self.client.get(API_V3_DEPTH, &request).await?;
+        let data = self.client.get(API_V3_DEPTH, Some(&request)).await?;
         let order_book: OrderBook = from_str(data.as_str())?;
 
         Ok(order_book)
@@ -70,7 +70,7 @@ impl Market {
         parameters.insert("limit".into(), limit.to_string());
 
         let request = build_request(&parameters);
-        let data = self.client.get(API_V3_DEPTH, &request).await?;
+        let data = self.client.get(API_V3_DEPTH, Some(&request)).await?;
         let order_book: OrderBook = from_str(data.as_str())?;
 
         Ok(order_book)
@@ -85,7 +85,7 @@ impl Market {
     /// assert!(prices.is_ok(), "{:?}", prices);
     /// ```
     pub async fn get_all_prices(&self) -> Result<Prices> {
-        let data = self.client.get(API_V3_TICKER_PRICE, "").await?;
+        let data = self.client.get(API_V3_TICKER_PRICE, None).await?;
 
         let prices: Prices = from_str(data.as_str())?;
 
@@ -105,7 +105,7 @@ impl Market {
         S: Into<String>,
     {
         let request = self.symbol_request(symbol);
-        let data = self.client.get(API_V3_TICKER_PRICE, &request).await?;
+        let data = self.client.get(API_V3_TICKER_PRICE, Some(&request)).await?;
         let symbol_price: SymbolPrice = from_str(data.as_str())?;
 
         Ok(symbol_price)
@@ -124,7 +124,7 @@ impl Market {
         S: Into<String>,
     {
         let request = self.symbol_request(symbol);
-        let data = self.client.get(API_V3_AVG_PRICE, &request).await?;
+        let data = self.client.get(API_V3_AVG_PRICE, Some(&request)).await?;
         let average_price: AveragePrice = from_str(data.as_str())?;
 
         Ok(average_price)
@@ -140,7 +140,7 @@ impl Market {
     /// assert!(tickers.is_ok(), "{:?}", tickers);
     /// ```
     pub async fn get_all_book_tickers(&self) -> Result<BookTickers> {
-        let data = self.client.get(API_V3_BOOK_TICKER, "").await?;
+        let data = self.client.get(API_V3_BOOK_TICKER, None).await?;
 
         let book_tickers: BookTickers = from_str(data.as_str())?;
 
@@ -160,7 +160,7 @@ impl Market {
         S: Into<String>,
     {
         let request = self.symbol_request(symbol);
-        let data = self.client.get(API_V3_BOOK_TICKER, &request).await?;
+        let data = self.client.get(API_V3_BOOK_TICKER, Some(&request)).await?;
         let ticker: Tickers = from_str(data.as_str())?;
 
         Ok(ticker)
@@ -179,7 +179,7 @@ impl Market {
         S: Into<String>,
     {
         let request = self.symbol_request(symbol);
-        let data = self.client.get(API_V3_24H_TICKER, &request).await?;
+        let data = self.client.get(API_V3_24H_TICKER, Some(&request)).await?;
 
         let stats: PriceStats = from_str(data.as_str())?;
 
@@ -231,7 +231,7 @@ impl Market {
 
         let request = build_request(&parameters);
 
-        self.client.get_p(API_V3_AGG_TRADES, &request).await
+        self.client.get_p(API_V3_AGG_TRADES, Some(&request)).await
     }
 
     /// Returns up to 'limit' klines for given symbol and interval ("1m", "5m", ...)
@@ -276,7 +276,7 @@ impl Market {
 
         let request = build_request(&parameters);
 
-        let data = self.client.get(API_V3_KLINES, &request).await?;
+        let data = self.client.get(API_V3_KLINES, Some(&request)).await?;
         let parsed_data: Vec<Vec<Value>> = from_str(data.as_str())?;
 
         let klines = KlineSummaries::AllKlineSummaries(
