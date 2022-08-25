@@ -45,9 +45,6 @@ impl Client {
     }
 
     pub async fn get_signed_d<T: de::DeserializeOwned>(&self, endpoint: &str, request: &str) -> Result<T> {
-        // let r = self.get_signed(endpoint, request).await?;
-        // let t = from_str(&r)?;
-        // Ok(t)
         self.get_signed(endpoint, request).await
     }
 
@@ -58,9 +55,6 @@ impl Client {
         recv_window: u64,
     ) -> Result<T> {
         let req = build_signed_request_p(payload, recv_window)?;
-        // let data = self.get_signed(endpoint, &req).await?;
-        // let t = from_str(&data)?;
-        // Ok(t)
         self.get_signed(endpoint, &req).await
     }
 
@@ -209,7 +203,7 @@ impl Client {
 
     async fn handler<T: de::DeserializeOwned>(&self, response: Response) -> Result<T> {
         match response.status() {
-            StatusCode::OK => response.json().await.map_err(|e| e.into()),
+            StatusCode::OK => Ok(response.json().await?),
             StatusCode::INTERNAL_SERVER_ERROR => Err(Error::InternalServerError),
             StatusCode::SERVICE_UNAVAILABLE => Err(Error::ServiceUnavailable),
             StatusCode::UNAUTHORIZED => Err(Error::Unauthorized),

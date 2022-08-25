@@ -78,7 +78,9 @@ impl Market {
     /// let prices = tokio_test::block_on(market.get_all_prices());
     /// assert!(prices.is_ok(), "{:?}", prices);
     /// ```
-    pub async fn get_all_prices(&self) -> Result<Prices> { self.client.get(API_V3_TICKER_PRICE, None).await }
+    pub async fn get_all_prices(&self) -> Result<Prices> {
+        self.client.get(API_V3_TICKER_PRICE, None).await
+    }
 
     /// Latest price for ONE symbol.
     /// # Examples
@@ -121,7 +123,9 @@ impl Market {
     /// let tickers = tokio_test::block_on(market.get_all_book_tickers());
     /// assert!(tickers.is_ok(), "{:?}", tickers);
     /// ```
-    pub async fn get_all_book_tickers(&self) -> Result<BookTickers> { self.client.get(API_V3_BOOK_TICKER, None).await }
+    pub async fn get_all_book_tickers(&self) -> Result<BookTickers> {
+        self.client.get(API_V3_BOOK_TICKER, None).await
+    }
 
     /// -> Best price/qty on the order book for ONE symbol
     /// # Examples

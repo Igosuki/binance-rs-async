@@ -3,7 +3,9 @@ use serde_json::Value;
 use crate::client::*;
 use crate::errors::*;
 use crate::futures::rest_model::*;
-use crate::rest_model::{BookTickers, KlineSummaries, KlineSummary, PairAndWindowQuery, PairQuery, SymbolPrice, Tickers};
+use crate::rest_model::{
+    BookTickers, KlineSummaries, KlineSummary, PairAndWindowQuery, PairQuery, SymbolPrice, Tickers,
+};
 use crate::util::*;
 
 //TODO: Validate intervals and start/end times in history queries
@@ -531,7 +533,9 @@ impl FuturesMarket {
             .await
     }
 
-    pub async fn get_mark_prices(&self) -> Result<MarkPrices> { self.client.get_p("/fapi/v1/premiumIndex", None).await }
+    pub async fn get_mark_prices(&self) -> Result<MarkPrices> {
+        self.client.get_p("/fapi/v1/premiumIndex", None).await
+    }
 
     pub async fn open_interest<S>(&self, symbol: S) -> Result<OpenInterest>
     where
