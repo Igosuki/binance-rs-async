@@ -16,9 +16,7 @@ impl FuturesGeneral {
     }
 
     // Check server time
-    pub async fn get_server_time(&self) -> Result<ServerTime> {
-        self.client.get_p("/fapi/v1/time", None).await
-    }
+    pub async fn get_server_time(&self) -> Result<ServerTime> { self.client.get_p("/fapi/v1/time", None).await }
 
     // Obtain exchange information
     // - Current exchange trading rules and symbol information
@@ -36,7 +34,7 @@ impl FuturesGeneral {
             info.symbols
                 .into_iter()
                 .find(|s| s.symbol == upper_symbol)
-                .ok_or_else(||Error::UnknownSymbol(symbol.as_ref().to_string()))
+                .ok_or_else(|| Error::UnknownSymbol(symbol.as_ref().to_string()))
         })
     }
 }
