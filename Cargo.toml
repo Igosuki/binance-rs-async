@@ -39,6 +39,7 @@ url = "2.2"
 lazy_static = "1.4"
 tokio-tungstenite = "0.16"
 tokio = { version = "1.14", features = ["full"] }
+boolinator = "2.4"
 
 [dev-dependencies]
 csv = "1.1"

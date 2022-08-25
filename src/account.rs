@@ -3,7 +3,6 @@ use crate::errors::*;
 use crate::rest_model::*;
 use crate::util::*;
 use serde_json::from_str;
-use std::collections::BTreeMap;
 
 static API_V3_ACCOUNT: &str = "/api/v3/account";
 static API_V3_OPEN_ORDERS: &str = "/api/v3/openOrders";
@@ -110,9 +109,8 @@ impl Account {
     /// assert!(account.is_ok(), "{:?}", account);
     /// ```
     pub async fn get_account(&self) -> Result<AccountInformation> {
-        let parameters: BTreeMap<String, String> = BTreeMap::new();
-
-        let request = build_signed_request(parameters, self.recv_window)?;
+        // TODO: should parameters be Option<>?
+        let request = build_signed_request([("", "")], self.recv_window)?;
         let data = self.client.get_signed(API_V3_ACCOUNT, &request).await?;
         let account_info: AccountInformation = from_str(data.as_str())?;
 
@@ -155,11 +153,9 @@ impl Account {
     /// ```
     pub async fn get_open_orders<S>(&self, symbol: S) -> Result<Vec<Order>>
     where
-        S: Into<String>,
+        S: AsRef<str>,
     {
-        let mut parameters: BTreeMap<String, String> = BTreeMap::new();
-        parameters.insert("symbol".into(), symbol.into());
-
+        let parameters = [("symbol", symbol.as_ref())];
         let request = build_signed_request(parameters, self.recv_window)?;
         let data = self.client.get_signed(API_V3_OPEN_ORDERS, &request).await?;
         let order: Vec<Order> = from_str(data.as_str())?;
@@ -201,7 +197,7 @@ impl Account {
     /// assert!(orders.is_ok(), "{:?}", orders);
     /// ```
     pub async fn get_all_open_orders(&self) -> Result<Vec<Order>> {
-        let request = build_signed_request(BTreeMap::new(), self.recv_window)?;
+        let request = build_signed_request([("", "")], self.recv_window)?;
         let data = self.client.get_signed(API_V3_OPEN_ORDERS, &request).await?;
         let order: Vec<Order> = from_str(data.as_str())?;
 
@@ -218,10 +214,9 @@ impl Account {
     /// ```
     pub async fn cancel_all_open_orders<S>(&self, symbol: S) -> Result<Vec<Order>>
     where
-        S: Into<String>,
+        S: AsRef<str>,
     {
-        let mut params: BTreeMap<String, String> = BTreeMap::new();
-        params.insert("symbol".into(), symbol.into());
+        let params = [("symbol", symbol.as_ref())];
         let request = build_signed_request(params, self.recv_window)?;
         let data = self.client.delete_signed(API_V3_OPEN_ORDERS, &request).await?;
         let order: Vec<Order> = from_str(data.as_str())?;
@@ -296,7 +291,7 @@ impl Account {
     /// assert!(transaction.is_ok(), "{:?}", transaction);
     /// ```
     pub async fn place_order(&self, order: OrderRequest) -> Result<Transaction> {
-        let _ = order.valid()?;
+        order.valid()?;
         let recv_window = order.recv_window.unwrap_or(self.recv_window);
         let request = build_signed_request_p(order, recv_window)?;
         let data = self.client.post_signed(API_V3_ORDER, &request).await?;
@@ -326,7 +321,7 @@ impl Account {
     /// assert!(resp.is_ok(), "{:?}", resp);
     /// ```
     pub async fn place_test_order(&self, order: OrderRequest) -> Result<TestResponse> {
-        let _ = order.valid()?;
+        order.valid()?;
         let recv_window = order.recv_window.unwrap_or(self.recv_window);
         let request = build_signed_request_p(order, recv_window)?;
         let data = self.client.post_signed(API_V3_ORDER_TEST, &request).await?;
@@ -394,11 +389,9 @@ impl Account {
     /// ```
     pub async fn trade_history<S>(&self, symbol: S) -> Result<Vec<TradeHistory>>
     where
-        S: Into<String>,
+        S: AsRef<str>,
     {
-        let mut parameters: BTreeMap<String, String> = BTreeMap::new();
-        parameters.insert("symbol".into(), symbol.into());
-
+        let parameters = [("symbol", symbol.as_ref())];
         let request = build_signed_request(parameters, self.recv_window)?;
         let data = self.client.get_signed(API_V3_MYTRADES, &request).await?;
         let trade_history: Vec<TradeHistory> = from_str(data.as_str())?;
