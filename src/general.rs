@@ -19,10 +19,10 @@ impl General {
     /// assert!(pong.is_ok(), "{:?}", pong);
     /// assert_eq!(pong.unwrap(), "pong");
     /// ```
-    pub async fn ping(&self) -> Result<String> {
+    pub async fn ping(&self) -> Result<&'static str> {
         let _: Value = self.client.get("/api/v3/ping", None).await?;
 
-        Ok("pong".into())
+        Ok("pong")
     }
 
     /// Check server time

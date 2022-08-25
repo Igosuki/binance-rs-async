@@ -119,7 +119,7 @@ impl Savings {
         } else {
             [("", "")]
         };
-        
+
         let request = build_signed_request(parameters, self.recv_window)?;
         self.client
             .get_signed_d("/sapi/v1/asset/assetDetail", request.as_str())
@@ -142,14 +142,13 @@ impl Savings {
         S: AsRef<str>,
     {
         let request = if let Some(network) = network {
-            let parameters = [("network", network),
-            ("coin", coin.as_ref())];
+            let parameters = [("network", network), ("coin", coin.as_ref())];
             build_signed_request(parameters, self.recv_window)?
         } else {
             let parameters = [("coin", coin.as_ref())];
             build_signed_request(parameters, self.recv_window)?
         };
-        
+
         self.client
             .get_signed_d("/sapi/v1/capital/deposit/address", request.as_str())
             .await

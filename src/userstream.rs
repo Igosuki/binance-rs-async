@@ -20,7 +20,9 @@ impl UserStream {
     /// assert!(start.is_ok(), "{:?}", start);
     /// assert!(start.unwrap().listen_key.len() > 0)
     /// ```
-    pub async fn start(&self) -> Result<UserDataStream> { self.client.post(USER_DATA_STREAM, None).await }
+    pub async fn start(&self) -> Result<UserDataStream> {
+        self.client.post(USER_DATA_STREAM, None).await
+    }
 
     /// Keep the connection alive, as the listen key becomes invalid after 60mn
     /// # Examples

@@ -904,7 +904,9 @@ impl Margin {
     /// assert!(start.is_ok(), "{:?}", start);
     /// assert!(start.unwrap().listen_key.len() > 0)
     /// ```
-    pub async fn start(&self) -> Result<UserDataStream> { self.client.post(SAPI_USER_DATA_STREAM, None).await }
+    pub async fn start(&self) -> Result<UserDataStream> {
+        self.client.post(SAPI_USER_DATA_STREAM, None).await
+    }
 
     /// Keep the connection alive
     /// # Examples

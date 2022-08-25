@@ -7,7 +7,9 @@ use binance::websockets::*;
 use binance::ws_model::WebsocketEvent;
 
 #[tokio::main]
-async fn main() { save_all_trades_websocket().await; }
+async fn main() {
+    save_all_trades_websocket().await;
+}
 
 async fn save_all_trades_websocket() {
     struct WebSocketHandler {
@@ -15,7 +17,9 @@ async fn save_all_trades_websocket() {
     }
 
     impl WebSocketHandler {
-        pub fn new(local_wrt: Writer<File>) -> Self { WebSocketHandler { wrt: local_wrt } }
+        pub fn new(local_wrt: Writer<File>) -> Self {
+            WebSocketHandler { wrt: local_wrt }
+        }
 
         // serialize DayTickerEvent as CSV records
         pub fn write_to_file(&mut self, events: Vec<WebsocketEvent>) -> Result<(), Box<dyn Error>> {
