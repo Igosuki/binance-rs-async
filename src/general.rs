@@ -2,8 +2,6 @@ use crate::client::*;
 use crate::errors::*;
 use crate::rest_model::*;
 
-use serde_json::from_str;
-
 #[derive(Clone)]
 pub struct General {
     pub client: Client,
@@ -33,13 +31,7 @@ impl General {
     /// let server_time = tokio_test::block_on(general.get_server_time());
     /// assert!(server_time.is_ok(), "{:?}", server_time);
     /// ```
-    pub async fn get_server_time(&self) -> Result<ServerTime> {
-        let data: String = self.client.get("/api/v3/time", None).await?;
-
-        let server_time: ServerTime = from_str(data.as_str())?;
-
-        Ok(server_time)
-    }
+    pub async fn get_server_time(&self) -> Result<ServerTime> { self.client.get("/api/v3/time", None).await }
 
     /// Obtain exchange information (rate limits, symbol metadata etc)
     /// # Examples
@@ -50,10 +42,6 @@ impl General {
     /// assert!(excyahge_info.is_ok(), "{:?}", excyahge_info);
     /// ```
     pub async fn exchange_info(&self) -> Result<ExchangeInformation> {
-        let data: String = self.client.get("/api/v3/exchangeInfo", None).await?;
-
-        let info: ExchangeInformation = from_str(data.as_str())?;
-
-        Ok(info)
+        self.client.get("/api/v3/exchangeInfo", None).await
     }
 }

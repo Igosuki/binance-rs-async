@@ -217,8 +217,7 @@ impl FuturesAccount {
     }
 
     pub async fn account_balance(&self) -> Result<Vec<AccountBalance>> {
-        let parameters = BTreeMap::new();
-        let request = build_signed_request(parameters, self.recv_window)?;
+        let request = build_signed_request([("", "")], self.recv_window)?;
         self.client.get_signed_d("/fapi/v2/balance", request.as_str()).await
     }
 

@@ -1,5 +1,3 @@
-use serde_json::from_str;
-
 use crate::client::*;
 use crate::errors::*;
 use crate::rest_model::*;
@@ -906,12 +904,7 @@ impl Margin {
     /// assert!(start.is_ok(), "{:?}", start);
     /// assert!(start.unwrap().listen_key.len() > 0)
     /// ```
-    pub async fn start(&self) -> Result<UserDataStream> {
-        let data = self.client.post(SAPI_USER_DATA_STREAM, None).await?;
-        let user_data_stream: UserDataStream = from_str(data.as_str())?;
-
-        Ok(user_data_stream)
-    }
+    pub async fn start(&self) -> Result<UserDataStream> { self.client.post(SAPI_USER_DATA_STREAM, None).await }
 
     /// Keep the connection alive
     /// # Examples
@@ -924,11 +917,7 @@ impl Margin {
     /// assert!(keep_alive.is_ok())
     /// ```
     pub async fn keep_alive(&self, listen_key: &str) -> Result<Success> {
-        let data = self.client.put(SAPI_USER_DATA_STREAM, listen_key, None).await?;
-
-        let success: Success = from_str(data.as_str())?;
-
-        Ok(success)
+        self.client.put(SAPI_USER_DATA_STREAM, listen_key, None).await
     }
 
     /// Close the user stream
@@ -942,11 +931,7 @@ impl Margin {
     /// assert!(close.is_ok())
     /// ```
     pub async fn close(&self, listen_key: &str) -> Result<Success> {
-        let data = self.client.delete(SAPI_USER_DATA_STREAM, listen_key, None).await?;
-
-        let success: Success = from_str(data.as_str())?;
-
-        Ok(success)
+        self.client.delete(SAPI_USER_DATA_STREAM, listen_key, None).await
     }
 
     /// Start user data stream
@@ -959,10 +944,7 @@ impl Margin {
     /// assert!(start.unwrap().listen_key.len() > 0)
     /// ```
     pub async fn start_isolated(&self, symbol: &str) -> Result<UserDataStream> {
-        let data = self.client.post(SAPI_USER_DATA_STREAM_ISOLATED, Some(symbol)).await?;
-        let user_data_stream: UserDataStream = from_str(data.as_str())?;
-
-        Ok(user_data_stream)
+        self.client.post(SAPI_USER_DATA_STREAM_ISOLATED, Some(symbol)).await
     }
 
     /// Keep the connection alive
@@ -976,14 +958,9 @@ impl Margin {
     /// assert!(keep_alive.is_ok())
     /// ```
     pub async fn keep_alive_isolated(&self, listen_key: &str, symbol: &str) -> Result<Success> {
-        let data = self
-            .client
+        self.client
             .put(SAPI_USER_DATA_STREAM_ISOLATED, listen_key, Some(symbol))
-            .await?;
-
-        let success: Success = from_str(data.as_str())?;
-
-        Ok(success)
+            .await
     }
 
     /// Close the user stream
@@ -997,23 +974,18 @@ impl Margin {
     /// assert!(close.is_ok())
     /// ```
     pub async fn close_isolated(&self, listen_key: &str, symbol: &str) -> Result<Success> {
-        let data = self
-            .client
+        self.client
             .delete(SAPI_USER_DATA_STREAM_ISOLATED, listen_key, Some(symbol))
-            .await?;
-
-        let success: Success = from_str(data.as_str())?;
-
-        Ok(success)
+            .await
     }
 
     pub async fn isolated_account_limit(&self) -> Result<IsolatedAccountLimit> {
-        let q: Option<PairQuery> = None;
-
-        let data = self
-            .client
-            .get_signed_p(SAPI_V1_MARGIN_ISOLATED_ACCOUNT_LIMIT, q, self.recv_window)
-            .await?;
-        Ok(data)
+        self.client
+            .get_signed_p(
+                SAPI_V1_MARGIN_ISOLATED_ACCOUNT_LIMIT,
+                None::<PairQuery>,
+                self.recv_window,
+            )
+            .await
     }
 }

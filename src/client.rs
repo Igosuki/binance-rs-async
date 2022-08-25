@@ -8,7 +8,6 @@ use reqwest::StatusCode;
 use ring::hmac;
 use serde::de;
 use serde::de::DeserializeOwned;
-use serde_json::from_str;
 
 use crate::errors::error_messages;
 use crate::errors::*;
@@ -38,7 +37,7 @@ impl Client {
         }
     }
 
-    pub async fn get_signed(&self, endpoint: &str, request: &str) -> Result<String> {
+    pub async fn get_signed<T: DeserializeOwned>(&self, endpoint: &str, request: &str) -> Result<T> {
         let url = self.sign_request(endpoint, request);
         let response = self.inner.get(&url).headers(self.build_headers(true)?).send().await?;
 
@@ -46,9 +45,10 @@ impl Client {
     }
 
     pub async fn get_signed_d<T: de::DeserializeOwned>(&self, endpoint: &str, request: &str) -> Result<T> {
-        let r = self.get_signed(endpoint, request).await?;
-        let t = from_str(&r)?;
-        Ok(t)
+        // let r = self.get_signed(endpoint, request).await?;
+        // let t = from_str(&r)?;
+        // Ok(t)
+        self.get_signed(endpoint, request).await
     }
 
     pub async fn get_signed_p<T: de::DeserializeOwned, P: serde::Serialize>(
@@ -58,12 +58,13 @@ impl Client {
         recv_window: u64,
     ) -> Result<T> {
         let req = build_signed_request_p(payload, recv_window)?;
-        let data = self.get_signed(endpoint, &req).await?;
-        let t = from_str(&data)?;
-        Ok(t)
+        // let data = self.get_signed(endpoint, &req).await?;
+        // let t = from_str(&data)?;
+        // Ok(t)
+        self.get_signed(endpoint, &req).await
     }
 
-    pub async fn post_signed(&self, endpoint: &str, request: &str) -> Result<String> {
+    pub async fn post_signed<T: DeserializeOwned>(&self, endpoint: &str, request: &str) -> Result<T> {
         let url = self.sign_request(endpoint, request);
         let response = self.inner.post(&url).headers(self.build_headers(true)?).send().await?;
 
@@ -71,9 +72,7 @@ impl Client {
     }
 
     pub async fn post_signed_d<T: de::DeserializeOwned>(&self, endpoint: &str, request: &str) -> Result<T> {
-        let r = self.post_signed(endpoint, request).await?;
-        let t = from_str(&r)?;
-        Ok(t)
+        self.post_signed(endpoint, request).await
     }
 
     pub async fn post_signed_p<T: de::DeserializeOwned, P: serde::Serialize>(
@@ -83,9 +82,7 @@ impl Client {
         recv_window: u64,
     ) -> Result<T> {
         let request = build_signed_request_p(payload, recv_window)?;
-        let data = self.post_signed(endpoint, &request).await?;
-        let t = from_str(&data)?;
-        Ok(t)
+        self.post_signed(endpoint, &request).await
     }
 
     pub async fn delete_signed_p<T: de::DeserializeOwned, P: serde::Serialize>(
@@ -95,12 +92,10 @@ impl Client {
         recv_window: u64,
     ) -> Result<T> {
         let request = build_signed_request_p(payload, recv_window)?;
-        let data = self.delete_signed(endpoint, &request).await?;
-        let t = from_str(&data)?;
-        Ok(t)
+        self.delete_signed(endpoint, &request).await
     }
 
-    pub async fn delete_signed(&self, endpoint: &str, request: &str) -> Result<String> {
+    pub async fn delete_signed<T: DeserializeOwned>(&self, endpoint: &str, request: &str) -> Result<T> {
         let url = self.sign_request(endpoint, request);
         let response = self
             .inner
@@ -112,7 +107,7 @@ impl Client {
         self.handler(response).await
     }
 
-    pub async fn get(&self, endpoint: &str, request: Option<&str>) -> Result<String> {
+    pub async fn get<T: DeserializeOwned>(&self, endpoint: &str, request: Option<&str>) -> Result<T> {
         let url = request
             .map(|r| format!("{}{}?{}", self.host, endpoint, r))
             .unwrap_or_else(|| format!("{}{}", self.host, endpoint));
@@ -123,9 +118,7 @@ impl Client {
     }
 
     pub async fn get_p<T: DeserializeOwned>(&self, endpoint: &str, request: Option<&str>) -> Result<T> {
-        let r = self.get(endpoint, request).await?;
-        let t = from_str(&r)?;
-        Ok(t)
+        self.get(endpoint, request).await
     }
 
     pub async fn get_d<T: DeserializeOwned, S: serde::Serialize>(
@@ -141,7 +134,7 @@ impl Client {
         self.get_p(endpoint, req.as_deref()).await
     }
 
-    pub async fn post(&self, endpoint: &str, symbol: Option<&str>) -> Result<String> {
+    pub async fn post<T: DeserializeOwned>(&self, endpoint: &str, symbol: Option<&str>) -> Result<T> {
         let url = symbol
             .map(|s| format!("{}{}?symbol={}", self.host, endpoint, s))
             .unwrap_or_else(|| format!("{}{}", self.host, endpoint));
@@ -151,7 +144,7 @@ impl Client {
         self.handler(response).await
     }
 
-    pub async fn put(&self, endpoint: &str, listen_key: &str, symbol: Option<&str>) -> Result<String> {
+    pub async fn put<T: DeserializeOwned>(&self, endpoint: &str, listen_key: &str, symbol: Option<&str>) -> Result<T> {
         let data = symbol
             .map(|s| format!("listenKey={}&symbol={}", listen_key, s))
             .unwrap_or_else(|| format!("listenKey={}", listen_key));
@@ -162,7 +155,12 @@ impl Client {
         self.handler(response).await
     }
 
-    pub async fn delete(&self, endpoint: &str, listen_key: &str, symbol: Option<&str>) -> Result<String> {
+    pub async fn delete<T: DeserializeOwned>(
+        &self,
+        endpoint: &str,
+        listen_key: &str,
+        symbol: Option<&str>,
+    ) -> Result<T> {
         let data = symbol
             .map(|s| format!("listenKey={}&symbol={}", listen_key, s))
             .unwrap_or_else(|| format!("listenKey={}", listen_key));
@@ -209,14 +207,9 @@ impl Client {
         Ok(header)
     }
 
-    async fn handler(&self, response: Response) -> Result<String> {
+    async fn handler<T: de::DeserializeOwned>(&self, response: Response) -> Result<T> {
         match response.status() {
-            StatusCode::OK => {
-                response.
-                let body = response.bytes().await?;
-                let result = std::str::from_utf8(&body).map(|s| s.to_string())?;
-                Ok(result)
-            }
+            StatusCode::OK => response.json().await.map_err(|e| e.into()),
             StatusCode::INTERNAL_SERVER_ERROR => Err(Error::InternalServerError),
             StatusCode::SERVICE_UNAVAILABLE => Err(Error::ServiceUnavailable),
             StatusCode::UNAUTHORIZED => Err(Error::Unauthorized),
