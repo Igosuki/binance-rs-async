@@ -143,10 +143,10 @@ impl Wallet {
     /// use binance::{api::*, wallet::*, config::*, rest_model::*};
     /// let wallet: Wallet = Binance::new_with_env(&Config::testnet());
     /// let query: DepositHistoryQuery = DepositHistoryQuery::default();
-    /// let records = tokio_test::block_on(wallet.deposit_history(query));
+    /// let records = tokio_test::block_on(wallet.deposit_history(&query));
     /// assert!(records.is_ok(), "{:?}", records);
     /// ```
-    pub async fn deposit_history(&self, query: DepositHistoryQuery) -> Result<Vec<DepositRecord>> {
+    pub async fn deposit_history(&self, query: &DepositHistoryQuery) -> Result<Vec<DepositRecord>> {
         self.client
             .get_signed_p(SAPI_V1_CAPITAL_DEPOSIT_HISREC, Some(query), self.recv_window)
             .await
@@ -182,7 +182,7 @@ impl Wallet {
             query.end_time = Some(current_period_end.timestamp_millis() as u64);
 
             // eprintln!("query: {:?}", query);
-            let records = self.deposit_history(query.clone()).await?;
+            let records = self.deposit_history(&query).await?;
 
             if !records.is_empty() {
                 let item = RecordHistory::<DepositRecord> {
@@ -207,10 +207,10 @@ impl Wallet {
     /// use binance::{api::*, wallet::*, config::*, rest_model::*};
     /// let wallet: Wallet = Binance::new_with_env(&Config::testnet());
     /// let query: WithdrawalHistoryQuery = WithdrawalHistoryQuery::default();
-    /// let records = tokio_test::block_on(wallet.withdraw_history(query));
+    /// let records = tokio_test::block_on(wallet.withdraw_history(&query));
     /// assert!(records.is_ok(), "{:?}", records);
     /// ```
-    pub async fn withdraw_history(&self, query: WithdrawalHistoryQuery) -> Result<Vec<WithdrawalRecord>> {
+    pub async fn withdraw_history(&self, query: &WithdrawalHistoryQuery) -> Result<Vec<WithdrawalRecord>> {
         self.client
             .get_signed_p(SAPI_V1_CAPITAL_WITHDRAW_HISTORY, Some(query), self.recv_window)
             .await
@@ -246,7 +246,7 @@ impl Wallet {
             query.start_time = Some(current_period_start.timestamp_millis() as u64);
             query.end_time = Some(current_period_end.timestamp_millis() as u64);
 
-            let records = self.withdraw_history(query.clone()).await?;
+            let records = self.withdraw_history(&query).await?;
 
             if !records.is_empty() {
                 let item = RecordHistory::<WithdrawalRecord> {

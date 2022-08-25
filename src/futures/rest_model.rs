@@ -455,7 +455,7 @@ pub(crate) struct HistoryQuery {
 
 impl HistoryQuery {
     pub fn validate(&self) -> crate::errors::Result<()> {
-        if let Some(period) = &self.period {
+        if let Some(period) = self.period.as_ref() {
             if !PERIODS.contains(&period.as_str()) {
                 return Err(crate::errors::Error::InvalidPeriod(period.clone()));
             }
