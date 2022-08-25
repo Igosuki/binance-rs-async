@@ -1,3 +1,5 @@
+use serde_json::Value;
+
 use crate::client::*;
 use crate::errors::*;
 use crate::rest_model::*;
@@ -18,7 +20,7 @@ impl General {
     /// assert_eq!(pong.unwrap(), "pong");
     /// ```
     pub async fn ping(&self) -> Result<String> {
-        self.client.get("/api/v3/ping", None).await?;
+        let _: Value = self.client.get("/api/v3/ping", None).await?;
 
         Ok("pong".into())
     }
@@ -31,7 +33,9 @@ impl General {
     /// let server_time = tokio_test::block_on(general.get_server_time());
     /// assert!(server_time.is_ok(), "{:?}", server_time);
     /// ```
-    pub async fn get_server_time(&self) -> Result<ServerTime> { self.client.get("/api/v3/time", None).await }
+    pub async fn get_server_time(&self) -> Result<ServerTime> {
+        self.client.get("/api/v3/time", None).await
+    }
 
     /// Obtain exchange information (rate limits, symbol metadata etc)
     /// # Examples

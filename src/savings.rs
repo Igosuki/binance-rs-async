@@ -110,7 +110,7 @@ impl Savings {
     /// ```rust,no_run
     /// use binance::{api::*, savings::*, config::*};
     /// let savings: Savings = Binance::new_with_env(&Config::testnet());
-    /// let coins = tokio_test::block_on(savings.asset_detail(Some("CTR".to_string())));
+    /// let coins = tokio_test::block_on(savings.asset_detail(Some("CTR")));
     /// assert!(coins.is_ok(), "{:?}", coins)
     /// ```
     pub async fn asset_detail(&self, asset: Option<&str>) -> Result<BTreeMap<String, AssetDetail>> {
