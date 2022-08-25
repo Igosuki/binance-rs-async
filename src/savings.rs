@@ -99,7 +99,7 @@ impl Savings {
     /// assert!(coins.is_ok(), "{:?}", coins)
     /// ```
     pub async fn get_all_coins(&self) -> Result<Vec<CoinInfo>> {
-        let request = build_signed_request(BTreeMap::new(), self.recv_window)?;
+        let request = build_signed_request([("", "")], self.recv_window)?;
         self.client
             .get_signed_d("/sapi/v1/capital/config/getall", request.as_str())
             .await
@@ -113,11 +113,13 @@ impl Savings {
     /// let coins = tokio_test::block_on(savings.asset_detail(Some("CTR".to_string())));
     /// assert!(coins.is_ok(), "{:?}", coins)
     /// ```
-    pub async fn asset_detail(&self, asset: Option<String>) -> Result<BTreeMap<String, AssetDetail>> {
-        let mut parameters = BTreeMap::new();
-        if let Some(asset) = asset {
-            parameters.insert("asset".into(), asset);
-        }
+    pub async fn asset_detail(&self, asset: Option<&str>) -> Result<BTreeMap<String, AssetDetail>> {
+        let parameters = if let Some(asset) = asset {
+            [("asset", asset)]
+        } else {
+            [("", "")]
+        };
+        
         let request = build_signed_request(parameters, self.recv_window)?;
         self.client
             .get_signed_d("/sapi/v1/asset/assetDetail", request.as_str())
@@ -135,16 +137,19 @@ impl Savings {
     /// let coins = tokio_test::block_on(savings.deposit_address("CTR", None));
     /// assert!(coins.is_ok(), "{:?}", coins)
     /// ```
-    pub async fn deposit_address<S>(&self, coin: S, network: Option<String>) -> Result<DepositAddress>
+    pub async fn deposit_address<S>(&self, coin: S, network: Option<&str>) -> Result<DepositAddress>
     where
-        S: Into<String>,
+        S: AsRef<str>,
     {
-        let mut parameters = BTreeMap::new();
-        parameters.insert("coin".into(), coin.into());
-        if let Some(network) = network {
-            parameters.insert("network".into(), network);
-        }
-        let request = build_signed_request(parameters, self.recv_window)?;
+        let request = if let Some(network) = network {
+            let parameters = [("network", network),
+            ("coin", coin.as_ref())];
+            build_signed_request(parameters, self.recv_window)?
+        } else {
+            let parameters = [("coin", coin.as_ref())];
+            build_signed_request(parameters, self.recv_window)?
+        };
+        
         self.client
             .get_signed_d("/sapi/v1/capital/deposit/address", request.as_str())
             .await

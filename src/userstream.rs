@@ -1,5 +1,3 @@
-use serde_json::from_str;
-
 use crate::client::*;
 use crate::errors::*;
 use crate::rest_model::*;
@@ -22,12 +20,7 @@ impl UserStream {
     /// assert!(start.is_ok(), "{:?}", start);
     /// assert!(start.unwrap().listen_key.len() > 0)
     /// ```
-    pub async fn start(&self) -> Result<UserDataStream> {
-        let data = self.client.post(USER_DATA_STREAM, None).await?;
-        let user_data_stream: UserDataStream = from_str(data.as_str())?;
-
-        Ok(user_data_stream)
-    }
+    pub async fn start(&self) -> Result<UserDataStream> { self.client.post(USER_DATA_STREAM, None).await }
 
     /// Keep the connection alive, as the listen key becomes invalid after 60mn
     /// # Examples
@@ -40,11 +33,7 @@ impl UserStream {
     /// assert!(keep_alive.is_ok())
     /// ```
     pub async fn keep_alive(&self, listen_key: &str) -> Result<Success> {
-        let data = self.client.put(USER_DATA_STREAM, listen_key, None).await?;
-
-        let success: Success = from_str(data.as_str())?;
-
-        Ok(success)
+        self.client.put(USER_DATA_STREAM, listen_key, None).await
     }
 
     /// Invalidate the listen key
@@ -58,10 +47,6 @@ impl UserStream {
     /// assert!(close.is_ok())
     /// ```
     pub async fn close(&self, listen_key: &str) -> Result<Success> {
-        let data = self.client.delete(USER_DATA_STREAM, listen_key, None).await?;
-
-        let success: Success = from_str(data.as_str())?;
-
-        Ok(success)
+        self.client.delete(USER_DATA_STREAM, listen_key, None).await
     }
 }
