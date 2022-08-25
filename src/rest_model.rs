@@ -42,16 +42,16 @@ pub struct Symbol {
 impl Symbol {
     pub fn lot_size(&self) -> Option<Filters> {
         self.filters
-            .clone()
-            .into_iter()
+            .iter()
             .find(|filter| matches!(filter, Filters::LotSize { .. }))
+            .cloned()
     }
 
     pub fn market_lot_size(&self) -> Option<Filters> {
         self.filters
-            .clone()
-            .into_iter()
+            .iter()
             .find(|filter| matches!(filter, Filters::MarketLotSize { .. }))
+            .cloned()
     }
 }
 

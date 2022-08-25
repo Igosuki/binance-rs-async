@@ -10,9 +10,9 @@ pub struct FuturesGeneral {
 
 impl FuturesGeneral {
     // Test connectivity
-    pub async fn ping(&self) -> Result<String> {
+    pub async fn ping(&self) -> Result<&'static str> {
         self.client.get("/fapi/v1/ping", None).await?;
-        Ok("pong".into())
+        Ok("pong")
     }
 
     // Check server time
@@ -29,20 +29,14 @@ impl FuturesGeneral {
     // Get Symbol information
     pub async fn get_symbol_info<S>(&self, symbol: S) -> Result<Symbol>
     where
-        S: Into<String>,
+        S: AsRef<str>,
     {
-        let symbol_string = symbol.into();
-        let upper_symbol = symbol_string.to_uppercase();
-        match self.exchange_info().await {
-            Ok(info) => {
-                for item in info.symbols {
-                    if item.symbol == upper_symbol {
-                        return Ok(item);
-                    }
-                }
-                Err(Error::UnknownSymbol(symbol_string.clone()))
-            }
-            Err(e) => Err(e),
-        }
+        let upper_symbol = symbol.as_ref().to_uppercase();
+        self.exchange_info().await.and_then(|info| {
+            info.symbols
+                .into_iter()
+                .find(|s| s.symbol == upper_symbol)
+                .ok_or_else(||Error::UnknownSymbol(symbol.as_ref().to_string()))
+        })
     }
 }

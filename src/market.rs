@@ -3,7 +3,7 @@ use crate::errors::*;
 use crate::rest_model::*;
 use crate::util::*;
 use serde_json::Value;
-use std::collections::BTreeMap;
+// use std::collections::BTreeMap;
 
 static API_V3_DEPTH: &str = "/api/v3/depth";
 static API_V3_TICKER_PRICE: &str = "/api/v3/ticker/price";
@@ -23,12 +23,9 @@ pub struct Market {
 impl Market {
     fn symbol_request<S>(&self, symbol: S) -> String
     where
-        S: Into<String>,
+        S: AsRef<str>,
     {
-        let mut parameters: BTreeMap<String, String> = BTreeMap::new();
-
-        parameters.insert("symbol".into(), symbol.into());
-        build_request(&parameters)
+        build_request([("symbol", symbol)])
     }
 
     /// Order book (Default 100; max 5000)
@@ -41,7 +38,7 @@ impl Market {
     /// ```
     pub async fn get_depth<S>(&self, symbol: S) -> Result<OrderBook>
     where
-        S: Into<String>,
+        S: AsRef<str>,
     {
         let request = self.symbol_request(symbol);
         self.client.get(API_V3_DEPTH, Some(&request)).await
@@ -60,13 +57,10 @@ impl Market {
     /// ```
     pub async fn get_custom_depth<S>(&self, symbol: S, limit: u16) -> Result<OrderBook>
     where
-        S: Into<String>,
+        S: AsRef<str>,
     {
-        let mut parameters: BTreeMap<String, String> = BTreeMap::new();
-        parameters.insert("symbol".into(), symbol.into());
-        parameters.insert("limit".into(), limit.to_string());
-
-        let request = build_request(&parameters);
+        let parameters = [("symbol", symbol.as_ref().to_string()), ("limit", limit.to_string())];
+        let request = build_request(parameters);
         self.client.get(API_V3_DEPTH, Some(&request)).await
     }
 
@@ -92,7 +86,7 @@ impl Market {
     /// ```
     pub async fn get_price<S>(&self, symbol: S) -> Result<SymbolPrice>
     where
-        S: Into<String>,
+        S: AsRef<str>,
     {
         let request = self.symbol_request(symbol);
         self.client.get(API_V3_TICKER_PRICE, Some(&request)).await
@@ -108,7 +102,7 @@ impl Market {
     /// ```
     pub async fn get_average_price<S>(&self, symbol: S) -> Result<AveragePrice>
     where
-        S: Into<String>,
+        S: AsRef<str>,
     {
         let request = self.symbol_request(symbol);
         self.client.get(API_V3_AVG_PRICE, Some(&request)).await
@@ -137,7 +131,7 @@ impl Market {
     /// ```
     pub async fn get_book_ticker<S>(&self, symbol: S) -> Result<Tickers>
     where
-        S: Into<String>,
+        S: AsRef<str>,
     {
         let request = self.symbol_request(symbol);
         self.client.get(API_V3_BOOK_TICKER, Some(&request)).await
@@ -153,7 +147,7 @@ impl Market {
     /// ```
     pub async fn get_24h_price_stats<S>(&self, symbol: S) -> Result<PriceStats>
     where
-        S: Into<String>,
+        S: AsRef<str>,
     {
         let request = self.symbol_request(symbol);
         self.client.get(API_V3_24H_TICKER, Some(&request)).await
@@ -178,31 +172,22 @@ impl Market {
         limit: S5,
     ) -> Result<Vec<AggTrade>>
     where
-        S1: Into<String>,
+        S1: AsRef<str>,
         S2: Into<Option<u64>>,
         S3: Into<Option<u64>>,
         S4: Into<Option<u64>>,
         S5: Into<Option<u16>>,
     {
-        let mut parameters: BTreeMap<String, String> = BTreeMap::new();
+        let parameters = IntoIterator::into_iter([
+            Some(("symbol", symbol.as_ref().to_string())),
+            limit.into().map(|l| ("limit", l.to_string())),
+            start_time.into().map(|s| ("startTime", s.to_string())),
+            end_time.into().map(|e| ("endTime", e.to_string())),
+            from_id.into().map(|f| ("fromId", f.to_string())),
+        ])
+        .flatten();
 
-        parameters.insert("symbol".into(), symbol.into());
-
-        // Add three optional parameters
-        if let Some(lt) = limit.into() {
-            parameters.insert("limit".into(), format!("{}", lt));
-        }
-        if let Some(st) = start_time.into() {
-            parameters.insert("startTime".into(), format!("{}", st));
-        }
-        if let Some(et) = end_time.into() {
-            parameters.insert("endTime".into(), format!("{}", et));
-        }
-        if let Some(fi) = from_id.into() {
-            parameters.insert("fromId".into(), format!("{}", fi));
-        }
-
-        let request = build_request(&parameters);
+        let request = build_request(parameters);
 
         self.client.get_p(API_V3_AGG_TRADES, Some(&request)).await
     }
@@ -231,23 +216,16 @@ impl Market {
         S4: Into<Option<u64>>,
         S5: Into<Option<u64>>,
     {
-        let mut parameters: BTreeMap<String, String> = BTreeMap::new();
+        let parameters = IntoIterator::into_iter([
+            Some(("symbol", symbol.into())),
+            Some(("interval", interval.into())),
+            limit.into().map(|l| ("limit", l.to_string())),
+            start_time.into().map(|s| ("startTime", s.to_string())),
+            end_time.into().map(|e| ("endTime", e.to_string())),
+        ])
+        .flatten();
 
-        parameters.insert("symbol".into(), symbol.into());
-        parameters.insert("interval".into(), interval.into());
-
-        // Add three optional parameters
-        if let Some(lt) = limit.into() {
-            parameters.insert("limit".into(), format!("{}", lt));
-        }
-        if let Some(st) = start_time.into() {
-            parameters.insert("startTime".into(), format!("{}", st));
-        }
-        if let Some(et) = end_time.into() {
-            parameters.insert("endTime".into(), format!("{}", et));
-        }
-
-        let request = build_request(&parameters);
+        let request = build_request(parameters);
 
         let parsed_data: Vec<Vec<Value>> = self.client.get(API_V3_KLINES, Some(&request)).await?;
 
