@@ -106,7 +106,7 @@ impl Client {
             .map(|r| format!("{}{}?{}", self.host, endpoint, r))
             .unwrap_or_else(|| format!("{}{}", self.host, endpoint));
 
-        let response = reqwest::get(url).await?;
+        let response = self.inner.get(&url).send().await?;
 
         self.handler(response).await
     }
