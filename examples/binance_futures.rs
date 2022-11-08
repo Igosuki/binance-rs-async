@@ -108,4 +108,9 @@ async fn market_data() {
         Ok(answer) => info!("Open interest: {:?}", answer),
         Err(e) => error!("Error: {:?}", e),
     }
+
+    match market.get_funding_rate("BTCUSDT", None, None, None).await {
+        Ok(answer) => info!("Funding: {:?}", answer),
+        Err(e) => error!("Error: {:?}", e),
+    }
 }
