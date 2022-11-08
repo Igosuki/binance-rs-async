@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use crate::client::*;
 use crate::errors::*;
 use crate::futures::rest_model::*;
@@ -11,7 +13,7 @@ pub struct FuturesGeneral {
 impl FuturesGeneral {
     // Test connectivity
     pub async fn ping(&self) -> Result<&'static str> {
-        self.client.get("/fapi/v1/ping", None).await?;
+        self.client.get::<HashMap<(), ()>>("/fapi/v1/ping", None).await?;
         Ok("pong")
     }
 
