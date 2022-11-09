@@ -1518,6 +1518,7 @@ pub struct DepositRecord {
     pub tx_id: String,
     pub insert_time: Option<u64>,
     pub transfer_type: u8,
+    #[serde(default)]
     pub unlock_confirm: u32,
     pub confirm_times: String,
     pub wallet_type: Option<u32>,
