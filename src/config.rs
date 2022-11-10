@@ -22,7 +22,7 @@ impl Config {
             ws_endpoint: "wss://stream.binance.com:9443".into(),
 
             futures_rest_api_endpoint: "https://fapi.binance.com".into(),
-            futures_ws_endpoint: "wss://fstream.binance.com:9443".into(),
+            futures_ws_endpoint: "wss://fstream.binance.com".into(),
 
             recv_window: 5000,
         }
