@@ -23,6 +23,7 @@ static SAPI_V1_ASSET_DUST: &str = "/sapi/v1/asset/dust";
 static SAPI_V1_ASSET_ASSETDIVIDEND: &str = "/sapi/v1/asset/assetDividend";
 static SAPI_V1_ASSET_ASSETDETAIL: &str = "/sapi/v1/asset/assetDetail";
 static SAPI_V1_ASSET_TRADEFEE: &str = "/sapi/v1/asset/tradeFee";
+static SAPI_V1_ASSET_TRADEFEE_US: &str = "/sapi/v1/asset/query/trading-fee";
 static SAPI_V1_ASSET_TRANSFER: &str = "/sapi/v1/asset/transfer";
 static SAPI_V1_ASSET_GETFUNDINGASSET: &str = "/sapi/v1/asset/get-funding-asset";
 static SAPI_V1_ASSET_APIRESTRICTIONS: &str = "/sapi/v1/account/apiRestrictions";
@@ -34,6 +35,7 @@ static DEFAULT_WALLET_HISTORY_QUERY_INTERVAL_DAYS: i64 = 90;
 pub struct Wallet {
     pub client: Client,
     pub recv_window: u64,
+    pub binance_us_api: bool,
 }
 
 impl Wallet {
@@ -462,7 +464,15 @@ impl Wallet {
         let mut query = HashMap::new();
         query.insert("symbol", symbol);
         self.client
-            .get_signed_p(SAPI_V1_ASSET_TRADEFEE, Some(query), self.recv_window)
+            .get_signed_p(
+                if self.binance_us_api {
+                    SAPI_V1_ASSET_TRADEFEE_US
+                } else {
+                    SAPI_V1_ASSET_TRADEFEE
+                },
+                Some(query),
+                self.recv_window,
+            )
             .await
     }
 
