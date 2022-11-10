@@ -112,6 +112,7 @@ impl Binance for crate::wallet::Wallet {
         Self {
             client: Client::new(api_key, secret_key, config.rest_api_endpoint.clone()),
             recv_window: config.recv_window,
+            binance_us_api: config.binance_us_api,
         }
     }
 }

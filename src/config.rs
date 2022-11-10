@@ -7,6 +7,8 @@ pub struct Config {
     pub futures_ws_endpoint: String,
 
     pub recv_window: u64,
+
+    pub binance_us_api: bool,
 }
 
 impl Config {
@@ -25,6 +27,7 @@ impl Config {
             futures_ws_endpoint: "wss://fstream.binance.com:9443".into(),
 
             recv_window: 5000,
+            binance_us_api: false,
         }
     }
 
