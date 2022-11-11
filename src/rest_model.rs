@@ -1406,6 +1406,7 @@ pub struct WalletCoinInfo {
 pub struct CoinNetwork {
     pub address_regex: String,
     pub coin: String,
+    #[serde(default)]
     pub deposit_desc: String,
     pub deposit_enable: bool,
     pub is_default: bool,
@@ -1416,6 +1417,7 @@ pub struct CoinNetwork {
     pub reset_address_status: bool,
     pub special_tips: Option<String>,
     pub un_lock_confirm: u32,
+    #[serde(default)]
     pub withdraw_desc: String,
     pub withdraw_enable: bool,
     #[serde(with = "string_or_float")]
@@ -1426,6 +1428,7 @@ pub struct CoinNetwork {
     pub withdraw_max: f64,
     #[serde(with = "string_or_float")]
     pub withdraw_min: f64,
+    #[serde(default)]
     pub same_address: bool,
 }
 
