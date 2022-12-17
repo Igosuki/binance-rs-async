@@ -1,4 +1,5 @@
 use chrono::{DateTime, Utc};
+use serde_repr::{Deserialize_repr, Serialize_repr};
 use std::collections::HashMap;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -413,7 +414,8 @@ pub struct AggTrade {
     pub qty: f64,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize_repr, Deserialize_repr, Clone, PartialEq)]
+#[repr(u8)]
 pub enum MarginTransferType {
     FromMainToMargin = 1,
     FromMarginToMain = 2,
