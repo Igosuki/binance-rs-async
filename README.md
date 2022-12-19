@@ -23,7 +23,8 @@ binance-rs-async = "1.2.1"
 - 1.0.0 Completely tested margin sapi endpoints
 - 1.0.* Changelog check to detect binance API changes
 - 1.1.* Wallet API
-- 1.2.* Complete tested futures (m-coin and usd-m futures)
+- 1.2.* Fixes for wallet and margin APIs
+- 1.3.* Complete tested futures (m-coin and usd-m futures)
 
 ## Risk Warning
 
