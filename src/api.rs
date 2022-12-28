@@ -25,7 +25,7 @@ pub trait Binance: Sized {
 impl Binance for General {
     fn new_with_config(api_key: Option<String>, secret_key: Option<String>, config: &Config) -> General {
         General {
-            client: Client::new(api_key, secret_key, config.rest_api_endpoint.clone()),
+            client: Client::new(api_key, secret_key, config.rest_api_endpoint.clone(), config.timeout),
         }
     }
 }
@@ -33,7 +33,7 @@ impl Binance for General {
 impl Binance for Account {
     fn new_with_config(api_key: Option<String>, secret_key: Option<String>, config: &Config) -> Account {
         Account {
-            client: Client::new(api_key, secret_key, config.rest_api_endpoint.clone()),
+            client: Client::new(api_key, secret_key, config.rest_api_endpoint.clone(), config.timeout),
             recv_window: config.recv_window,
         }
     }
@@ -52,7 +52,7 @@ impl Binance for crate::savings::Savings {
 impl Binance for Market {
     fn new_with_config(api_key: Option<String>, secret_key: Option<String>, config: &Config) -> Market {
         Market {
-            client: Client::new(api_key, secret_key, config.rest_api_endpoint.clone()),
+            client: Client::new(api_key, secret_key, config.rest_api_endpoint.clone(), config.timeout),
             recv_window: config.recv_window,
         }
     }
@@ -61,7 +61,7 @@ impl Binance for Market {
 impl Binance for UserStream {
     fn new_with_config(api_key: Option<String>, secret_key: Option<String>, config: &Config) -> UserStream {
         UserStream {
-            client: Client::new(api_key, secret_key, config.rest_api_endpoint.clone()),
+            client: Client::new(api_key, secret_key, config.rest_api_endpoint.clone(), config.timeout),
             recv_window: config.recv_window,
         }
     }

@@ -25,9 +25,9 @@ impl Client {
     /// Returns a client based on the specified host and credentials
     /// Credentials do not need to be specified when using public endpoints
     /// Host is mandatory
-    pub fn new(api_key: Option<String>, secret_key: Option<String>, host: String) -> Self {
+    pub fn new(api_key: Option<String>, secret_key: Option<String>, host: String, timeout: u64) -> Self {
         let builder: reqwest::ClientBuilder = reqwest::ClientBuilder::new();
-        let builder = builder.timeout(Duration::from_secs(2));
+        let builder = builder.timeout(Duration::from_secs(timeout));
         Client {
             // Does it ever make sense for api_key and secret_key to be ""?
             api_key: api_key.unwrap_or_else(|| "".into()),
