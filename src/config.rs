@@ -9,6 +9,8 @@ pub struct Config {
     pub recv_window: u64,
 
     pub binance_us_api: bool,
+
+    pub timeout: u64,
 }
 
 impl Config {
@@ -28,6 +30,8 @@ impl Config {
 
             recv_window: 5000,
             binance_us_api: false,
+
+            timeout: 2,
         }
     }
 
@@ -66,6 +70,11 @@ impl Config {
 
     pub fn set_recv_window(mut self, recv_window: u64) -> Self {
         self.recv_window = recv_window;
+        self
+    }
+
+    pub fn set_timeout(mut self, timout: u64) -> Self {
+        self.timeout = timout;
         self
     }
 }
