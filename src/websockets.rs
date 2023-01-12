@@ -98,7 +98,7 @@ impl<'a, WE: serde::de::DeserializeOwned> WebSockets<'a, WE> {
             .push(STREAM_ENDPOINT);
         url.set_query(Some(&format!("streams={}", combined_stream(endpoints))));
 
-        return self.handle_connect(url).await;
+        self.handle_connect(url).await
     }
 
     /// Connect to a websocket endpoint
@@ -106,7 +106,7 @@ impl<'a, WE: serde::de::DeserializeOwned> WebSockets<'a, WE> {
         let wss: String = format!("{}/{}/{}", self.conf.ws_endpoint, WS_ENDPOINT, endpoint);
         let url = Url::parse(&wss)?;
 
-        return self.handle_connect(url).await;
+        self.handle_connect(url).await
     }
 
     async fn handle_connect(&mut self, url: Url) -> Result<()> {
