@@ -20,7 +20,7 @@ async fn main() {
     let wait_loop = tokio::spawn(async move {
         'hello: loop {
             select! {
-                event = logger_rx.recv() => println!("{:?}", event),
+                event = logger_rx.recv() => println!("{event:?}"),
                 _ = close_rx.recv() => break 'hello
             }
         }
@@ -63,13 +63,13 @@ async fn user_stream() {
         let listen_key = answer.listen_key;
 
         match user_stream.keep_alive(&listen_key).await {
-            Ok(msg) => println!("Keepalive user data stream: {:?}", msg),
-            Err(e) => println!("Error: {}", e),
+            Ok(msg) => println!("Keepalive user data stream: {msg:?}"),
+            Err(e) => println!("Error: {e}"),
         }
 
         match user_stream.close(&listen_key).await {
-            Ok(msg) => println!("Close user data stream: {:?}", msg),
-            Err(e) => println!("Error: {}", e),
+            Ok(msg) => println!("Close user data stream: {msg:?}"),
+            Err(e) => println!("Error: {e}"),
         }
     } else {
         println!("Not able to start an User Stream (Check your API_KEY)");
@@ -98,7 +98,7 @@ async fn user_stream_websocket() {
 
         web_socket.connect(&listen_key).await.unwrap(); // check error
         if let Err(e) = web_socket.event_loop(&keep_running).await {
-            println!("Error: {}", e);
+            println!("Error: {e}");
         }
         user_stream.close(&listen_key).await.unwrap();
         web_socket.disconnect().await.unwrap();
@@ -132,7 +132,7 @@ async fn market_websocket(logger_tx: UnboundedSender<WebsocketEvent>) {
 
     web_socket.connect(&agg_trade).await.unwrap(); // check error
     if let Err(e) = web_socket.event_loop(&keep_running).await {
-        println!("Error: {}", e);
+        println!("Error: {e}");
     }
     web_socket.disconnect().await.unwrap();
     println!("disconnected");
@@ -160,7 +160,7 @@ async fn all_trades_websocket(logger_tx: UnboundedSender<WebsocketEvent>) {
 
     web_socket.connect(agg_trade).await.unwrap(); // check error
     if let Err(e) = web_socket.event_loop(&keep_running).await {
-        println!("Error: {}", e);
+        println!("Error: {e}");
     }
     web_socket.disconnect().await.unwrap();
     println!("disconnected");
@@ -184,7 +184,7 @@ async fn kline_websocket(logger_tx: UnboundedSender<WebsocketEvent>) {
 
     web_socket.connect(&kline).await.unwrap(); // check error
     if let Err(e) = web_socket.event_loop(&keep_running).await {
-        println!("Error: {}", e);
+        println!("Error: {e}");
     }
     web_socket.disconnect().await.unwrap();
     println!("disconnected");
@@ -204,7 +204,7 @@ async fn last_price(logger_tx: UnboundedSender<WebsocketEvent>) {
                     let mut btcusdt = btcusdt.write().unwrap();
                     *btcusdt = tick_event.average_price.parse::<f32>().unwrap();
                     let btcusdt_close: f32 = tick_event.current_close.parse().unwrap();
-                    println!("{} - {}", btcusdt, btcusdt_close);
+                    println!("{btcusdt} - {btcusdt_close}");
 
                     if btcusdt_close as i32 == 7000 {
                         // Break the event loop
@@ -219,7 +219,7 @@ async fn last_price(logger_tx: UnboundedSender<WebsocketEvent>) {
 
     web_socket.connect(all_ticker).await.unwrap(); // check error
     if let Err(e) = web_socket.event_loop(&keep_running).await {
-        println!("Error: {}", e);
+        println!("Error: {e}");
     }
     web_socket.disconnect().await.unwrap();
     println!("disconnected");
@@ -235,14 +235,14 @@ async fn book_ticker(logger_tx: UnboundedSender<WebsocketEvent>) {
             logger_tx.send(we.clone()).unwrap();
         }
         if let WebsocketEventUntag::BookTicker(tick_event) = events {
-            println!("{:?}", tick_event)
+            println!("{tick_event:?}")
         }
         Ok(())
     });
 
     web_socket.connect(&book_ticker).await.unwrap(); // check error
     if let Err(e) = web_socket.event_loop(&keep_running).await {
-        println!("Error: {}", e);
+        println!("Error: {e}");
     }
     web_socket.disconnect().await.unwrap();
     println!("disconnected");
@@ -262,14 +262,14 @@ async fn combined_orderbook(logger_tx: UnboundedSender<WebsocketEvent>) {
             }
             let data = event.data;
             if let WebsocketEventUntag::Orderbook(orderbook) = data {
-                println!("{:?}", orderbook)
+                println!("{orderbook:?}")
             }
             Ok(())
         });
 
     web_socket.connect_multiple(streams).await.unwrap(); // check error
     if let Err(e) = web_socket.event_loop(&keep_running).await {
-        println!("Error: {}", e);
+        println!("Error: {e}");
     }
     web_socket.disconnect().await.unwrap();
     println!("disconnected");
@@ -288,7 +288,7 @@ async fn custom_event_loop(logger_tx: UnboundedSender<WebsocketEvent>) {
             }
             let data = event.data;
             if let WebsocketEventUntag::Orderbook(orderbook) = data {
-                println!("{:?}", orderbook)
+                println!("{orderbook:?}")
             }
             Ok(())
         });
@@ -302,11 +302,11 @@ async fn custom_event_loop(logger_tx: UnboundedSender<WebsocketEvent>) {
                             continue;
                         }
                         let event: CombinedStreamEvent<WebsocketEventUntag> = from_str(msg.as_str()).unwrap();
-                        eprintln!("event = {:?}", event);
+                        eprintln!("event = {event:?}");
                     }
                     Message::Ping(_) | Message::Pong(_) | Message::Binary(_) => {}
                     Message::Close(e) => {
-                        eprintln!("closed stream = {:?}", e);
+                        eprintln!("closed stream = {e:?}");
                         break;
                     }
                 }

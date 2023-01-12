@@ -142,8 +142,8 @@ impl Client {
 
     pub async fn put<T: DeserializeOwned>(&self, endpoint: &str, listen_key: &str, symbol: Option<&str>) -> Result<T> {
         let data = symbol
-            .map(|s| format!("listenKey={}&symbol={}", listen_key, s))
-            .unwrap_or_else(|| format!("listenKey={}", listen_key));
+            .map(|s| format!("listenKey={listen_key}&symbol={s}"))
+            .unwrap_or_else(|| format!("listenKey={listen_key}"));
         let headers = self.build_headers(false)?;
         let url = format!("{}{}?{}", self.host, endpoint, data);
         let response = self.inner.put(&url).headers(headers).send().await?;
@@ -158,8 +158,8 @@ impl Client {
         symbol: Option<&str>,
     ) -> Result<T> {
         let data = symbol
-            .map(|s| format!("listenKey={}&symbol={}", listen_key, s))
-            .unwrap_or_else(|| format!("listenKey={}", listen_key));
+            .map(|s| format!("listenKey={listen_key}&symbol={s}"))
+            .unwrap_or_else(|| format!("listenKey={listen_key}"));
         let url = format!("{}{}?{}", self.host, endpoint, data);
         let response = self
             .inner
@@ -213,7 +213,7 @@ impl Client {
                 let error: BinanceContentError = response.json().await?;
                 Err(handle_content_error(error))
             }
-            s => Err(Error::Msg(format!("Received response: {:?}", s))),
+            s => Err(Error::Msg(format!("Received response: {s:?}"))),
         }
     }
 }

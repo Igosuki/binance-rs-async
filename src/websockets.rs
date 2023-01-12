@@ -25,21 +25,21 @@ pub static DAYTICKER: &str = "24hrTicker";
 
 pub fn all_ticker_stream() -> &'static str { "!ticker@arr" }
 
-pub fn ticker_stream(symbol: &str) -> String { format!("{}@ticker", symbol) }
+pub fn ticker_stream(symbol: &str) -> String { format!("{symbol}@ticker") }
 
-pub fn agg_trade_stream(symbol: &str) -> String { format!("{}@aggTrade", symbol) }
+pub fn agg_trade_stream(symbol: &str) -> String { format!("{symbol}@aggTrade") }
 
-pub fn trade_stream(symbol: &str) -> String { format!("{}@trade", symbol) }
+pub fn trade_stream(symbol: &str) -> String { format!("{symbol}@trade") }
 
-pub fn kline_stream(symbol: &str, interval: &str) -> String { format!("{}@kline_{}", symbol, interval) }
+pub fn kline_stream(symbol: &str, interval: &str) -> String { format!("{symbol}@kline_{interval}") }
 
-pub fn book_ticker_stream(symbol: &str) -> String { format!("{}@bookTicker", symbol) }
+pub fn book_ticker_stream(symbol: &str) -> String { format!("{symbol}@bookTicker") }
 
 pub fn all_book_ticker_stream() -> &'static str { "!bookTicker" }
 
 pub fn all_mini_ticker_stream() -> &'static str { "!miniTicker@arr" }
 
-pub fn mini_ticker_stream(symbol: &str) -> String { format!("{}@miniTicker", symbol) }
+pub fn mini_ticker_stream(symbol: &str) -> String { format!("{symbol}@miniTicker") }
 
 /// # Arguments
 ///
@@ -47,16 +47,14 @@ pub fn mini_ticker_stream(symbol: &str) -> String { format!("{}@miniTicker", sym
 /// * `levels`: 5, 10 or 20
 /// * `update_speed`: 1000 or 100
 pub fn partial_book_depth_stream(symbol: &str, levels: u16, update_speed: u16) -> String {
-    format!("{}@depth{}@{}ms", symbol, levels, update_speed)
+    format!("{symbol}@depth{levels}@{update_speed}ms")
 }
 
 /// # Arguments
 ///
 /// * `symbol`: the market symbol
 /// * `update_speed`: 1000 or 100
-pub fn diff_book_depth_stream(symbol: &str, update_speed: u16) -> String {
-    format!("{}@depth@{}ms", symbol, update_speed)
-}
+pub fn diff_book_depth_stream(symbol: &str, update_speed: u16) -> String { format!("{symbol}@depth@{update_speed}ms") }
 
 fn combined_stream(streams: Vec<String>) -> String { streams.join("/") }
 
@@ -100,13 +98,7 @@ impl<'a, WE: serde::de::DeserializeOwned> WebSockets<'a, WE> {
             .push(STREAM_ENDPOINT);
         url.set_query(Some(&format!("streams={}", combined_stream(endpoints))));
 
-        match connect_async(url).await {
-            Ok(answer) => {
-                self.socket = Some(answer);
-                Ok(())
-            }
-            Err(e) => Err(Error::Msg(format!("Error during handshake {}", e))),
-        }
+        return self.handle_connect(url).await;
     }
 
     /// Connect to a websocket endpoint
@@ -114,13 +106,17 @@ impl<'a, WE: serde::de::DeserializeOwned> WebSockets<'a, WE> {
         let wss: String = format!("{}/{}/{}", self.conf.ws_endpoint, WS_ENDPOINT, endpoint);
         let url = Url::parse(&wss)?;
 
-        match connect_async(url).await {
+        return self.handle_connect(url).await;
+    }
+
+    async fn handle_connect(&mut self, url: Url) -> Result<()> {
+        return match connect_async(url).await {
             Ok(answer) => {
                 self.socket = Some(answer);
                 Ok(())
             }
-            Err(e) => Err(Error::Msg(format!("Error during handshake {}", e))),
-        }
+            Err(e) => Err(Error::Msg(format!("Error during handshake {e}"))),
+        };
     }
 
     /// Disconnect from the endpoint
@@ -151,7 +147,7 @@ impl<'a, WE: serde::de::DeserializeOwned> WebSockets<'a, WE> {
                     }
                     Message::Ping(_) | Message::Pong(_) | Message::Binary(_) => {}
                     Message::Close(e) => {
-                        return Err(Error::Msg(format!("Disconnected {:?}", e)));
+                        return Err(Error::Msg(format!("Disconnected {e:?}")));
                     }
                 }
             }

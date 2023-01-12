@@ -301,8 +301,8 @@ impl Wallet {
         transfer_type: UniversalTransferType,
     ) -> Result<TransactionId> {
         let transfer = UniversalTransfer {
-            asset: asset.into(),
-            amount: amount.into(),
+            asset,
+            amount,
             from_symbol: from_symbol.map(Into::<String>::into),
             to_symbol: to_symbol.map(Into::<String>::into),
             transfer_type,
@@ -493,7 +493,7 @@ impl Wallet {
     ) -> Result<WalletFundings> {
         let mut query = HashMap::new();
         query.insert("asset", asset);
-        query.insert("need_btc_valuation", need_btc_valuation.map(|b| format!("{}", b)));
+        query.insert("need_btc_valuation", need_btc_valuation.map(|b| format!("{b}")));
         self.client
             .post_signed_p(SAPI_V1_ASSET_GETFUNDINGASSET, Some(query), self.recv_window)
             .await
