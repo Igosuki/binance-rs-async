@@ -56,7 +56,7 @@ impl Symbol {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 #[serde(tag = "filterType")]
 pub enum Filters {
     #[serde(rename = "PRICE_FILTER")]
@@ -150,7 +150,7 @@ pub struct AccountInformation {
     pub update_time: i64,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum MarketPermission {
     Spot,
@@ -159,7 +159,7 @@ pub enum MarketPermission {
     Other,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum AccountType {
     Spot,
@@ -302,14 +302,14 @@ pub struct UserDataStream {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Success {}
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 #[serde(untagged)]
 pub enum Prices {
     AllPrices(Vec<SymbolPrice>),
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub struct SymbolPrice {
     pub symbol: String,
     #[serde(with = "string_or_float")]
@@ -323,19 +323,19 @@ pub struct AveragePrice {
     pub price: f64,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 #[serde(untagged)]
 pub enum BookTickers {
     AllBookTickers(Vec<Tickers>),
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub enum KlineSummaries {
     AllKlineSummaries(Vec<KlineSummary>),
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct Tickers {
     pub symbol: String,
@@ -414,7 +414,7 @@ pub struct AggTrade {
     pub qty: f64,
 }
 
-#[derive(Debug, Serialize_repr, Deserialize_repr, Clone, PartialEq)]
+#[derive(Debug, Serialize_repr, Deserialize_repr, Clone, PartialEq, Eq)]
 #[repr(u8)]
 pub enum MarginTransferType {
     FromMainToMargin = 1,
@@ -430,7 +430,7 @@ pub struct Transfer {
     pub transfer_type: MarginTransferType,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum IsolatedMarginTransferType {
     Spot,
@@ -471,7 +471,7 @@ pub enum TimeInForce {
     Other,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum OrderResponse {
     Ack,
@@ -481,7 +481,7 @@ pub enum OrderResponse {
     Other,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum SideEffectType {
     NoSideEffect,
@@ -491,7 +491,7 @@ pub enum SideEffectType {
     Other,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum OrderSide {
     Buy,
@@ -511,7 +511,7 @@ impl Default for OrderSide {
 /// MARKET orders using quantity specifies how much a user wants to buy or sell based on the market price.
 /// MARKET orders using quoteOrderQty specifies the amount the user wants to spend (when buying) or receive (when selling) of the quote asset; the correct quantity will be determined based on the market liquidity and quoteOrderQty.
 /// MARKET orders using quoteOrderQty will not break LOT_SIZE filter rules; the order will execute a quantity that will have the notional value as close as possible to quoteOrderQty.
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum OrderType {
     Limit,
@@ -758,7 +758,7 @@ pub struct RepayState {
     pub isolated_symbol: Option<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum TransactionStatus {
     Pending,
@@ -780,7 +780,7 @@ pub struct LoanState {
     pub tx_id: u64,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub enum TransferType {
     #[serde(rename = "ROLL_IN")]
     RollIn,
@@ -803,7 +803,7 @@ pub struct OrderState {
     pub transfer_type: TransferType,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum InterestType {
     /// First interested charged on borrow
@@ -939,7 +939,7 @@ pub struct IsolatedMarginAccountAssetDetails {
     pub trade_enabled: bool,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum MarginLevelStatus {
     Excessive,
@@ -1165,7 +1165,7 @@ pub struct MaxTransferableAmount {
     pub amount: f64,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum SymbolStatus {
     PreTrading,
@@ -1180,7 +1180,7 @@ pub enum SymbolStatus {
     Other,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum SymbolPermission {
     Spot,
@@ -1190,7 +1190,7 @@ pub enum SymbolPermission {
 }
 
 /// Status of an order, this can typically change over time
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum OrderStatus {
     /// The order has been accepted by the engine.
@@ -1211,7 +1211,7 @@ pub enum OrderStatus {
     Trade,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum OCOStatus {
     Response,
@@ -1219,7 +1219,7 @@ pub enum OCOStatus {
     AllDone,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum OCOOrderStatus {
     Executing,
@@ -1246,7 +1246,7 @@ pub struct MarginOCOOrderQuery {
     pub orig_client_order_id: Option<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum ContingencyType {
     OCO,
@@ -1263,7 +1263,7 @@ pub enum ContingencyType {
 ///   "limit": 1200
 /// }
 ///
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum RateLimitType {
     RequestWeight,
@@ -1274,7 +1274,7 @@ pub enum RateLimitType {
 }
 
 /// Rate Limit Interval, used by RateLimitType
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum RateLimitInterval {
     Second,
@@ -1457,7 +1457,7 @@ pub struct SnapshotVosData {
     pub total_asset_of_btc: f64,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum AccountSnapshotType {
     Spot,
@@ -1595,7 +1595,7 @@ pub struct DepositAddress {
     pub url: Option<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum UniversalTransferType {
     /// Spot account transfer to USDⓈ-M Futures account
@@ -1668,7 +1668,7 @@ pub struct UniversalTransferHistoryQuery {
     pub to_symbol: Option<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum UniversalTransferStatus {
     Confirmed,
