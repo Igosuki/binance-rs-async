@@ -26,3 +26,6 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           version: ${{ inputs.version }}
+          crate-name: binance-rs-async
+          check-semver: true
+
