@@ -10,31 +10,10 @@ pub struct Config {
 
     pub binance_us_api: bool,
 
-    pub timeout: u64,
+    pub timeout: Option<u64>,
 }
 
 impl Config {
-    /// Configure binance with default production endpoints
-    /// # Examples
-    /// ```
-    /// use binance::config::Config;
-    /// let config = Config::default();
-    /// ```
-    pub fn default() -> Config {
-        Config {
-            rest_api_endpoint: "https://api.binance.com".into(),
-            ws_endpoint: "wss://stream.binance.com:9443".into(),
-
-            futures_rest_api_endpoint: "https://fapi.binance.com".into(),
-            futures_ws_endpoint: "wss://fstream.binance.com".into(),
-
-            recv_window: 5000,
-            binance_us_api: false,
-
-            timeout: 2,
-        }
-    }
-
     /// Configure binance with all testnet endpoints
     /// # Examples
     /// ```
@@ -166,7 +145,30 @@ impl Config {
     /// config.set_timeout(3);
     /// ```
     pub fn set_timeout(mut self, timeout: u64) -> Self {
-        self.timeout = timeout;
+        self.timeout = Some(timeout);
         self
+    }
+}
+
+impl Default for Config {
+    /// Configure binance with default production endpoints
+    /// # Examples
+    /// ```
+    /// use binance::config::Config;
+    /// let config = Config::default();
+    /// ```
+    fn default() -> Config {
+        Config {
+            rest_api_endpoint: "https://api.binance.com".into(),
+            ws_endpoint: "wss://stream.binance.com:9443".into(),
+
+            futures_rest_api_endpoint: "https://fapi.binance.com".into(),
+            futures_ws_endpoint: "wss://fstream.binance.com".into(),
+
+            recv_window: 5000,
+            binance_us_api: false,
+
+            timeout: None,
+        }
     }
 }
