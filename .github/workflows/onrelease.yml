@@ -1,0 +1,53 @@
+name: Release a crate
+on:
+  pull_request:
+    types: closed
+    branches: [master]
+
+jobs:
+  info:
+    if: github.event.pull_request.merged
+    outputs:
+      go: ${{ steps.meta.outputs.is-release }}
+      crate: ${{ steps.meta.outputs.crate-names }}
+      version: ${{ steps.meta.outputs.version-actual }}
+      notes: ${{ steps.meta.outputs.notes }}
+
+    runs-on: ubuntu-latest
+    steps:
+      - id: meta
+        uses: cargo-bins/release-meta@v1
+        with:
+          event-data: ${{ toJSON(github.event) }}
+          extract-notes-under: '### Release notes'
+
+  release:
+    needs: info
+    #if: needs.info.go == 'true'
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { o: macos-latest,    t: x86_64-apple-darwin        }
+          - { o: macos-latest,    t: aarch64-apple-darwin       }
+          - { o: ubuntu-latest,   t: x86_64-unknown-linux-musl  }
+          - { o: ubuntu-latest,   t: aarch64-unknown-linux-musl }
+          - { o: windows-latest,  t: x86_64-pc-windows-msvc     }
+          - { o: windows-latest,  t: aarch64-pc-windows-msvc    }
+
+    name: ${{ matrix.t }}
+    runs-on: ${{ matrix.o }}
+    steps:
+      - run: echo ${{ needs.info.outputs.go }}
+      - uses: actions/checkout@v3
+      - uses: cargo-bins/release-rust
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          publish-token: ${{ secrets.CRATES_TOKEN }}
+          toolchain: stable
+          target: ${{ matrix.t }}
+          packaging: tar+zstd
+          crates: ${{ needs.info.outputs.crate }}
+          release-tag: v${{ needs.info.outputs.version }}
+          release-notes: ${{ needs.info.outputs.notes }}
