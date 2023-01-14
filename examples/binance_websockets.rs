@@ -304,7 +304,7 @@ async fn custom_event_loop(logger_tx: UnboundedSender<WebsocketEvent>) {
                         let event: CombinedStreamEvent<WebsocketEventUntag> = from_str(msg.as_str()).unwrap();
                         eprintln!("event = {event:?}");
                     }
-                    Message::Ping(_) | Message::Pong(_) | Message::Binary(_) => {}
+                    Message::Ping(_) | Message::Pong(_) | Message::Binary(_) | Message::Frame(_) => {}
                     Message::Close(e) => {
                         eprintln!("closed stream = {e:?}");
                         break;
