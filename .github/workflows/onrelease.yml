@@ -23,7 +23,7 @@ jobs:
 
   release:
     needs: info
-    #if: needs.info.go == 'true'
+    if: needs.info.go == 'true'
 
     strategy:
       fail-fast: false
