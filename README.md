@@ -61,3 +61,10 @@ cargo semver-checks check-release --package binance-rs-async --verbose
 ## Contribution
 
 Simply create a pull request. Properly documented code and tests (using binance testnet) are a must.
+
+## Running github actions locally : 
+
+```shell
+# Example that runs the make-release-pr workflow 
+act -P ubuntu-latest=cimg/rust:1.66.1-node workflow_dispatch -j make-release-pr --eventpath release.json --secret-file=secrets
+```
