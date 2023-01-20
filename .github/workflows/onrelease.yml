@@ -41,13 +41,12 @@ jobs:
     steps:
       - run: echo ${{ needs.info.outputs.go }}
       - uses: actions/checkout@v3
-      - uses: cargo-bins/release-rust
+      - run: cargo-bins/release-rust@v1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           publish-token: ${{ secrets.CRATES_TOKEN }}
           toolchain: stable
           target: ${{ matrix.t }}
-          packaging: tar+zstd
           crates: ${{ needs.info.outputs.crate }}
           release-tag: v${{ needs.info.outputs.version }}
           release-notes: ${{ needs.info.outputs.notes }}
