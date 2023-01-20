@@ -1577,6 +1577,7 @@ pub struct WithdrawalRecord {
     pub tx_id: String,
 }
 
+#[cfg(feature = "wallet_api")]
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct DepositAddressQuery {
