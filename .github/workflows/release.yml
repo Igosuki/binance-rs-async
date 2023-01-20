@@ -26,6 +26,7 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           version: ${{ inputs.version }}
+          crate-name: binance
           check-semver: true
           pr-title: "Release <%= crate.name %> <%= version.actual %> (was <%= version.previous %>)"
           pr-release-notes: true
