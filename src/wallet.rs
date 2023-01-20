@@ -239,7 +239,7 @@ impl Wallet {
         let total_duration =
             total_duration.unwrap_or_else(|| Duration::days(DEFAULT_WALLET_HISTORY_QUERY_INTERVAL_DAYS));
         let interval_duration = Duration::days(DEFAULT_WALLET_HISTORY_QUERY_INTERVAL_DAYS);
-        let mut current_period_end: DateTime<Utc> = start_from.unwrap_or(Utc::now());
+        let mut current_period_end: DateTime<Utc> = start_from.unwrap_or_else(Utc::now);
         let end_at = current_period_end.sub(total_duration);
         let mut current_period_start: DateTime<Utc> = current_period_end.sub(interval_duration);
 
