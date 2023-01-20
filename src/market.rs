@@ -189,7 +189,7 @@ impl Market {
     }
 
     /// Returns up to 'limit' klines for given symbol and interval ("1m", "5m", ...)
-    /// https://github.com/binance-exchange/binance-official-api-docs/blob/master/rest-api.md#klinecandlestick-data
+    /// <https://github.com/binance-exchange/binance-official-api-docs/blob/master/rest-api.md#klinecandlestick-data>
     /// # Examples
     /// ```rust
     /// use binance::{api::*, market::*, config::*};

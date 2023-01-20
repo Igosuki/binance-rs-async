@@ -30,7 +30,7 @@ static SAPI_V1_ASSET_APIRESTRICTIONS: &str = "/sapi/v1/account/apiRestrictions";
 static DEFAULT_WALLET_HISTORY_QUERY_INTERVAL_DAYS: i64 = 90;
 
 /// This struct acts as a gateway for all wallet endpoints.
-/// Preferably use the trait [`Binance`] to get an instance.
+/// Preferably use the trait [`crate::api::Binance`] to get an instance.
 #[derive(Clone)]
 pub struct Wallet {
     pub client: Client,

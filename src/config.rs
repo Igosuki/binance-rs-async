@@ -28,7 +28,7 @@ impl Config {
             .set_futures_ws_endpoint("wss://testnet.binancefuture.com")
     }
 
-    /// Sets the rest api endpoint. Defaults to "https://testnet.binance.vision".
+    /// Sets the rest api endpoint. Defaults to <https://testnet.binance.vision>.
     ///
     /// # Arguments
     ///
@@ -68,7 +68,7 @@ impl Config {
         self
     }
 
-    /// Sets the futures rest api endpoint. Defaults to "https://testnet.binancefuture.com".
+    /// Sets the futures rest api endpoint. Defaults to <https://testnet.binancefuture.com>.
     ///
     /// # Arguments
     ///

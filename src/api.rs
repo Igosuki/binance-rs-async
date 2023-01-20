@@ -11,8 +11,8 @@ pub trait Binance: Sized {
     }
 
     /// Create a binance API using environment variables for credentials
-    /// BINANCE_API_KEY=<your api key>
-    /// BINANCE_API_SECRET_KEY=<your secret key>
+    /// BINANCE_API_KEY=$YOUR_API_KEY
+    /// BINANCE_API_SECRET_KEY=$YOUR_SECRET_KEY
     fn new_with_env(config: &Config) -> Self {
         let api_key = std::env::var("BINANCE_API_KEY").ok();
         let secret = std::env::var("BINANCE_API_SECRET_KEY").ok();

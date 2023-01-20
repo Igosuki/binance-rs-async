@@ -7,7 +7,7 @@
 //! <br>
 //!
 //! This library provides access to all of Binance's APIs using .
-//! [`tokio`]: https://docs.rs/tokio/latest/tokio/
+//! [`tokio`]: <https://docs.rs/tokio/latest/tokio/>
 //!
 //! <br>
 //!

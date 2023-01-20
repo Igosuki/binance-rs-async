@@ -1582,7 +1582,7 @@ pub struct WithdrawalRecord {
 pub struct DepositAddressQuery {
     pub coin: String,
     /// If network is not send, return with default network of the coin.
-    /// You can get network and isDefault in networkList in the response [`Wallet::all_coin_info`]
+    /// You can get network and isDefault in networkList in the response [`crate::wallet::Wallet::all_coin_info`]
     pub network: Option<String>,
 }
 

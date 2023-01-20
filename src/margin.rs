@@ -35,7 +35,7 @@ static SAPI_V1_BNB_BURN: &str = "/sapi/v1/bnbBurn";
 static SAPI_V1_MARGIN_INTEREST_RATE_HISTORY: &str = "/sapi/v1/margin/interestRateHistory";
 
 /// This struct acts as a gateway for all margin endpoints.
-/// Preferably use the trait [`Binance`] to get an instance.
+/// Preferably use the trait [`crate::api::Binance`] to get an instance.
 #[derive(Clone)]
 pub struct Margin {
     pub client: Client,
