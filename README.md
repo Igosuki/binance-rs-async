@@ -42,8 +42,20 @@ dev box.
 
 ## Rust >= 1.37
 
-```rust
+```shell
 rustup install stable
+```
+
+## Cargo dependencies
+
+```shell
+cargo install cargo-semver-checks
+```
+
+## Checking documentation and release
+
+```shell
+cargo semver-checks check-release --package binance-rs-async --verbose
 ```
 
 ## Contribution
