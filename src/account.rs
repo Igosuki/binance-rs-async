@@ -8,6 +8,7 @@ static API_V3_OPEN_ORDERS: &str = "/api/v3/openOrders";
 static API_V3_ALL_ORDERS: &str = "/api/v3/allOrders";
 static API_V3_MYTRADES: &str = "/api/v3/myTrades";
 static API_V3_ORDER: &str = "/api/v3/order";
+static API_V3_CANCEL_REPLACE: &str = "/api/v3/order/cancelReplace";
 /// Endpoint for test orders.
 /// Orders issued to this endpoint are validated, but not sent into the matching engine.
 static API_V3_ORDER_TEST: &str = "/api/v3/order/test";
@@ -70,6 +71,43 @@ pub struct OrderCancellation {
     /// Cannot be greater than 60000
     pub recv_window: Option<u64>,
 }
+
+/// Order Cancellation and Replace Request
+/// Cancels an existing order and places a new order on the same symbol.
+#[derive(Default, Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct CancelReplaceRequest {
+    pub symbol: String,
+    pub side: OrderSide,
+    #[serde(rename = "type")]
+    pub order_type: OrderType,
+    pub cancel_replace_mode: CancelReplaceMode,
+    pub time_in_force: Option<TimeInForce>,
+    pub quantity: Option<f64>,
+    pub quote_order_qty: Option<f64>,
+    pub price: Option<f64>,
+    pub cancel_new_client_order_id: Option<String>,
+    pub cancel_orig_client_order_id: Option<String>,
+    pub cancel_order_id: Option<u64>,
+    pub new_client_order_id: Option<String>,
+    pub stop_price: Option<f64>,
+    pub iceberg_qty: Option<f64>,
+    pub new_order_resp_type: Option<OrderResponse>,
+    /// Cannot be greater than 60000
+    pub recv_window: Option<u64>,
+}
+
+impl CancelReplaceRequest {
+    pub fn valid(&self) -> Result<()> {
+        if self.iceberg_qty.is_some() && self.time_in_force != Some(TimeInForce::GTC) {
+            return Err(Error::InvalidOrderError {
+                msg: "Time in force has to be GTC for iceberg orders".to_string(),
+            });
+        }
+        Ok(())
+    }
+}
+
 
 /// Order Status Request
 /// perform an order status request for the account
@@ -322,6 +360,13 @@ impl Account {
         let recv_window = o.recv_window.unwrap_or(self.recv_window);
         let request = build_signed_request_p(o, recv_window)?;
         self.client.delete_signed(API_V3_ORDER, &request).await
+    }
+
+    pub async fn cancel_replace_order(&self, order: CancelReplaceRequest) -> Result<OrderCanceledReplaced> {
+        order.valid()?;
+        let recv_window = order.recv_window.unwrap_or(self.recv_window);
+        let request = build_signed_request_p(order, recv_window)?;
+        self.client.post_signed(API_V3_CANCEL_REPLACE, &request).await
     }
 
     /// Place a test cancel order
