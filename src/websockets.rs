@@ -110,13 +110,13 @@ impl<'a, WE: serde::de::DeserializeOwned> WebSockets<'a, WE> {
     }
 
     async fn handle_connect(&mut self, url: Url) -> Result<()> {
-        return match connect_async(url).await {
+        match connect_async(url).await {
             Ok(answer) => {
                 self.socket = Some(answer);
                 Ok(())
             }
             Err(e) => Err(Error::Msg(format!("Error during handshake {e}"))),
-        };
+        }
     }
 
     /// Disconnect from the endpoint
