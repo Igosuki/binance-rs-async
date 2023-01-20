@@ -41,7 +41,7 @@ jobs:
     steps:
       - run: echo ${{ needs.info.outputs.go }}
       - uses: actions/checkout@v3
-      - run: cargo-bins/release-rust@v1
+      - uses: cargo-bins/release-rust@v1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           publish-token: ${{ secrets.CRATES_TOKEN }}
