@@ -1,3 +1,5 @@
+pub static DATA_REST_ENDPOINT: &str = "https://data.binance.com";
+
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Config {
     pub rest_api_endpoint: String,
@@ -28,11 +30,11 @@ impl Config {
             .set_futures_ws_endpoint("wss://testnet.binancefuture.com")
     }
 
-    /// Sets the rest api endpoint. Defaults to <https://testnet.binance.vision>.
+    /// Sets the rest api endpoint. Defaults to <https://api.binance.com>.
     ///
     /// # Arguments
     ///
-    /// * `futures_rest_api_endpoint`:
+    /// * `rest_api_endpoint`:
     ///
     /// returns: Config
     ///
@@ -48,11 +50,11 @@ impl Config {
         self
     }
 
-    /// Sets the websocket endpoint. Defaults to "wss://testnet.binance.vision".
+    /// Sets the websocket endpoint. Defaults to "wss://stream.binance.com:9443".
     ///
     /// # Arguments
     ///
-    /// * `futures_ws_endpoint`:
+    /// * `ws_endpoint`:
     ///
     /// returns: Config
     ///
@@ -68,7 +70,7 @@ impl Config {
         self
     }
 
-    /// Sets the futures rest api endpoint. Defaults to <https://testnet.binancefuture.com>.
+    /// Sets the futures rest api endpoint. Defaults to <https://fapi.binance.com>.
     ///
     /// # Arguments
     ///
@@ -88,7 +90,7 @@ impl Config {
         self
     }
 
-    /// Sets the futures websocket endpoint. Defaults to "wss://testnet.binancefuture.com".
+    /// Sets the futures websocket endpoint. Defaults to "wss://fstream.binance.com".
     ///
     /// # Arguments
     ///

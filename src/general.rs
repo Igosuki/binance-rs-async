@@ -29,7 +29,8 @@ impl General {
     /// # Examples
     /// ```rust
     /// use binance::{api::*, general::*, config::*};
-    /// let general: General = Binance::new_with_env(&Config::default());
+    /// let conf = Config::default().set_rest_api_endpoint(DATA_REST_ENDPOINT);
+    /// let general: General = Binance::new_with_env(&conf);
     /// let server_time = tokio_test::block_on(general.get_server_time());
     /// assert!(server_time.is_ok(), "{:?}", server_time);
     /// ```
