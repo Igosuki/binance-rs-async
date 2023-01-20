@@ -1,0 +1,25 @@
+{
+  "extends": [
+    "config:base"
+  ],
+  "enabled": true,
+  "enabledManagers": [
+    "cargo",
+    "docker-compose",
+    "dockerfile",
+    "github-actions"
+  ],
+  "labels": [
+    "dependencies"
+  ],
+  "packageRules": [
+    {
+      "matchDepTypes": [
+        "optionalDependencies"
+      ],
+      "addLabels": [
+        "optional"
+      ]
+    }
+  ]
+}
