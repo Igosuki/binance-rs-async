@@ -122,7 +122,7 @@ impl Config {
     /// ```
     /// use binance::config::Config;
     /// let config = Config::default();
-    /// config.recv_window(300);
+    /// config.set_recv_window(300);
     /// ```
     pub fn set_recv_window(mut self, recv_window: u64) -> Self {
         self.recv_window = recv_window;
