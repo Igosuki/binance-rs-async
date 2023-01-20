@@ -33,7 +33,7 @@ reqwest = { version = "0.11", features = ["json"], default-features = false }
 ring = "0.16"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-serde_qs = "0.8"
+serde_qs = "0.11"
 serde_repr = "0.1.9"
 thiserror = "1.0"
 url = "2.2"
