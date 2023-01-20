@@ -222,6 +222,15 @@ pub struct OrderCanceled {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
+pub struct OrderCanceledReplaced {
+    pub cancel_result: String,
+    pub new_order_result: String,
+    pub cancel_response: OrderCanceled,
+    pub new_order_response: Transaction,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct Fill {
     #[serde(with = "string_or_float")]
     pub price: f64,
@@ -501,6 +510,21 @@ pub enum OrderSide {
 /// By default, buy
 impl Default for OrderSide {
     fn default() -> Self { Self::Buy }
+}
+
+/// The allowed values are:
+/// STOP_ON_FAILURE - If the cancel request fails, the new order placement will not be attempted.
+/// ALLOW_FAILURE - new order placement will be attempted even if cancel request fails.
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum CancelReplaceMode {
+    StopOnFailure,
+    AllowFailure,
+}
+
+/// By default, STOP_ON_FAILURE
+impl Default for CancelReplaceMode {
+    fn default() -> Self { Self::StopOnFailure }
 }
 
 /// Order types, the following restrictions apply
