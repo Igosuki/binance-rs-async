@@ -14,7 +14,8 @@ impl General {
     /// # Examples
     /// ```rust
     /// use binance::{api::*, general::*, config::*};
-    /// let general: General = Binance::new_with_env(&Config::default());
+    /// let conf = Config::default().set_rest_api_endpoint(DATA_REST_ENDPOINT);
+    /// let general: General = Binance::new_with_env(&conf);
     /// let pong = tokio_test::block_on(general.ping());
     /// assert!(pong.is_ok(), "{:?}", pong);
     /// assert_eq!(pong.unwrap(), "pong");
@@ -40,9 +41,10 @@ impl General {
     /// # Examples
     /// ```rust
     /// use binance::{api::*, general::*, config::*};
-    /// let general: General = Binance::new_with_env(&Config::default());
-    /// let excyahge_info = tokio_test::block_on(general.exchange_info());
-    /// assert!(excyahge_info.is_ok(), "{:?}", excyahge_info);
+    /// let conf = Config::default().set_rest_api_endpoint(DATA_REST_ENDPOINT);
+    /// let general: General = Binance::new_with_env(&conf);
+    /// let exchange_info = tokio_test::block_on(general.exchange_info());
+    /// assert!(exchange_info.is_ok(), "{:?}", exchange_info);
     /// ```
     pub async fn exchange_info(&self) -> Result<ExchangeInformation> {
         self.client.get("/api/v3/exchangeInfo", None).await
