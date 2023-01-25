@@ -613,8 +613,8 @@ pub struct MarginOrderCancellationResult {
     pub order_list_id: Option<i64>,
     pub transaction_time: Option<u64>,
     pub contingency_type: Option<ContingencyType>,
-    pub orders: Vec<OCOOrderDetail>,
-    pub order_reports: Vec<OCOOrderReport>,
+    pub orders: Option<Vec<OCOOrderDetail>>,
+    pub order_reports: Option<Vec<OCOOrderReport>>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
