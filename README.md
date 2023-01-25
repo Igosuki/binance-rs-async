@@ -15,7 +15,7 @@ Add this to your Cargo.toml
 
 ```toml
 [dependencies]
-binance-rs-async = "1.2.2"
+binance-rs-async = "1.3.0"
 ```
 
 ## Roadmap
@@ -23,8 +23,11 @@ binance-rs-async = "1.2.2"
 - 1.0.0 Completely tested margin sapi endpoints
 - 1.0.* Changelog check to detect binance API changes
 - 1.1.* Wallet API
-- 1.2.* Fixes for wallet and margin APIs
-- 1.3.* Complete tested futures (m-coin and usd-m futures)
+- 1.2.* to 1.3.* Continuous updates for wallet and margin APIs
+- 1.4.* Complete tested futures (m-coin and usd-m futures)
+
+## Breaking changes
+- 1.3.0 introduces optional fields for MarginOrderCancellationResult instead of definitely set fields
 
 ## Risk Warning
 
