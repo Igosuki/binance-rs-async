@@ -598,11 +598,11 @@ pub struct MarginOrderCancellationResult {
     pub client_order_id: Option<String>,
     #[serde(with = "string_or_float_opt")]
     pub price: Option<f64>,
-    #[serde(with = "string_or_float")]
+    #[serde(with = "string_or_float_opt")]
     pub orig_qty: Option<f64>,
-    #[serde(with = "string_or_float")]
+    #[serde(with = "string_or_float_opt")]
     pub executed_qty: Option<f64>,
-    #[serde(with = "string_or_float")]
+    #[serde(with = "string_or_float_opt")]
     pub cummulative_quote_qty: Option<f64>,
     pub status: Option<OrderStatus>,
     pub time_in_force: Option<TimeInForce>,
