@@ -593,24 +593,28 @@ pub struct MarginOrderCancellation {
 #[serde(rename_all = "camelCase")]
 pub struct MarginOrderCancellationResult {
     pub symbol: String,
-    pub order_id: u64,
-    pub orig_client_order_id: String,
-    pub client_order_id: String,
+    pub order_id: Option<u64>,
+    pub orig_client_order_id: Option<String>,
+    pub client_order_id: Option<String>,
+    #[serde(with = "string_or_float_opt")]
+    pub price: Option<f64>,
     #[serde(with = "string_or_float")]
-    pub price: f64,
+    pub orig_qty: Option<f64>,
     #[serde(with = "string_or_float")]
-    pub orig_qty: f64,
+    pub executed_qty: Option<f64>,
     #[serde(with = "string_or_float")]
-    pub executed_qty: f64,
-    #[serde(with = "string_or_float")]
-    pub cummulative_quote_qty: f64,
-    pub status: OrderStatus,
-    pub time_in_force: TimeInForce,
+    pub cummulative_quote_qty: Option<f64>,
+    pub status: Option<OrderStatus>,
+    pub time_in_force: Option<TimeInForce>,
     #[serde(rename(serialize = "type", deserialize = "type"))]
-    pub order_type: OrderType,
-    pub side: OrderSide,
+    pub order_type: Option<OrderType>,
+    pub side: Option<OrderSide>,
     pub is_isolated: Option<bool>,
     pub order_list_id: Option<i64>,
+    pub transaction_time: Option<u64>,
+    pub contingency_type: Option<ContingencyType>,
+    pub orders: Vec<OCOOrderDetail>,
+    pub order_reports: Vec<OCOOrderReport>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -696,6 +700,8 @@ pub struct OCOOrderReport {
     pub side: OrderSide,
     #[serde(default, with = "string_or_float_opt")]
     pub stop_price: Option<f64>,
+    #[serde(default, with = "string_or_float_opt")]
+    pub iceberg_qty: Option<f64>,
 }
 
 /// archived and is_isolated are only applicable to certain endpoints
