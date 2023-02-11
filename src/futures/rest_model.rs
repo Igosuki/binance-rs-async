@@ -447,6 +447,38 @@ pub struct Position {
     pub isolated_wallet: f64,
 }
 
+// https://binance-docs.github.io/apidocs/futures/en/#account-information-v2-user_data
+// it has differences from Position returned by positionRisk endpoint
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct AccountPosition {
+    pub symbol: String,
+    #[serde(with = "string_or_float")]
+    pub initial_margin: f64,
+    #[serde(with = "string_or_float", rename = "maintMargin")]
+    pub maintenance_margin: f64,
+    #[serde(with = "string_or_float")]
+    pub unrealized_profit: f64,
+    #[serde(with = "string_or_float")]
+    pub position_initial_margin: f64,
+    #[serde(with = "string_or_float")]
+    pub open_order_initial_margin: f64,
+    pub leverage: u64,
+    pub isolated: bool,
+    #[serde(with = "string_or_float")]
+    pub entry_price: f64,
+    #[serde(with = "string_or_float")]
+    pub max_notional: f64,
+    #[serde(with = "string_or_float")]
+    pub bid_notional: f64,
+    #[serde(with = "string_or_float")]
+    pub ask_notional: f64,
+    pub position_side: PositionSide,
+    #[serde(with = "string_or_float", rename = "positionAmt")]
+    pub position_amount: f64,
+    pub update_time: u64,
+}
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct AccountBalance {
