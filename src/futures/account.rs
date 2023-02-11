@@ -75,7 +75,7 @@ struct ChangePositionModeRequest {
 }
 
 impl FuturesAccount {
-    async fn place_order(&self, order: OrderRequest) -> Result<Transaction> {
+    pub async fn place_order(&self, order: OrderRequest) -> Result<Transaction> {
         self.client
             .post_signed_p("/fapi/v1/order", order, self.recv_window)
             .await
