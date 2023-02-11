@@ -64,6 +64,7 @@ pub struct OrderRequest {
     pub working_type: Option<WorkingType>,
     #[serde(serialize_with = "serialize_opt_as_uppercase")]
     pub price_protect: Option<bool>,
+    pub new_client_order_id: Option<String>,
 }
 
 #[derive(Serialize)]
@@ -112,6 +113,7 @@ impl FuturesAccount {
             callback_rate: None,
             working_type: None,
             price_protect: None,
+            new_client_order_id: None,
         };
         self.post_order(order).await
     }
@@ -138,6 +140,7 @@ impl FuturesAccount {
             callback_rate: None,
             working_type: None,
             price_protect: None,
+            new_client_order_id: None,
         };
         self.post_order(order).await
     }
@@ -163,6 +166,7 @@ impl FuturesAccount {
             callback_rate: None,
             working_type: None,
             price_protect: None,
+            new_client_order_id: None,
         };
         self.post_order(order).await
     }
@@ -188,6 +192,7 @@ impl FuturesAccount {
             callback_rate: None,
             working_type: None,
             price_protect: None,
+            new_client_order_id: None,
         };
         self.post_order(order).await
     }
