@@ -1,6 +1,9 @@
 use std::collections::BTreeMap;
 
-use super::rest_model::{AccountBalance, CanceledOrder, ChangeLeverageResponse, OrderType, Position, Transaction};
+use super::rest_model::{
+    AccountBalance, CanceledOrder, ChangeLeverageResponse, Order, OrderType, Position,
+    PositionSide, Transaction, WorkingType,
+};
 use crate::account::OrderCancellation;
 use crate::client::Client;
 use crate::errors::*;
@@ -8,27 +11,13 @@ use crate::rest_model::{OrderSide, TimeInForce};
 use crate::rest_model::{PairAndWindowQuery, PairQuery};
 use crate::util::*;
 use serde::Serializer;
+use serde_json::from_str;
 use std::fmt;
 
 #[derive(Clone)]
 pub struct FuturesAccount {
     pub client: Client,
     pub recv_window: u64,
-}
-
-#[derive(Deserialize, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub enum PositionSide {
-    Both,
-    Long,
-    Short,
-}
-
-#[derive(Deserialize, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub enum WorkingType {
-    MarkPrice,
-    ContractPrice,
 }
 
 /// Serialize bool as str
@@ -41,7 +30,10 @@ where
 }
 
 /// Serialize opt bool as str
-fn serialize_opt_as_uppercase<S, T>(t: &Option<T>, serializer: S) -> std::result::Result<S::Ok, S::Error>
+fn serialize_opt_as_uppercase<S, T>(
+    t: &Option<T>,
+    serializer: S,
+) -> std::result::Result<S::Ok, S::Error>
 where
     S: Serializer,
     T: ToString,
@@ -86,6 +78,16 @@ impl FuturesAccount {
         self.client
             .post_signed_p("/fapi/v1/order", order, self.recv_window)
             .await
+    }
+
+    pub async fn get_open_orders(&self, symbol: impl Into<String>) -> Result<Vec<Order>> {
+        let payload = build_signed_request_p([("symbol", symbol.into())], self.recv_window)?;
+        Ok(from_str(
+            &self
+                .client
+                .get_signed("/fapi/v1/openOrders", &payload)
+                .await?,
+        )?)
     }
 
     pub async fn limit_buy(
@@ -193,7 +195,9 @@ impl FuturesAccount {
     /// Place a cancellation order
     pub async fn cancel_order(&self, o: OrderCancellation) -> Result<CanceledOrder> {
         let recv_window = o.recv_window.unwrap_or(self.recv_window);
-        self.client.delete_signed_p("/fapi/v1/order", &o, recv_window).await
+        self.client
+            .delete_signed_p("/fapi/v1/order", &o, recv_window)
+            .await
     }
 
     pub async fn position_information<S>(&self, symbol: S) -> Result<Vec<Position>>
@@ -214,10 +218,16 @@ impl FuturesAccount {
     pub async fn account_balance(&self) -> Result<Vec<AccountBalance>> {
         let parameters = BTreeMap::new();
         let request = build_signed_request(parameters, self.recv_window)?;
-        self.client.get_signed_d("/fapi/v2/balance", request.as_str()).await
+        self.client
+            .get_signed_d("/fapi/v2/balance", request.as_str())
+            .await
     }
 
-    pub async fn change_initial_leverage<S>(&self, symbol: S, leverage: u8) -> Result<ChangeLeverageResponse>
+    pub async fn change_initial_leverage<S>(
+        &self,
+        symbol: S,
+        leverage: u8,
+    ) -> Result<ChangeLeverageResponse>
     where
         S: Into<String>,
     {
@@ -226,7 +236,9 @@ impl FuturesAccount {
         parameters.insert("leverage".into(), leverage.to_string());
 
         let request = build_signed_request(parameters, self.recv_window)?;
-        self.client.post_signed_d("/fapi/v1/leverage", request.as_str()).await
+        self.client
+            .post_signed_d("/fapi/v1/leverage", request.as_str())
+            .await
     }
 
     pub async fn change_position_mode(&self, dual_side_position: bool) -> Result<()> {
@@ -247,7 +259,9 @@ impl FuturesAccount {
         self.client
             .delete_signed_p(
                 "/fapi/v1/allOpenOrders",
-                PairQuery { symbol: symbol.into() },
+                PairQuery {
+                    symbol: symbol.into(),
+                },
                 self.recv_window,
             )
             .await?;
