@@ -345,17 +345,17 @@ pub struct Transaction {
     #[serde(with = "string_or_float")]
     pub orig_qty: f64,
     pub reduce_only: bool,
-    pub side: String,
-    pub position_side: String,
-    pub status: String,
+    pub side: OrderSide,
+    pub position_side: PositionSide,
+    pub status: OrderStatus,
     #[serde(with = "string_or_float")]
     pub stop_price: f64,
     pub close_position: bool,
     pub symbol: String,
-    pub time_in_force: String,
+    pub time_in_force: TimeInForce,
     #[serde(rename = "type")]
-    pub type_name: String,
-    pub orig_type: String,
+    pub type_name: OrderType,
+    pub orig_type: OrderType,
     #[serde(default)]
     #[serde(with = "string_or_float_opt")]
     pub activate_price: Option<f64>,
@@ -363,7 +363,7 @@ pub struct Transaction {
     #[serde(with = "string_or_float_opt")]
     pub price_rate: Option<f64>,
     pub update_time: u64,
-    pub working_type: String,
+    pub working_type: WorkingType,
     price_protect: bool,
 }
 
