@@ -102,6 +102,13 @@ pub enum WorkingType {
     ContractPrice,
 }
 
+#[derive(Debug, Deserialize, Serialize, Clone)]
+#[serde(rename_all = "lowercase")]
+pub enum MarginType {
+    Isolated,
+    Cross,
+}
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(tag = "filterType")]
 pub enum Filters {
@@ -415,12 +422,12 @@ pub struct CanceledOrder {
 pub struct Position {
     #[serde(with = "string_or_float")]
     pub entry_price: f64,
-    pub margin_type: String,
+    pub margin_type: MarginType,
     #[serde(with = "string_or_bool")]
     pub is_auto_add_margin: bool,
     #[serde(with = "string_or_float")]
     pub isolated_margin: f64,
-    pub leverage: String,
+    pub leverage: u64,
     #[serde(with = "string_or_float")]
     pub liquidation_price: f64,
     #[serde(with = "string_or_float")]
@@ -432,7 +439,12 @@ pub struct Position {
     pub symbol: String,
     #[serde(with = "string_or_float", rename = "unRealizedProfit")]
     pub unrealized_profit: f64,
-    pub position_side: String,
+    pub position_side: PositionSide,
+    pub update_time: u64,
+    #[serde(with = "string_or_float")]
+    pub notional: f64,
+    #[serde(with = "string_or_float")]
+    pub isolated_wallet: f64,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
