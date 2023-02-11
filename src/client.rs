@@ -48,7 +48,11 @@ impl Client {
         self.handler(response).await
     }
 
-    pub async fn get_signed_d<T: de::DeserializeOwned>(&self, endpoint: &str, request: &str) -> Result<T> {
+    pub async fn get_signed_d<T: de::DeserializeOwned>(
+        &self,
+        endpoint: &str,
+        request: &str,
+    ) -> Result<T> {
         let r = self.get_signed(endpoint, request).await?;
         let t = from_str(r.as_str())?;
         Ok(t)
@@ -83,7 +87,11 @@ impl Client {
         self.handler(response).await
     }
 
-    pub async fn post_signed_d<T: de::DeserializeOwned>(&self, endpoint: &str, request: &str) -> Result<T> {
+    pub async fn post_signed_d<T: de::DeserializeOwned>(
+        &self,
+        endpoint: &str,
+        request: &str,
+    ) -> Result<T> {
         let r = self.post_signed(endpoint, request).await?;
         let t = from_str(r.as_str())?;
         Ok(t)
@@ -240,7 +248,9 @@ impl Client {
                 let result = std::str::from_utf8(&body);
                 Ok(result?.to_string())
             }
-            StatusCode::INTERNAL_SERVER_ERROR => Err(Error::Msg("Internal Server Error".to_string())),
+            StatusCode::INTERNAL_SERVER_ERROR => {
+                Err(Error::Msg("Internal Server Error".to_string()))
+            }
             StatusCode::SERVICE_UNAVAILABLE => Err(Error::Msg("Service Unavailable".to_string())),
             StatusCode::UNAUTHORIZED => Err(Error::Msg("Unauthorized".to_string())),
             StatusCode::BAD_REQUEST => {

@@ -1,8 +1,8 @@
 use std::collections::BTreeMap;
 
 use super::rest_model::{
-    AccountBalance, CanceledOrder, ChangeLeverageResponse, Order, OrderType, Position,
-    PositionSide, Transaction, WorkingType,
+    AccountBalance, AccountInformation, CanceledOrder, ChangeLeverageResponse, Order, OrderType,
+    Position, PositionSide, Transaction, WorkingType,
 };
 use crate::account::OrderCancellation;
 use crate::client::Client;
@@ -218,6 +218,12 @@ impl FuturesAccount {
                 }),
             )
             .await
+    }
+
+    pub async fn account_information(&self) -> Result<AccountInformation> {
+        // needs to be changed to smth better later
+        let payload = build_signed_request(BTreeMap::new(), self.recv_window)?;
+        self.client.get_signed_d("/fapi/v2/account", &payload).await
     }
 
     pub async fn account_balance(&self) -> Result<Vec<AccountBalance>> {

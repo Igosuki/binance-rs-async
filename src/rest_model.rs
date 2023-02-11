@@ -842,6 +842,37 @@ pub mod string_or_float {
     }
 }
 
+pub mod string_or_u64 {
+    use std::fmt;
+
+    use serde::{de, Deserialize, Deserializer, Serializer};
+
+    pub fn serialize<T, S>(value: &T, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        T: fmt::Display,
+        S: Serializer,
+    {
+        serializer.collect_str(value)
+    }
+
+    pub fn deserialize<'de, D>(deserializer: D) -> Result<u64, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        #[derive(Deserialize)]
+        #[serde(untagged)]
+        enum StringOrU64 {
+            String(String),
+            U64(u64),
+        }
+
+        match StringOrU64::deserialize(deserializer)? {
+            StringOrU64::String(s) => s.parse().map_err(de::Error::custom),
+            StringOrU64::U64(i) => Ok(i),
+        }
+    }
+}
+
 pub(crate) mod string_or_float_opt {
     use std::fmt;
 

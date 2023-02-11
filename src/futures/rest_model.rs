@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::rest_model::{string_or_bool, string_or_float, string_or_float_opt};
+use crate::rest_model::{string_or_bool, string_or_float, string_or_float_opt, string_or_u64};
 pub use crate::rest_model::{
     Asks, Bids, BookTickers, KlineSummaries, KlineSummary, OrderSide, OrderStatus, RateLimit,
     ServerTime, SymbolPrice, SymbolStatus, Tickers, TimeInForce,
@@ -463,6 +463,7 @@ pub struct AccountPosition {
     pub position_initial_margin: f64,
     #[serde(with = "string_or_float")]
     pub open_order_initial_margin: f64,
+    #[serde(with = "string_or_u64")]
     pub leverage: u64,
     pub isolated: bool,
     #[serde(with = "string_or_float")]
@@ -494,7 +495,7 @@ pub struct AccountAsset {
     #[serde(with = "string_or_float")]
     pub initial_margin: f64,
     #[serde(with = "string_or_float")]
-    pub position_inital_margin: f64,
+    pub position_initial_margin: f64,
     #[serde(with = "string_or_float")]
     pub open_order_initial_margin: f64,
     #[serde(with = "string_or_float")]
