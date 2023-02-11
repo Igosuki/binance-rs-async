@@ -1,11 +1,9 @@
 use serde::{Deserialize, Serialize};
 
-use crate::rest_model::{
-    string_or_bool, string_or_float, string_or_float_opt, Asks, Bids, OrderSide, OrderStatus,
-    RateLimit, SymbolStatus, TimeInForce,
-};
+use crate::rest_model::{string_or_bool, string_or_float, string_or_float_opt};
 pub use crate::rest_model::{
-    BookTickers, KlineSummaries, KlineSummary, ServerTime, SymbolPrice, Tickers,
+    Asks, Bids, BookTickers, KlineSummaries, KlineSummary, OrderSide, OrderStatus, RateLimit,
+    ServerTime, SymbolPrice, SymbolStatus, Tickers, TimeInForce,
 };
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
