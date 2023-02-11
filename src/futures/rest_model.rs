@@ -481,6 +481,36 @@ pub struct AccountPosition {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
+pub struct AccountAsset {
+    pub asset: String,
+    #[serde(with = "string_or_float")]
+    pub wallet_balance: f64,
+    #[serde(with = "string_or_float")]
+    pub unrealized_profit: f64,
+    #[serde(with = "string_or_float")]
+    pub margin_balance: f64,
+    #[serde(with = "string_or_float")]
+    pub maint_margin: f64,
+    #[serde(with = "string_or_float")]
+    pub initial_margin: f64,
+    #[serde(with = "string_or_float")]
+    pub position_inital_margin: f64,
+    #[serde(with = "string_or_float")]
+    pub open_order_initial_margin: f64,
+    #[serde(with = "string_or_float")]
+    pub cross_wallet_balance: f64,
+    #[serde(with = "string_or_float", rename = "crossUnPnl")]
+    pub cross_unrealized_pnl: f64,
+    #[serde(with = "string_or_float")]
+    pub available_balance: f64,
+    #[serde(with = "string_or_float")]
+    pub max_withdraw_amount: f64,
+    pub margin_available: bool,
+    pub update_time: u64,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct AccountBalance {
     pub account_alias: String,
     pub asset: String,
