@@ -44,7 +44,7 @@ where
     }
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct OrderRequest {
     pub symbol: String,

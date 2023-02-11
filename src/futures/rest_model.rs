@@ -80,6 +80,13 @@ pub enum OrderType {
     TrailingStopMarket,
 }
 
+/// By default, use market orders
+impl Default for OrderType {
+    fn default() -> Self {
+        Self::Market
+    }
+}
+
 #[derive(Debug, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum PositionSide {
