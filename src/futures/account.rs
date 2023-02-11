@@ -75,7 +75,7 @@ struct ChangePositionModeRequest {
 }
 
 impl FuturesAccount {
-    async fn post_order(&self, order: OrderRequest) -> Result<Transaction> {
+    async fn place_order(&self, order: OrderRequest) -> Result<Transaction> {
         self.client
             .post_signed_p("/fapi/v1/order", order, self.recv_window)
             .await
@@ -115,7 +115,7 @@ impl FuturesAccount {
             price_protect: None,
             new_client_order_id: None,
         };
-        self.post_order(order).await
+        self.place_order(order).await
     }
 
     pub async fn limit_sell(
@@ -142,7 +142,7 @@ impl FuturesAccount {
             price_protect: None,
             new_client_order_id: None,
         };
-        self.post_order(order).await
+        self.place_order(order).await
     }
 
     // Place a MARKET order - BUY
@@ -168,7 +168,7 @@ impl FuturesAccount {
             price_protect: None,
             new_client_order_id: None,
         };
-        self.post_order(order).await
+        self.place_order(order).await
     }
 
     // Place a MARKET order - SELL
@@ -194,7 +194,7 @@ impl FuturesAccount {
             price_protect: None,
             new_client_order_id: None,
         };
-        self.post_order(order).await
+        self.place_order(order).await
     }
 
     /// Place a cancellation order
