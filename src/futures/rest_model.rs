@@ -511,6 +511,41 @@ pub struct AccountAsset {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
+pub struct AccountInformation {
+    pub fee_tier: u64,
+    pub can_trade: bool,
+    pub can_deposit: bool,
+    pub can_withdraw: bool,
+    pub update_time: u64,
+    pub multi_assets_margin: bool,
+    #[serde(with = "string_or_float")]
+    pub total_initial_margin: f64,
+    #[serde(with = "string_or_float", rename = "totalMaintMargin")]
+    pub total_maintenance_margin: f64,
+    #[serde(with = "string_or_float")]
+    pub total_wallet_balance: f64,
+    #[serde(with = "string_or_float")]
+    pub total_unrealized_profit: f64,
+    #[serde(with = "string_or_float")]
+    pub total_margin_balance: f64,
+    #[serde(with = "string_or_float")]
+    pub total_position_initial_margin: f64,
+    #[serde(with = "string_or_float")]
+    pub total_open_order_initial_margin: f64,
+    #[serde(with = "string_or_float")]
+    pub total_cross_wallet_balance: f64,
+    #[serde(with = "string_or_float", rename = "totalCrossUnPnl")]
+    pub total_cross_unrealized_pnl: f64,
+    #[serde(with = "string_or_float")]
+    pub available_balance: f64,
+    #[serde(with = "string_or_float")]
+    pub max_withdraw_amount: f64,
+    pub assets: Vec<AccountAsset>,
+    pub positions: Vec<AccountPosition>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct AccountBalance {
     pub account_alias: String,
     pub asset: String,
