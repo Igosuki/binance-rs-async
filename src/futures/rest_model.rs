@@ -81,6 +81,29 @@ pub enum OrderType {
     Other,
 }
 
+impl Symbol {
+    pub fn lot_size(&self) -> Option<Filters> {
+        self.filters
+            .iter()
+            .find(|filter| matches!(filter, Filters::LotSize { .. }))
+            .cloned()
+    }
+
+    pub fn market_lot_size(&self) -> Option<Filters> {
+        self.filters
+            .iter()
+            .find(|filter| matches!(filter, Filters::MarketLotSize { .. }))
+            .cloned()
+    }
+    pub fn price_filter(&self) -> Option<Filters> {
+        self.filters
+            .iter()
+            .find(|filter| matches!(filter, Filters::PriceFilter{ .. }))
+            .cloned()
+    }
+
+}
+
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 #[serde(tag = "filterType")]
 pub enum Filters {

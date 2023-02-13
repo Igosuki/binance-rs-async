@@ -89,6 +89,13 @@ impl<'a, WE: serde::de::DeserializeOwned> WebSockets<'a, WE> {
         }
     }
 
+    pub fn new_for_futures<Callback>(handler: Callback) -> WebSockets<'a, WE>
+    where
+        Callback: FnMut(WE) -> Result<()> + 'a + Send,
+    {
+        Self::new_with_options(handler, Config::futures())
+    }
+
     /// Connect to multiple websocket endpoints
     /// N.B: WE has to be CombinedStreamEvent
     pub async fn connect_multiple(&mut self, endpoints: Vec<String>) -> Result<()> {
