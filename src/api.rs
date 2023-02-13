@@ -69,6 +69,10 @@ impl Binance for UserStream {
 
 #[cfg(feature = "futures_api")]
 impl Binance for crate::futures::general::FuturesGeneral {
+    fn new(api_key: Option<String>, secret_key: Option<String>) -> Self {
+
+        Self::new_with_config(api_key, secret_key, &Config::default())
+    }
     fn new_with_config(api_key: Option<String>, secret_key: Option<String>, config: &Config) -> Self {
         Self {
             client: Client::new(

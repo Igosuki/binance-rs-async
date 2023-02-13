@@ -22,6 +22,21 @@ impl Config {
     /// use binance::config::Config;
     /// let config = Config::testnet();
     /// ```
+
+    pub fn futures() -> Config {
+        Config {
+            rest_api_endpoint: "https://fapi.binance.com".into(),
+            ws_endpoint: "wss://fstream.binance.com".into(),
+
+            futures_rest_api_endpoint: "https://fapi.binance.com".into(),
+            futures_ws_endpoint: "wss://fstream.binance.com".into(),
+
+            recv_window: 5000,
+            binance_us_api: false,
+
+            timeout: None,
+        }
+    }
     pub fn testnet() -> Config {
         Config::default()
             .set_rest_api_endpoint("https://testnet.binance.vision")

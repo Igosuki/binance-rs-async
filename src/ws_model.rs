@@ -247,6 +247,9 @@ pub struct DepthOrderBookEvent {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct BookTickerEvent {
+    #[serde(default, rename = "E")]
+    pub event_time: u64,
+
     #[serde(rename = "u")]
     pub update_id: u64,
 
