@@ -43,7 +43,7 @@ tokio = { version = "1.25", features = ["full"] }
 boolinator = "2.4"
 
 [dev-dependencies]
-csv = "1.1"
+csv = "1.2"
 env_logger = "0.9"
 tracing = { version = "0.1", features = ["release_max_level_debug", "log"] }
 tokio-test = "0.4"
