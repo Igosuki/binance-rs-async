@@ -1,16 +1,17 @@
 use std::collections::BTreeMap;
-use std::fmt;
 
-use serde::Serializer;
-
+use super::rest_model::{
+    AccountBalance, AccountInformation, CanceledOrder, ChangeLeverageResponse, Order, OrderType, Position,
+    PositionSide, Transaction, WorkingType,
+};
 use crate::account::OrderCancellation;
 use crate::client::Client;
 use crate::errors::*;
 use crate::rest_model::{OrderSide, TimeInForce};
 use crate::rest_model::{PairAndWindowQuery, PairQuery};
 use crate::util::*;
-
-use super::rest_model::{AccountBalance, CanceledOrder, ChangeLeverageResponse, OrderType, Position, Transaction};
+use serde::Serializer;
+use std::fmt;
 
 #[derive(Clone)]
 pub struct FuturesAccount {
@@ -18,25 +19,8 @@ pub struct FuturesAccount {
     pub recv_window: u64,
 }
 
-#[derive(Deserialize, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub enum PositionSide {
-    Both,
-    Long,
-    Short,
-}
-
-#[derive(Deserialize, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub enum WorkingType {
-    MarkPrice,
-    ContractPrice,
-    #[serde(other)]
-    Other,
-}
-
 /// Serialize bool as str
-fn serialize_as_str<S, T>(t: &T, serializer: S) -> std::result::Result<S::Ok, S::Error>
+fn serialize_as_str<'a, S, T>(t: &T, serializer: S) -> std::result::Result<S::Ok, S::Error>
 where
     S: Serializer,
     T: fmt::Display,
@@ -56,9 +40,9 @@ where
     }
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Default)]
 #[serde(rename_all = "camelCase")]
-struct OrderRequest {
+pub struct OrderRequest {
     pub symbol: String,
     pub side: OrderSide,
     pub position_side: Option<PositionSide>,
@@ -66,7 +50,7 @@ struct OrderRequest {
     pub order_type: OrderType,
     pub time_in_force: Option<TimeInForce>,
     #[serde(rename = "quantity")]
-    pub qty: Option<f64>,
+    pub quantity: Option<f64>,
     pub reduce_only: Option<bool>,
     pub price: Option<f64>,
     pub stop_price: Option<f64>,
@@ -76,6 +60,7 @@ struct OrderRequest {
     pub working_type: Option<WorkingType>,
     #[serde(serialize_with = "serialize_opt_as_uppercase")]
     pub price_protect: Option<bool>,
+    pub new_client_order_id: Option<String>,
 }
 
 #[derive(Serialize)]
@@ -86,10 +71,15 @@ struct ChangePositionModeRequest {
 }
 
 impl FuturesAccount {
-    async fn post_order(&self, order: OrderRequest) -> Result<Transaction> {
+    pub async fn place_order(&self, order: OrderRequest) -> Result<Transaction> {
         self.client
             .post_signed_p("/fapi/v1/order", order, self.recv_window)
             .await
+    }
+
+    pub async fn get_open_orders(&self, symbol: impl Into<String>) -> Result<Vec<Order>> {
+        let payload = build_signed_request_p([("symbol", symbol.into())], self.recv_window)?;
+        Ok(self.client.get_signed("/fapi/v1/openOrders", &payload).await?)
     }
 
     pub async fn limit_buy(
@@ -105,7 +95,7 @@ impl FuturesAccount {
             position_side: None,
             order_type: OrderType::Limit,
             time_in_force: Some(time_in_force),
-            qty: Some(qty.into()),
+            quantity: Some(qty.into()),
             reduce_only: None,
             price: Some(price),
             stop_price: None,
@@ -114,8 +104,9 @@ impl FuturesAccount {
             callback_rate: None,
             working_type: None,
             price_protect: None,
+            new_client_order_id: None,
         };
-        self.post_order(order).await
+        self.place_order(order).await
     }
 
     pub async fn limit_sell(
@@ -131,7 +122,7 @@ impl FuturesAccount {
             position_side: None,
             order_type: OrderType::Limit,
             time_in_force: Some(time_in_force),
-            qty: Some(qty.into()),
+            quantity: Some(qty.into()),
             reduce_only: None,
             price: Some(price),
             stop_price: None,
@@ -140,8 +131,9 @@ impl FuturesAccount {
             callback_rate: None,
             working_type: None,
             price_protect: None,
+            new_client_order_id: None,
         };
-        self.post_order(order).await
+        self.place_order(order).await
     }
 
     // Place a MARKET order - BUY
@@ -156,7 +148,7 @@ impl FuturesAccount {
             position_side: None,
             order_type: OrderType::Market,
             time_in_force: None,
-            qty: Some(qty.into()),
+            quantity: Some(qty.into()),
             reduce_only: None,
             price: None,
             stop_price: None,
@@ -165,8 +157,9 @@ impl FuturesAccount {
             callback_rate: None,
             working_type: None,
             price_protect: None,
+            new_client_order_id: None,
         };
-        self.post_order(order).await
+        self.place_order(order).await
     }
 
     // Place a MARKET order - SELL
@@ -181,7 +174,7 @@ impl FuturesAccount {
             position_side: None,
             order_type: OrderType::Market,
             time_in_force: None,
-            qty: Some(qty.into()),
+            quantity: Some(qty.into()),
             reduce_only: None,
             price: None,
             stop_price: None,
@@ -190,8 +183,9 @@ impl FuturesAccount {
             callback_rate: None,
             working_type: None,
             price_protect: None,
+            new_client_order_id: None,
         };
-        self.post_order(order).await
+        self.place_order(order).await
     }
 
     /// Place a cancellation order
@@ -216,8 +210,15 @@ impl FuturesAccount {
             .await
     }
 
+    pub async fn account_information(&self) -> Result<AccountInformation> {
+        // needs to be changed to smth better later
+        let payload = build_signed_request(BTreeMap::<String, String>::new(), self.recv_window)?;
+        self.client.get_signed_d("/fapi/v2/account", &payload).await
+    }
+
     pub async fn account_balance(&self) -> Result<Vec<AccountBalance>> {
-        let request = build_signed_request([("", "")], self.recv_window)?;
+        let parameters = BTreeMap::<String, String>::new();
+        let request = build_signed_request(parameters, self.recv_window)?;
         self.client.get_signed_d("/fapi/v2/balance", request.as_str()).await
     }
 
