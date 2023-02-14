@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use crate::client::*;
 use crate::errors::*;
 use crate::futures::rest_model::*;
@@ -12,13 +10,15 @@ pub struct FuturesGeneral {
 
 impl FuturesGeneral {
     // Test connectivity
-    pub async fn ping(&self) -> Result<&'static str> {
-        self.client.get::<HashMap<(), ()>>("/fapi/v1/ping", None).await?;
-        Ok("pong")
+    pub async fn ping(&self) -> Result<String> {
+        self.client.get("/fapi/v1/ping", None).await?;
+        Ok("pong".into())
     }
 
     // Check server time
-    pub async fn get_server_time(&self) -> Result<ServerTime> { self.client.get_p("/fapi/v1/time", None).await }
+    pub async fn get_server_time(&self) -> Result<ServerTime> {
+        self.client.get_p("/fapi/v1/time", None).await
+    }
 
     // Obtain exchange information
     // - Current exchange trading rules and symbol information
@@ -29,14 +29,20 @@ impl FuturesGeneral {
     // Get Symbol information
     pub async fn get_symbol_info<S>(&self, symbol: S) -> Result<Symbol>
     where
-        S: AsRef<str>,
+        S: Into<String>,
     {
-        let upper_symbol = symbol.as_ref().to_uppercase();
-        self.exchange_info().await.and_then(|info| {
-            info.symbols
-                .into_iter()
-                .find(|s| s.symbol == upper_symbol)
-                .ok_or_else(|| Error::UnknownSymbol(symbol.as_ref().to_string()))
-        })
+        let symbol_string = symbol.into();
+        let upper_symbol = symbol_string.to_uppercase();
+        match self.exchange_info().await {
+            Ok(info) => {
+                for item in info.symbols {
+                    if item.symbol == upper_symbol {
+                        return Ok(item);
+                    }
+                }
+                Err(Error::UnknownSymbol(symbol_string.clone()))
+            }
+            Err(e) => Err(e),
+        }
     }
 }

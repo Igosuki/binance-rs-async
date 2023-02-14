@@ -1,14 +1,15 @@
-use serde_json::Value;
-
 use crate::client::*;
 use crate::errors::*;
 use crate::futures::rest_model::*;
-use crate::rest_model::{BookTickers, KlineSummaries, KlineSummary, PairAndWindowQuery, PairQuery, SymbolPrice, Tickers};
+use crate::rest_model::{
+    BookTickers, KlineSummaries, KlineSummary, PairAndWindowQuery, PairQuery, SymbolPrice, Tickers,
+};
 use crate::util::*;
+use serde_json::Value;
 
-//TODO: Validate intervals and start/end times in history queries
-//TODO: find out the repartition of kline/candlestick columns in the future kline rows
-//TODO: make limit optional where applicable
+//TODO : Validate intervals and start/end times in history queries
+//TODO : find out the repartition of kline/candlestick columns in the future kline rows
+//TODO : make limit optional where applicable
 
 #[derive(Clone)]
 pub struct FuturesMarket {
@@ -95,27 +96,30 @@ impl FuturesMarket {
     }
 
     /// Get funding rate history
-    pub async fn get_funding_rate<S1, S2, S3, S4>(
+    pub async fn get_funding_rate<S1, S3, S4, S5>(
         &self,
         symbol: S1,
-        start_time: S2,
-        end_time: S3,
-        limit: S4,
+        start_time: S3,
+        end_time: S4,
+        limit: S5,
     ) -> Result<Vec<FundingRate>>
     where
         S1: Into<String>,
-        S2: Into<Option<u64>>,
         S3: Into<Option<u64>>,
-        S4: Into<Option<u16>>,
+        S4: Into<Option<u64>>,
+        S5: Into<u16>,
     {
         self.client
             .get_signed_p(
                 "/fapi/v1/fundingRate",
-                Some(FundingQuery {
-                    symbol: symbol.into(),
+                Some(HistoryQuery {
                     start_time: start_time.into(),
                     end_time: end_time.into(),
                     limit: limit.into(),
+                    symbol: symbol.into(),
+                    from_id: None,
+                    interval: None,
+                    period: None,
                 }),
                 self.recv_window,
             )
@@ -282,7 +286,7 @@ impl FuturesMarket {
     }
 
     /// Returns up to 'limit' klines for given symbol and interval ("1m", "5m", ...)
-    /// <https://github.com/binance-exchange/binance-official-api-docs/blob/master/rest-api.md#klinecandlestick-data>
+    /// https://github.com/binance-exchange/binance-official-api-docs/blob/master/rest-api.md#klinecandlestick-data
     pub async fn get_klines<S1, S2, S3, S4, S5>(
         &self,
         symbol: S1,
@@ -331,7 +335,7 @@ impl FuturesMarket {
 
     /// Returns up to 'limit' blvt klines for given symbol and interval ("1m", "5m", ...)
     /// Note that the symbol is not the traditional pair but rather {symbol}{UP|DOWN}
-    /// <https://binance-docs.github.io/apidocs/futures/en/#blvt-nav-kline-candlestick-streams>
+    /// https://binance-docs.github.io/apidocs/futures/en/#blvt-nav-kline-candlestick-streams
     /// As the vector fields are undocumented on binance futures you are un your own, follow
     /// KlineSummary for an example
     pub async fn get_blvt_klines_v<S1, S2, S3, S4, S5>(
@@ -364,7 +368,7 @@ impl FuturesMarket {
     }
 
     /// Returns up to 'limit' mark price klines for given symbol and interval ("1m", "5m", ...)
-    /// <https://binance-docs.github.io/apidocs/futures/en/#mark-price-kline-candlestick-data>
+    /// https://binance-docs.github.io/apidocs/futures/en/#mark-price-kline-candlestick-data
     /// As the vector fields are undocumented on binance futures you are un your own, follow
     /// KlineSummary for an example
     pub async fn get_mark_price_klines_v<S1, S2, S3, S4, S5>(
@@ -397,7 +401,7 @@ impl FuturesMarket {
     }
 
     /// Returns up to 'limit' index price klines for given symbol and interval ("1m", "5m", ...)
-    /// <https://binance-docs.github.io/apidocs/futures/en/#index-price-kline-candlestick-data>
+    /// https://binance-docs.github.io/apidocs/futures/en/#index-price-kline-candlestick-data
     /// As the vector fields are undocumented on binance futures you are un your own, follow
     /// KlineSummary for an example
     pub async fn get_index_price_klines_v<S1, S2, S3, S4, S5>(
@@ -431,7 +435,7 @@ impl FuturesMarket {
     }
 
     /// Returns up to 'limit' continuous contract klines for given symbol and interval ("1m", "5m", ...)
-    /// <https://binance-docs.github.io/apidocs/futures/en/#continuous-contract-kline-candlestick-data>
+    /// https://binance-docs.github.io/apidocs/futures/en/#continuous-contract-kline-candlestick-data
     /// As the vector fields are undocumented on binance futures you are un your own, follow
     /// KlineSummary for an example
     pub async fn get_continuous_contract_klines_v<S1, S2, S3, S4, S5>(
@@ -463,7 +467,7 @@ impl FuturesMarket {
         Ok(klines)
     }
 
-    /// <https://binance-docs.github.io/apidocs/futures/en/#notional-and-leverage-brackets-user_data>
+    /// https://binance-docs.github.io/apidocs/futures/en/#notional-and-leverage-brackets-user_data
     pub async fn get_notional_leverage_brackets<S>(&self, symbol: S) -> Result<SymbolBrackets>
     where
         S: Into<String>,
@@ -477,7 +481,7 @@ impl FuturesMarket {
             .await
     }
 
-    /// <https://binance-docs.github.io/apidocs/futures/en/#composite-index-symbol-information>
+    /// https://binance-docs.github.io/apidocs/futures/en/#composite-index-symbol-information
     /// Only for composite symbols (ex: DEFIUSDT)
     pub async fn get_index_info<S>(&self, symbol: Option<S>) -> Result<PriceStats>
     where
@@ -528,7 +532,13 @@ impl FuturesMarket {
             .await
     }
 
-    pub async fn get_mark_prices(&self) -> Result<MarkPrices> { self.client.get_p("/fapi/v1/premiumIndex", None).await }
+    pub async fn get_mark_prices(&self) -> Result<MarkPrices> {
+        self.client.get_p("/fapi/v1/premiumIndex", None).await
+    }
+
+    pub async fn get_all_liquidation_orders(&self) -> Result<LiquidationOrders> {
+        self.client.get_p("/fapi/v1/allForceOrders", None).await
+    }
 
     pub async fn open_interest<S>(&self, symbol: S) -> Result<OpenInterest>
     where

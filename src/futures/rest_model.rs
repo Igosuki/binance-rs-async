@@ -1,7 +1,10 @@
 use serde::{Deserialize, Serialize};
 
-use crate::rest_model::{string_or_float, string_or_float_opt, Asks, Bids, RateLimit, SymbolStatus, TimeInForce};
-pub use crate::rest_model::{BookTickers, KlineSummaries, KlineSummary, ServerTime, SymbolPrice, Tickers};
+use crate::rest_model::{string_or_bool, string_or_float, string_or_float_opt, string_or_u64};
+pub use crate::rest_model::{
+    Asks, Bids, BookTickers, KlineSummaries, KlineSummary, OrderSide, OrderStatus, RateLimit, ServerTime, SymbolPrice,
+    SymbolStatus, Tickers, TimeInForce,
+};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -45,7 +48,7 @@ pub struct Symbol {
     pub quote_precision: u64,
     pub underlying_type: String,
     pub underlying_sub_type: Vec<String>,
-    pub settle_plan: u64,
+    pub settle_plan: u16,
     #[serde(with = "string_or_float")]
     pub trigger_protect: f64,
     pub filters: Vec<Filters>,
@@ -53,7 +56,7 @@ pub struct Symbol {
     pub time_in_force: Vec<TimeInForce>,
 }
 
-#[derive(Debug, Deserialize, Serialize, Clone, PartialEq)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum ContractType {
     Perpetual,
@@ -63,11 +66,9 @@ pub enum ContractType {
     NextQuarter,
     #[serde(rename = "")]
     Empty,
-    #[serde(other)]
-    Other,
 }
 
-#[derive(Debug, Deserialize, Serialize, Clone, PartialEq)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum OrderType {
     Limit,
@@ -77,11 +78,38 @@ pub enum OrderType {
     TakeProfit,
     TakeProfitMarket,
     TrailingStopMarket,
-    #[serde(other)]
-    Other,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+/// By default, use market orders
+impl Default for OrderType {
+    fn default() -> Self {
+        Self::Market
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum PositionSide {
+    Both,
+    Long,
+    Short,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum WorkingType {
+    MarkPrice,
+    ContractPrice,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+#[serde(rename_all = "lowercase")]
+pub enum MarginType {
+    Isolated,
+    Cross,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(tag = "filterType")]
 pub enum Filters {
     #[serde(rename = "PRICE_FILTER")]
@@ -107,12 +135,9 @@ pub enum Filters {
     #[serde(rename = "MARKET_LOT_SIZE")]
     #[serde(rename_all = "camelCase")]
     MarketLotSize {
-        #[serde(with = "string_or_float")]
-        min_qty: f64,
-        #[serde(with = "string_or_float")]
-        max_qty: f64,
-        #[serde(with = "string_or_float")]
-        step_size: f64,
+        min_qty: String,
+        max_qty: String,
+        step_size: String,
     },
     #[serde(rename = "MAX_NUM_ORDERS")]
     #[serde(rename_all = "camelCase")]
@@ -182,13 +207,13 @@ pub struct PriceStats {
     pub count: u64,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(untagged)]
 pub enum Trades {
     AllTrades(Vec<Trade>),
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Trade {
     pub id: u64,
@@ -202,13 +227,13 @@ pub struct Trade {
     pub time: u64,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(untagged)]
 pub enum AggTrades {
     AllAggTrades(Vec<AggTrade>),
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct AggTrade {
     #[serde(rename = "T")]
@@ -227,13 +252,13 @@ pub struct AggTrade {
     pub qty: f64,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(untagged)]
 pub enum MarkPrices {
     AllMarkPrices(Vec<MarkPrice>),
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct MarkPrice {
     pub symbol: String,
@@ -245,13 +270,13 @@ pub struct MarkPrice {
     pub time: u64,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(untagged)]
 pub enum LiquidationOrders {
     AllLiquidationOrders(Vec<LiquidationOrder>),
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct LiquidationOrder {
     #[serde(with = "string_or_float")]
@@ -278,43 +303,43 @@ pub struct OpenInterest {
     pub symbol: String,
 }
 
-// #[derive(Debug, Deserialize, Clone)]
-// #[serde(rename_all = "camelCase")]
-// struct Order {
-//     pub client_order_id: String,
-//     #[serde(with = "string_or_float")]
-//     pub cum_qty: f64,
-//     #[serde(with = "string_or_float")]
-//     pub cum_quote: f64,
-//     #[serde(with = "string_or_float")]
-//     pub executed_qty: f64,
-//     pub order_id: u64,
-//     #[serde(with = "string_or_float")]
-//     pub avg_price: f64,
-//     #[serde(with = "string_or_float")]
-//     pub orig_qty: f64,
-//     #[serde(with = "string_or_float")]
-//     pub price: f64,
-//     pub side: String,
-//     pub reduce_only: bool,
-//     pub position_side: String,
-//     pub status: String,
-//     #[serde(with = "string_or_float", default = "default_stop_price")]
-//     pub stop_price: f64,
-//     pub close_position: bool,
-//     pub symbol: String,
-//     pub time_in_force: String,
-//     #[serde(rename = "type")]
-//     pub order_type: String,
-//     pub orig_type: String,
-//     #[serde(with = "string_or_float", default = "default_activation_price")]
-//     pub activation_price: f64,
-//     #[serde(with = "string_or_float", default = "default_price_rate")]
-//     pub price_rate: f64,
-//     pub update_time: u64,
-//     pub working_type: String,
-//     pub price_protect: bool,
-// }
+#[derive(Debug, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct Order {
+    pub client_order_id: String,
+    #[serde(with = "string_or_float")]
+    pub cum_qty: f64,
+    #[serde(with = "string_or_float")]
+    pub cum_quote: f64,
+    #[serde(with = "string_or_float")]
+    pub executed_qty: f64,
+    pub order_id: u64,
+    #[serde(with = "string_or_float")]
+    pub avg_price: f64,
+    #[serde(with = "string_or_float")]
+    pub orig_qty: f64,
+    #[serde(with = "string_or_float")]
+    pub price: f64,
+    pub side: OrderSide,
+    pub reduce_only: bool,
+    pub position_side: PositionSide,
+    pub status: OrderStatus,
+    #[serde(with = "string_or_float", default = "default_stop_price")]
+    pub stop_price: f64,
+    pub close_position: bool,
+    pub symbol: String,
+    pub time_in_force: TimeInForce,
+    #[serde(rename = "type")]
+    pub order_type: OrderType,
+    pub orig_type: OrderType,
+    #[serde(with = "string_or_float", default = "default_activation_price")]
+    pub activation_price: f64,
+    #[serde(with = "string_or_float", default = "default_price_rate")]
+    pub price_rate: f64,
+    pub update_time: u64,
+    pub working_type: WorkingType,
+    pub price_protect: bool,
+}
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -332,23 +357,25 @@ pub struct Transaction {
     #[serde(with = "string_or_float")]
     pub orig_qty: f64,
     pub reduce_only: bool,
-    pub side: String,
-    pub position_side: String,
-    pub status: String,
+    pub side: OrderSide,
+    pub position_side: PositionSide,
+    pub status: OrderStatus,
     #[serde(with = "string_or_float")]
     pub stop_price: f64,
     pub close_position: bool,
     pub symbol: String,
-    pub time_in_force: String,
+    pub time_in_force: TimeInForce,
     #[serde(rename = "type")]
-    pub type_name: String,
-    pub orig_type: String,
-    #[serde(default, with = "string_or_float_opt")]
+    pub type_name: OrderType,
+    pub orig_type: OrderType,
+    #[serde(default)]
+    #[serde(with = "string_or_float_opt")]
     pub activate_price: Option<f64>,
-    #[serde(default, with = "string_or_float_opt")]
+    #[serde(default)]
+    #[serde(with = "string_or_float_opt")]
     pub price_rate: Option<f64>,
     pub update_time: u64,
-    pub working_type: String,
+    pub working_type: WorkingType,
     price_protect: bool,
 }
 
@@ -379,9 +406,11 @@ pub struct CanceledOrder {
     pub time_in_force: String,
     #[serde(rename = "type")]
     pub type_name: String,
-    #[serde(default, with = "string_or_float_opt")]
+    #[serde(default)]
+    #[serde(with = "string_or_float_opt")]
     pub activate_price: Option<f64>,
-    #[serde(default, with = "string_or_float_opt")]
+    #[serde(default)]
+    #[serde(with = "string_or_float_opt")]
     pub price_rate: Option<f64>,
     pub update_time: u64,
     pub working_type: String,
@@ -393,12 +422,12 @@ pub struct CanceledOrder {
 pub struct Position {
     #[serde(with = "string_or_float")]
     pub entry_price: f64,
-    pub margin_type: String,
+    pub margin_type: MarginType,
     #[serde(with = "string_or_bool")]
     pub is_auto_add_margin: bool,
     #[serde(with = "string_or_float")]
     pub isolated_margin: f64,
-    pub leverage: String,
+    pub leverage: u64,
     #[serde(with = "string_or_float")]
     pub liquidation_price: f64,
     #[serde(with = "string_or_float")]
@@ -410,7 +439,110 @@ pub struct Position {
     pub symbol: String,
     #[serde(with = "string_or_float", rename = "unRealizedProfit")]
     pub unrealized_profit: f64,
-    pub position_side: String,
+    pub position_side: PositionSide,
+    pub update_time: u64,
+    #[serde(with = "string_or_float")]
+    pub notional: f64,
+    #[serde(with = "string_or_float")]
+    pub isolated_wallet: f64,
+}
+
+// https://binance-docs.github.io/apidocs/futures/en/#account-information-v2-user_data
+// it has differences from Position returned by positionRisk endpoint
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct AccountPosition {
+    pub symbol: String,
+    #[serde(with = "string_or_float")]
+    pub initial_margin: f64,
+    #[serde(with = "string_or_float", rename = "maintMargin")]
+    pub maintenance_margin: f64,
+    #[serde(with = "string_or_float")]
+    pub unrealized_profit: f64,
+    #[serde(with = "string_or_float")]
+    pub position_initial_margin: f64,
+    #[serde(with = "string_or_float")]
+    pub open_order_initial_margin: f64,
+    #[serde(with = "string_or_u64")]
+    pub leverage: u64,
+    pub isolated: bool,
+    #[serde(with = "string_or_float")]
+    pub entry_price: f64,
+    #[serde(with = "string_or_float")]
+    pub max_notional: f64,
+    #[serde(with = "string_or_float")]
+    pub bid_notional: f64,
+    #[serde(with = "string_or_float")]
+    pub ask_notional: f64,
+    pub position_side: PositionSide,
+    #[serde(with = "string_or_float", rename = "positionAmt")]
+    pub position_amount: f64,
+    pub update_time: u64,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct AccountAsset {
+    pub asset: String,
+    #[serde(with = "string_or_float")]
+    pub wallet_balance: f64,
+    #[serde(with = "string_or_float")]
+    pub unrealized_profit: f64,
+    #[serde(with = "string_or_float")]
+    pub margin_balance: f64,
+    #[serde(with = "string_or_float")]
+    pub maint_margin: f64,
+    #[serde(with = "string_or_float")]
+    pub initial_margin: f64,
+    #[serde(with = "string_or_float")]
+    pub position_initial_margin: f64,
+    #[serde(with = "string_or_float")]
+    pub open_order_initial_margin: f64,
+    #[serde(with = "string_or_float")]
+    pub cross_wallet_balance: f64,
+    #[serde(with = "string_or_float", rename = "crossUnPnl")]
+    pub cross_unrealized_pnl: f64,
+    #[serde(with = "string_or_float")]
+    pub available_balance: f64,
+    #[serde(with = "string_or_float")]
+    pub max_withdraw_amount: f64,
+    pub margin_available: bool,
+    pub update_time: u64,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct AccountInformation {
+    pub fee_tier: u64,
+    pub can_trade: bool,
+    pub can_deposit: bool,
+    pub can_withdraw: bool,
+    pub update_time: u64,
+    pub multi_assets_margin: bool,
+    #[serde(with = "string_or_float")]
+    pub total_initial_margin: f64,
+    #[serde(with = "string_or_float", rename = "totalMaintMargin")]
+    pub total_maintenance_margin: f64,
+    #[serde(with = "string_or_float")]
+    pub total_wallet_balance: f64,
+    #[serde(with = "string_or_float")]
+    pub total_unrealized_profit: f64,
+    #[serde(with = "string_or_float")]
+    pub total_margin_balance: f64,
+    #[serde(with = "string_or_float")]
+    pub total_position_initial_margin: f64,
+    #[serde(with = "string_or_float")]
+    pub total_open_order_initial_margin: f64,
+    #[serde(with = "string_or_float")]
+    pub total_cross_wallet_balance: f64,
+    #[serde(with = "string_or_float", rename = "totalCrossUnPnl")]
+    pub total_cross_unrealized_pnl: f64,
+    #[serde(with = "string_or_float")]
+    pub available_balance: f64,
+    #[serde(with = "string_or_float")]
+    pub max_withdraw_amount: f64,
+    pub assets: Vec<AccountAsset>,
+    pub positions: Vec<AccountPosition>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -441,6 +573,16 @@ pub struct ChangeLeverageResponse {
     pub symbol: String,
 }
 
+fn default_stop_price() -> f64 {
+    0.0
+}
+fn default_activation_price() -> f64 {
+    0.0
+}
+fn default_price_rate() -> f64 {
+    0.0
+}
+
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct HistoryQuery {
@@ -455,7 +597,7 @@ pub(crate) struct HistoryQuery {
 
 impl HistoryQuery {
     pub fn validate(&self) -> crate::errors::Result<()> {
-        if let Some(period) = self.period.as_ref() {
+        if let Some(period) = &self.period {
             if !PERIODS.contains(&period.as_str()) {
                 return Err(crate::errors::Error::InvalidPeriod(period.clone()));
             }
@@ -464,16 +606,7 @@ impl HistoryQuery {
     }
 }
 
-#[derive(Serialize)]
-#[serde(rename_all = "camelCase")]
-pub(crate) struct FundingQuery {
-    pub symbol: String,
-    pub start_time: Option<u64>,
-    pub end_time: Option<u64>,
-    pub limit: Option<u16>,
-}
-
-#[derive(Debug, Deserialize)]
+#[derive(Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct FundingRate {
     pub symbol: String,
@@ -482,7 +615,7 @@ pub struct FundingRate {
     pub funding_rate: f64,
 }
 
-pub static PERIODS: &[&str] = &["5m", "15m", "30m", "1h", "2h", "4h", "6h", "12h", "1d"];
+pub static PERIODS: &'static [&str] = &["5m", "15m", "30m", "1h", "2h", "4h", "6h", "12h", "1d"];
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -524,35 +657,4 @@ pub struct LeverageBracket {
 pub struct SymbolBrackets {
     pub symbol: String,
     pub brackets: Vec<LeverageBracket>,
-}
-
-pub(crate) mod string_or_bool {
-    use std::fmt;
-
-    use serde::{de, Deserialize, Deserializer, Serializer};
-
-    pub fn serialize<T, S>(value: &T, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        T: fmt::Display,
-        S: Serializer,
-    {
-        serializer.collect_str(value)
-    }
-
-    pub fn deserialize<'de, D>(deserializer: D) -> Result<bool, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        #[derive(Deserialize)]
-        #[serde(untagged)]
-        enum StringOrFloat {
-            String(String),
-            Bool(bool),
-        }
-
-        match StringOrFloat::deserialize(deserializer)? {
-            StringOrFloat::String(s) => s.parse().map_err(de::Error::custom),
-            StringOrFloat::Bool(i) => Ok(i),
-        }
-    }
 }
