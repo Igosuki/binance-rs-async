@@ -48,7 +48,7 @@ pub struct Symbol {
     pub quote_precision: u64,
     pub underlying_type: String,
     pub underlying_sub_type: Vec<String>,
-    pub settle_plan: u16,
+    pub settle_plan: u64,
     #[serde(with = "string_or_float")]
     pub trigger_protect: f64,
     pub filters: Vec<Filters>,
