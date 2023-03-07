@@ -308,8 +308,6 @@ pub struct OpenInterest {
 pub struct Order {
     pub client_order_id: String,
     #[serde(with = "string_or_float")]
-    pub cum_qty: f64,
-    #[serde(with = "string_or_float")]
     pub cum_quote: f64,
     #[serde(with = "string_or_float")]
     pub executed_qty: f64,
@@ -333,7 +331,7 @@ pub struct Order {
     pub order_type: OrderType,
     pub orig_type: OrderType,
     #[serde(with = "string_or_float", default = "default_activation_price")]
-    pub activation_price: f64,
+    pub activate_price: f64,
     #[serde(with = "string_or_float", default = "default_price_rate")]
     pub price_rate: f64,
     pub update_time: u64,
