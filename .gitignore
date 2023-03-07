@@ -5,6 +5,7 @@ precommit_venv
 *.fmt
 *.iml
 .idea
+.env
 
 release.json
 secrets
