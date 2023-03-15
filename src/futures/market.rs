@@ -532,8 +532,16 @@ impl FuturesMarket {
             .await
     }
 
-    pub async fn get_mark_prices(&self) -> Result<MarkPrices> {
-        self.client.get_p("/fapi/v1/premiumIndex", None).await
+    pub async fn get_mark_prices(&self, symbol: Option<String>) -> Result<MarkPrices> {
+        if let Some(symbol) = symbol {
+            Ok(MarkPrices::AllMarkPrices(vec![
+                self.client
+                    .get_d::<MarkPrice, PairQuery>("/fapi/v1/premiumIndex", Some(PairQuery { symbol }))
+                    .await?,
+            ]))
+        } else {
+            self.client.get_p("/fapi/v1/premiumIndex", None).await
+        }
     }
 
     pub async fn get_all_liquidation_orders(&self) -> Result<LiquidationOrders> {
