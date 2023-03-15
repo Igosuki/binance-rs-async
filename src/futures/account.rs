@@ -20,7 +20,7 @@ pub struct FuturesAccount {
 }
 
 /// Serialize bool as str
-fn serialize_as_str<'a, S, T>(t: &T, serializer: S) -> std::result::Result<S::Ok, S::Error>
+fn serialize_as_str<S, T>(t: &T, serializer: S) -> std::result::Result<S::Ok, S::Error>
 where
     S: Serializer,
     T: fmt::Display,
@@ -79,7 +79,7 @@ impl FuturesAccount {
 
     pub async fn get_open_orders(&self, symbol: impl Into<String>) -> Result<Vec<Order>> {
         let payload = build_signed_request_p([("symbol", symbol.into())], self.recv_window)?;
-        Ok(self.client.get_signed("/fapi/v1/openOrders", &payload).await?)
+        self.client.get_signed("/fapi/v1/openOrders", &payload).await
     }
 
     pub async fn limit_buy(
