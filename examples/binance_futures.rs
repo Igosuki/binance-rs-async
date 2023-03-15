@@ -102,7 +102,7 @@ async fn market_data() {
     }
 
     match market.get_mark_prices(Some("btcusdt".into())).await {
-        Ok(MarkPrices::AllMarkPrices(answer)) => info!("First mark Prices: {:?}", answer[0]),
+        Ok(answer) => info!("First mark Prices: {:?}", answer[0]),
         Err(e) => info!("Error: {:?}", e),
     }
 
