@@ -33,17 +33,17 @@ reqwest = { version = "0.11", features = ["json"], default-features = false }
 ring = "0.16"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-serde_qs = "0.11"
-serde_repr = "0.1.10"
+serde_qs = "0.12"
+serde_repr = "0.1.12"
 thiserror = "1.0"
 url = "2.3"
 lazy_static = "1.4"
 tokio-tungstenite = "0.18"
-tokio = { version = "1.25", features = ["full"] }
+tokio = { version = "1.27", features = ["full"] }
 boolinator = "2.4"
 
 [dev-dependencies]
 csv = "1.2"
-env_logger = "0.9"
+env_logger = "0.10"
 tracing = { version = "0.1", features = ["release_max_level_debug", "log"] }
 tokio-test = "0.4"
