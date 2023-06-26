@@ -71,15 +71,24 @@ struct ChangePositionModeRequest {
 }
 
 impl FuturesAccount {
+    
+
+    pub async fn get_order(&self, order: OrderRequest) -> Result<Transaction> {
+        self.client
+            .get_signed("/fapi/v1/order", order, self.recv_window)
+            .await
+    }
+
     pub async fn place_order(&self, order: OrderRequest) -> Result<Transaction> {
         self.client
             .post_signed_p("/fapi/v1/order", order, self.recv_window)
             .await
     }
 
-    pub async fn get_open_orders(&self, symbol: impl Into<String>) -> Result<Vec<Order>> {
-        let payload = build_signed_request_p([("symbol", symbol.into())], self.recv_window)?;
-        self.client.get_signed("/fapi/v1/openOrders", &payload).await
+    pub async fn place_order_test(&self, order: OrderRequest) -> Result<Transaction> {
+        self.client
+            .post_signed_p("/fapi/v1/order/test", order, self.recv_window)
+            .await
     }
 
     pub async fn limit_buy(
@@ -194,6 +203,25 @@ impl FuturesAccount {
         self.client.delete_signed_p("/fapi/v1/order", &o, recv_window).await
     }
 
+    pub async fn get_open_orders(&self, symbol: impl Into<String>) -> Result<Vec<Order>> {
+        let payload = build_signed_request_p([("symbol", symbol.into())], self.recv_window)?;
+        self.client.get_signed("/fapi/v1/openOrders", &payload).await
+    }
+
+    pub async fn cancel_all_open_orders<S>(&self, symbol: S) -> Result<()>
+    where
+        S: Into<String>,
+    {
+        self.client
+            .delete_signed_p(
+                "/fapi/v1/allOpenOrders",
+                PairQuery { symbol: symbol.into() },
+                self.recv_window,
+            )
+            .await?;
+        Ok(())
+    }
+
     pub async fn position_information<S>(&self, symbol: S) -> Result<Vec<Position>>
     where
         S: Into<String>,
@@ -245,17 +273,4 @@ impl FuturesAccount {
         Ok(())
     }
 
-    pub async fn cancel_all_open_orders<S>(&self, symbol: S) -> Result<()>
-    where
-        S: Into<String>,
-    {
-        self.client
-            .delete_signed_p(
-                "/fapi/v1/allOpenOrders",
-                PairQuery { symbol: symbol.into() },
-                self.recv_window,
-            )
-            .await?;
-        Ok(())
-    }
 }
