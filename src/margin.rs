@@ -278,14 +278,13 @@ impl Margin {
     pub async fn cancel_trade<S, F>(
         &self,
         symbol: S,
-        order_id: F,
+        order_id: S,
         orig_client_order_id: String,
         new_client_order_id: String,
         is_isolated: Option<bool>,
     ) -> Result<MarginOrderCancellationResult>
     where
         S: Into<String>,
-        F: Into<u64>,
     {
         let margin_order_cancellation: MarginOrderCancellation = MarginOrderCancellation {
             symbol: symbol.into(),
