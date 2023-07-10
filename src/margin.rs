@@ -275,7 +275,7 @@ impl Margin {
     /// let result = tokio_test::block_on(margin.cancel_trade("BTCUSDT", 1_u64, "my_id".to_string(), "my_next_id".to_string(), None));
     /// assert!(result.is_ok(), "{:?}", result);
     /// ```
-    pub async fn cancel_trade<S, F>(
+    pub async fn cancel_trade<S>(
         &self,
         symbol: S,
         order_id: S,
