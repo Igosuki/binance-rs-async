@@ -1102,7 +1102,7 @@ pub struct MarginOrderQuery {
 #[serde(rename_all = "camelCase")]
 pub struct MarginOrderResult {
     pub symbol: String,
-    pub order_id: u64,
+    pub order_id: String,
     pub client_order_id: String,
     pub transact_time: u128,
     #[serde(with = "string_or_float")]
@@ -1136,7 +1136,7 @@ pub struct MarginOrderState {
     #[serde(with = "string_or_float")]
     pub iceberg_qty: f64,
     pub is_working: bool,
-    pub order_id: u64,
+    pub order_id: String,
     #[serde(with = "string_or_float")]
     pub orig_qty: f64,
     #[serde(with = "string_or_float")]
