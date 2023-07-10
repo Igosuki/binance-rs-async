@@ -589,7 +589,7 @@ pub struct MarginOrder {
 #[serde(rename_all = "camelCase")]
 pub struct MarginOrderCancellation {
     pub symbol: String,
-    pub order_id: u64,
+    pub order_id: String,
     pub orig_client_order_id: String,
     pub new_client_order_id: String,
     pub is_isolated: Option<String>,
@@ -599,7 +599,7 @@ pub struct MarginOrderCancellation {
 #[serde(rename_all = "camelCase")]
 pub struct MarginOrderCancellationResult {
     pub symbol: String,
-    pub order_id: Option<u64>,
+    pub order_id: Option<String>,
     pub orig_client_order_id: Option<String>,
     pub client_order_id: Option<String>,
     #[serde(with = "string_or_float_opt")]
