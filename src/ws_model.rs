@@ -1,4 +1,7 @@
-use crate::rest_model::{string_or_float, Asks, Bids, OrderBook, OrderSide, OrderStatus, OrderType, TimeInForce};
+use crate::futures::rest_model::ContractType;
+use crate::rest_model::{
+    string_or_float, Asks, Bids, OrderBook, OrderSide, OrderStatus, OrderType, SymbolStatus, TimeInForce,
+};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "e")]
@@ -23,6 +26,8 @@ pub enum WebsocketEvent {
     OrderUpdate(Box<OrderUpdate>),
     #[serde(alias = "listStatus")]
     ListOrderUpdate(Box<OrderListUpdate>),
+    #[serde(alias = "contractInfo")]
+    ContractInfoUpdate(Box<ContractInfoUpdate>),
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -238,6 +243,9 @@ pub struct DepthOrderBookEvent {
     pub first_update_id: u64,
     #[serde(rename = "u")]
     pub final_update_id: u64,
+    #[serde(rename = "pu")]
+    #[serde(default)]
+    pub previous_final_update_id: Option<u64>,
     #[serde(rename = "b")]
     pub bids: Vec<Bids>,
     #[serde(rename = "a")]
@@ -483,4 +491,24 @@ pub struct OrderListTransaction {
     pub order_id: i64,
     #[serde(rename = "c")]
     pub client_order_id: String,
+}
+
+/// For OCO Events
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct ContractInfoUpdate {
+    #[serde(rename = "E")]
+    pub event_time: u64,
+    #[serde(rename = "s")]
+    pub symbol: String,
+    #[serde(rename = "ps")]
+    pub pair: String,
+    #[serde(rename = "ct")]
+    pub contract_type: ContractType,
+    #[serde(rename = "dt")]
+    pub delivery_date: u64,
+    #[serde(rename = "ot")]
+    pub onboard_date: u64,
+    #[serde(rename = "cs")]
+    pub status: SymbolStatus,
 }

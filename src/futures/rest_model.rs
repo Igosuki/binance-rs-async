@@ -56,7 +56,7 @@ pub struct Symbol {
     pub time_in_force: Vec<TimeInForce>,
 }
 
-#[derive(Debug, Deserialize, Serialize, Clone)]
+#[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum ContractType {
     Perpetual,
