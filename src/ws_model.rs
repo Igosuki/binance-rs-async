@@ -23,6 +23,8 @@ pub enum WebsocketEvent {
     OrderUpdate(Box<OrderUpdate>),
     #[serde(alias = "listStatus")]
     ListOrderUpdate(Box<OrderListUpdate>),
+    #[serde(alias = "markPriceUpdate")]
+    MarkPriceUpdate(Box<MarkPriceEvent>),
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -264,6 +266,31 @@ pub struct BookTickerEvent {
 
     #[serde(rename = "A", with = "string_or_float")]
     pub best_ask_qty: f64,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct MarkPriceEvent {
+    #[serde(rename = "E")]
+    pub event_time: u64,
+
+    #[serde(rename = "s")]
+    pub symbol: String,
+
+    #[serde(rename = "p")]
+    pub mark_price: String,
+
+    #[serde(rename = "i")]
+    pub index_price: String,
+
+    #[serde(rename = "P")]
+    pub estimated_settle_price: String,
+
+    #[serde(rename = "r")]
+    pub funding_rate: String,
+
+    #[serde(rename = "T")]
+    pub next_funding_time: u64,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
