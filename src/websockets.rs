@@ -22,6 +22,7 @@ pub static AGGREGATED_TRADE: &str = "aggTrade";
 pub static DEPTH_ORDERBOOK: &str = "depthUpdate";
 pub static PARTIAL_ORDERBOOK: &str = "lastUpdateId";
 pub static DAYTICKER: &str = "24hrTicker";
+pub static MARK_PRICE: &str = "markPrice";
 
 pub fn all_ticker_stream() -> &'static str { "!ticker@arr" }
 
@@ -40,6 +41,12 @@ pub fn all_book_ticker_stream() -> &'static str { "!bookTicker" }
 pub fn all_mini_ticker_stream() -> &'static str { "!miniTicker@arr" }
 
 pub fn mini_ticker_stream(symbol: &str) -> String { format!("{symbol}@miniTicker") }
+
+/// # Arguments
+/// 
+/// * `symbol`: the market symbol
+/// * `update_speed`: 1 or 3
+pub fn mark_price_stream(symbol: &str, update_speed: u8) -> String { format!("{symbol}@markPrice@{update_speed}s") }
 
 /// # Arguments
 ///
