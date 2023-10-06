@@ -116,6 +116,14 @@ impl<'a, WE: serde::de::DeserializeOwned> WebSockets<'a, WE> {
         self.handle_connect(url).await
     }
 
+    /// Connect to a futures websocket endpoint
+    pub async fn connect_futures(&mut self, endpoint: &str) -> Result<()> {
+        let wss: String = format!("{}/{}/{}", self.conf.futures_ws_endpoint, WS_ENDPOINT, endpoint);
+        let url = Url::parse(&wss)?;
+
+        self.handle_connect(url).await
+    }
+
     async fn handle_connect(&mut self, url: Url) -> Result<()> {
         match connect_async(url).await {
             Ok(answer) => {
