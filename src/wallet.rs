@@ -27,6 +27,7 @@ static SAPI_V1_ASSET_TRADEFEE_US: &str = "/sapi/v1/asset/query/trading-fee";
 static SAPI_V1_ASSET_TRANSFER: &str = "/sapi/v1/asset/transfer";
 static SAPI_V1_ASSET_GETFUNDINGASSET: &str = "/sapi/v1/asset/get-funding-asset";
 static SAPI_V1_ASSET_APIRESTRICTIONS: &str = "/sapi/v1/account/apiRestrictions";
+static SAPI_V1_ASSET_WALLET_BALANCE: &str = "/sapi/v1/asset/wallet/balance";
 static DEFAULT_WALLET_HISTORY_QUERY_INTERVAL_DAYS: i64 = 90;
 
 /// This struct acts as a gateway for all wallet endpoints.
@@ -513,6 +514,21 @@ impl Wallet {
     pub async fn api_key_permissions(&self) -> Result<ApiKeyPermissions> {
         self.client
             .get_signed_p(SAPI_V1_ASSET_APIRESTRICTIONS, Option::<String>::None, self.recv_window)
+            .await
+    }
+
+    /// Wallet
+    ///
+    /// # Examples
+    /// ```rust,no_run
+    /// use binance::{api::*, wallet::*, config::*, rest_model::*};
+    /// let wallet: Wallet = Binance::new_with_env(&Config::testnet());
+    /// let records = tokio_test::block_on(wallet.wallet_balance());
+    /// assert!(records.is_ok(), "{:?}", records);
+    /// ```
+    pub async fn wallet_balance(&self) -> Result<WalletBalances> {
+        self.client
+            .get_signed_p(SAPI_V1_ASSET_WALLET_BALANCE, Option::<String>::None, self.recv_window)
             .await
     }
 }
