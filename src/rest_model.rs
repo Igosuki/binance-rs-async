@@ -1946,6 +1946,19 @@ pub struct ApiKeyPermissions {
     trading_authority_expiration_time: Option<u64>,
 }
 
+pub type WalletBalances = Vec<WalletBalance>;
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct WalletBalance {
+    /// Shows whether the wallet is activated or not
+    activate: bool,
+    /// Shows the overall balance of the wallet quoted in BTC
+    balance: String,
+    /// Indicates the wallet type: 'Spot', 'Funding', 'Cross Margin', 'Isolated Margin', 'USDⓈ-M Futures', 'COIN-M Futures', 'Earn', 'Options', 'Trading Bots'
+    wallet_name: String,
+}
+
 pub mod string_or_float {
     use std::fmt;
 
