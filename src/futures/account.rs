@@ -42,6 +42,16 @@ where
 
 #[derive(Serialize, Default)]
 #[serde(rename_all = "camelCase")]
+pub struct GetOrderRequest {
+    pub symbol: String,
+    #[serde(rename = "orderId")]
+    pub order_id: Option<String>,
+    #[serde(rename = "origClientOrderId")]
+    pub orig_client_order_id: Option<String>,
+}
+
+#[derive(Serialize, Default)]
+#[serde(rename_all = "camelCase")]
 pub struct OrderRequest {
     pub symbol: String,
     pub side: OrderSide,
@@ -72,10 +82,9 @@ struct ChangePositionModeRequest {
 
 impl FuturesAccount {
     
-
-    pub async fn get_order(&self, order: OrderRequest) -> Result<Transaction> {
+    pub async fn get_order(&self, order: Option<GetOrderRequest>) -> Result<Transaction> {
         self.client
-            .get_signed("/fapi/v1/order", order, self.recv_window)
+            .get_signed_p("/fapi/v1/order", order, self.recv_window)
             .await
     }
 

@@ -18,7 +18,7 @@ path = "src/lib.rs"
 [features]
 rustls-tls = ["tokio-tungstenite/rustls-tls-webpki-roots", "reqwest/rustls-tls"]
 native-tls = ["tokio-tungstenite/native-tls", "reqwest/native-tls"]
-default = ["native-tls"]
+default = ["native-tls","futures_api"]
 futures_api = []
 margin_api = []
 savings_api = []
