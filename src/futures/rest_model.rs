@@ -64,6 +64,8 @@ pub enum ContractType {
     NextMonth,
     CurrentQuarter,
     NextQuarter,
+    #[serde(rename = "CURRENT_QUARTER DELIVERING")]
+    CurrentQuarterDelivery,
     #[serde(rename = "")]
     Empty,
 }
@@ -82,9 +84,7 @@ pub enum OrderType {
 
 /// By default, use market orders
 impl Default for OrderType {
-    fn default() -> Self {
-        Self::Market
-    }
+    fn default() -> Self { Self::Market }
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
