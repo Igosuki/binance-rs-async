@@ -419,14 +419,12 @@ impl FuturesMarket {
         S4: Into<Option<u64>>,
         S5: Into<Option<u64>>,
     {
-        let query = HistoryQuery {
+        let query = IndexQuery {
             start_time: start_time.into(),
             end_time: end_time.into(),
             limit: limit.into(),
-            symbol: symbol.into(),
-            interval: Some(interval.into()),
-            from_id: None,
-            period: None,
+            pair: symbol.into(),
+            interval: Some(interval.into())
         };
 
         let klines = self.client.get_d("/fapi/v1/indexPriceKlines", Some(query)).await?;
