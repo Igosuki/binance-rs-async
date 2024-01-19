@@ -509,9 +509,7 @@ pub enum OrderSide {
 
 /// By default, buy
 impl Default for OrderSide {
-    fn default() -> Self {
-        Self::Buy
-    }
+    fn default() -> Self { Self::Buy }
 }
 
 /// The allowed values are:
@@ -526,9 +524,7 @@ pub enum CancelReplaceMode {
 
 /// By default, STOP_ON_FAILURE
 impl Default for CancelReplaceMode {
-    fn default() -> Self {
-        Self::StopOnFailure
-    }
+    fn default() -> Self { Self::StopOnFailure }
 }
 
 /// Order types, the following restrictions apply
@@ -555,9 +551,7 @@ pub enum OrderType {
 
 /// By default, use market orders
 impl Default for OrderType {
-    fn default() -> Self {
-        Self::Market
-    }
+    fn default() -> Self { Self::Market }
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -599,6 +593,7 @@ pub struct MarginOrderCancellation {
 #[serde(rename_all = "camelCase")]
 pub struct MarginOrderCancellationResult {
     pub symbol: String,
+    #[serde(with = "string_or_float_opt")]
     pub order_id: Option<u64>,
     pub orig_client_order_id: Option<String>,
     pub client_order_id: Option<String>,
@@ -1102,6 +1097,7 @@ pub struct MarginOrderQuery {
 #[serde(rename_all = "camelCase")]
 pub struct MarginOrderResult {
     pub symbol: String,
+    #[serde(with = "string_or_float")]
     pub order_id: u64,
     pub client_order_id: String,
     pub transact_time: u128,

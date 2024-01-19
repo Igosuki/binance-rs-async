@@ -108,7 +108,6 @@ impl CancelReplaceRequest {
     }
 }
 
-
 /// Order Status Request
 /// perform an order status request for the account
 #[derive(Default, Debug, Serialize, Deserialize, Clone)]
