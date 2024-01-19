@@ -1,5 +1,7 @@
-pub use crate::rest_model::{Asks, Bids, BookTickers, KlineSummaries, KlineSummary, OrderSide, OrderStatus, RateLimit,
-                            ServerTime, SymbolPrice, SymbolStatus, Tickers, TimeInForce};
+use crate::rest_model::{string_or_bool, string_or_float_opt};
+pub use crate::rest_model::{string_or_float, string_or_u64, Asks, Bids, BookTickers, KlineSummaries, KlineSummary,
+                            OrderSide, OrderStatus, RateLimit, ServerTime, SymbolPrice, SymbolStatus, Tickers,
+                            TimeInForce};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -607,7 +609,7 @@ pub(crate) struct IndexQuery {
     pub end_time: Option<u64>,
     pub limit: u16,
     pub pair: String,
-    pub interval: Option<String>
+    pub interval: Option<String>,
 }
 
 #[derive(Deserialize, Debug, Clone)]

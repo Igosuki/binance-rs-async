@@ -593,7 +593,7 @@ pub struct MarginOrderCancellation {
 #[serde(rename_all = "camelCase")]
 pub struct MarginOrderCancellationResult {
     pub symbol: String,
-    #[serde(with = "string_or_float_opt")]
+    #[serde(with = "string_or_u64_opt")]
     pub order_id: Option<u64>,
     pub orig_client_order_id: Option<String>,
     pub client_order_id: Option<String>,
@@ -1097,7 +1097,7 @@ pub struct MarginOrderQuery {
 #[serde(rename_all = "camelCase")]
 pub struct MarginOrderResult {
     pub symbol: String,
-    #[serde(with = "string_or_float")]
+    #[serde(with = "string_or_u64")]
     pub order_id: u64,
     pub client_order_id: String,
     pub transact_time: u128,
@@ -2048,6 +2048,40 @@ pub mod string_or_u64 {
         match StringOrU64::deserialize(deserializer)? {
             StringOrU64::String(s) => s.parse().map_err(de::Error::custom),
             StringOrU64::U64(i) => Ok(i),
+        }
+    }
+}
+
+pub mod string_or_u64_opt {
+    use std::fmt;
+
+    use serde::{de, Deserialize, Deserializer, Serializer};
+
+    pub fn serialize<T, S>(value: &Option<T>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        T: fmt::Display,
+        S: Serializer,
+    {
+        match value {
+            Some(v) => crate::rest_model::string_or_u64::serialize(v, serializer),
+            None => serializer.serialize_none(),
+        }
+    }
+
+    pub fn deserialize<'de, D>(deserializer: D) -> Result<Option<u64>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        #[derive(Deserialize)]
+        #[serde(untagged)]
+        enum StringOrU64 {
+            String(String),
+            U64(u64),
+        }
+
+        match StringOrU64::deserialize(deserializer)? {
+            StringOrU64::String(s) => s.parse().map_err(de::Error::custom).map(|v| Some(v)),
+            StringOrU64::U64(i) => Ok(Some(i)),
         }
     }
 }
