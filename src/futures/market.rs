@@ -1,9 +1,7 @@
 use crate::client::*;
 use crate::errors::*;
 use crate::futures::rest_model::*;
-use crate::rest_model::{
-    BookTickers, KlineSummaries, KlineSummary, PairAndWindowQuery, PairQuery, SymbolPrice, Tickers,
-};
+use crate::rest_model::{BookTickers, KlineSummaries, KlineSummary, PairAndWindowQuery, PairQuery, SymbolPrice, Tickers};
 use crate::util::*;
 use serde_json::Value;
 
@@ -18,7 +16,7 @@ pub struct FuturesMarket {
 }
 
 impl FuturesMarket {
-    // Order book (Default 100; max 1000)
+    /// Order book (Default 100; max 1000)
     pub async fn get_depth<S>(&self, symbol: S) -> Result<OrderBook>
     where
         S: Into<String>,
@@ -419,14 +417,12 @@ impl FuturesMarket {
         S4: Into<Option<u64>>,
         S5: Into<Option<u64>>,
     {
-        let query = HistoryQuery {
+        let query = IndexQuery {
             start_time: start_time.into(),
             end_time: end_time.into(),
             limit: limit.into(),
-            symbol: symbol.into(),
-            interval: Some(interval.into()),
-            from_id: None,
-            period: None,
+            pair: symbol.into(),
+            interval: Some(interval.into())
         };
 
         let klines = self.client.get_d("/fapi/v1/indexPriceKlines", Some(query)).await?;
@@ -468,7 +464,7 @@ impl FuturesMarket {
     }
 
     /// https://binance-docs.github.io/apidocs/futures/en/#notional-and-leverage-brackets-user_data
-    pub async fn get_notional_leverage_brackets<S>(&self, symbol: S) -> Result<SymbolBrackets>
+    pub async fn get_notional_leverage_brackets<S>(&self, symbol: S) -> Result<Vec<SymbolBrackets>>
     where
         S: Into<String>,
     {

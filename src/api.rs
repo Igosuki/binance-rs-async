@@ -111,6 +111,21 @@ impl Binance for crate::futures::account::FuturesAccount {
     }
 }
 
+#[cfg(feature = "futures_api")]
+impl Binance for crate::futures::userstream::UserStream {
+    fn new_with_config(api_key: Option<String>, secret_key: Option<String>, config: &Config) -> Self {
+        Self {
+            client: Client::new(
+                api_key,
+                secret_key,
+                config.futures_rest_api_endpoint.clone(),
+                config.timeout,
+            ),
+            recv_window: config.recv_window,
+        }
+    }
+}
+
 #[cfg(feature = "margin_api")]
 impl Binance for crate::margin::Margin {
     fn new_with_config(api_key: Option<String>, secret_key: Option<String>, config: &Config) -> Self {

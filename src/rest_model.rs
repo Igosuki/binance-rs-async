@@ -509,9 +509,7 @@ pub enum OrderSide {
 
 /// By default, buy
 impl Default for OrderSide {
-    fn default() -> Self {
-        Self::Buy
-    }
+    fn default() -> Self { Self::Buy }
 }
 
 /// The allowed values are:
@@ -526,9 +524,7 @@ pub enum CancelReplaceMode {
 
 /// By default, STOP_ON_FAILURE
 impl Default for CancelReplaceMode {
-    fn default() -> Self {
-        Self::StopOnFailure
-    }
+    fn default() -> Self { Self::StopOnFailure }
 }
 
 /// Order types, the following restrictions apply
@@ -555,9 +551,7 @@ pub enum OrderType {
 
 /// By default, use market orders
 impl Default for OrderType {
-    fn default() -> Self {
-        Self::Market
-    }
+    fn default() -> Self { Self::Market }
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -599,6 +593,7 @@ pub struct MarginOrderCancellation {
 #[serde(rename_all = "camelCase")]
 pub struct MarginOrderCancellationResult {
     pub symbol: String,
+    #[serde(with = "string_or_u64_opt")]
     pub order_id: Option<u64>,
     pub orig_client_order_id: Option<String>,
     pub client_order_id: Option<String>,
@@ -1102,6 +1097,7 @@ pub struct MarginOrderQuery {
 #[serde(rename_all = "camelCase")]
 pub struct MarginOrderResult {
     pub symbol: String,
+    #[serde(with = "string_or_u64")]
     pub order_id: u64,
     pub client_order_id: String,
     pub transact_time: u128,
@@ -1950,6 +1946,19 @@ pub struct ApiKeyPermissions {
     trading_authority_expiration_time: Option<u64>,
 }
 
+pub type WalletBalances = Vec<WalletBalance>;
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct WalletBalance {
+    /// Shows whether the wallet is activated or not
+    activate: bool,
+    /// Shows the overall balance of the wallet quoted in BTC
+    balance: String,
+    /// Indicates the wallet type: 'Spot', 'Funding', 'Cross Margin', 'Isolated Margin', 'USDⓈ-M Futures', 'COIN-M Futures', 'Earn', 'Options', 'Trading Bots'
+    wallet_name: String,
+}
+
 pub mod string_or_float {
     use std::fmt;
 
@@ -2039,6 +2048,40 @@ pub mod string_or_u64 {
         match StringOrU64::deserialize(deserializer)? {
             StringOrU64::String(s) => s.parse().map_err(de::Error::custom),
             StringOrU64::U64(i) => Ok(i),
+        }
+    }
+}
+
+pub mod string_or_u64_opt {
+    use std::fmt;
+
+    use serde::{de, Deserialize, Deserializer, Serializer};
+
+    pub fn serialize<T, S>(value: &Option<T>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        T: fmt::Display,
+        S: Serializer,
+    {
+        match value {
+            Some(v) => crate::rest_model::string_or_u64::serialize(v, serializer),
+            None => serializer.serialize_none(),
+        }
+    }
+
+    pub fn deserialize<'de, D>(deserializer: D) -> Result<Option<u64>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        #[derive(Deserialize)]
+        #[serde(untagged)]
+        enum StringOrU64 {
+            String(String),
+            U64(u64),
+        }
+
+        match StringOrU64::deserialize(deserializer)? {
+            StringOrU64::String(s) => s.parse().map_err(de::Error::custom).map(|v| Some(v)),
+            StringOrU64::U64(i) => Ok(Some(i)),
         }
     }
 }

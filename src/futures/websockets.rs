@@ -22,7 +22,6 @@ pub static AGGREGATED_TRADE: &str = "aggTrade";
 pub static DEPTH_ORDERBOOK: &str = "depthUpdate";
 pub static PARTIAL_ORDERBOOK: &str = "lastUpdateId";
 pub static DAYTICKER: &str = "24hrTicker";
-pub static MARK_PRICE: &str = "markPrice";
 
 pub fn all_ticker_stream() -> &'static str { "!ticker@arr" }
 
@@ -43,12 +42,6 @@ pub fn all_mini_ticker_stream() -> &'static str { "!miniTicker@arr" }
 pub fn mini_ticker_stream(symbol: &str) -> String { format!("{symbol}@miniTicker") }
 
 /// # Arguments
-/// 
-/// * `symbol`: the market symbol
-/// * `update_speed`: 1 or 3
-pub fn mark_price_stream(symbol: &str, update_speed: u8) -> String { format!("{symbol}@markPrice@{update_speed}s") }
-
-/// # Arguments
 ///
 /// * `symbol`: the market symbol
 /// * `levels`: 5, 10 or 20
@@ -65,17 +58,17 @@ pub fn diff_book_depth_stream(symbol: &str, update_speed: u16) -> String { forma
 
 fn combined_stream(streams: Vec<String>) -> String { streams.join("/") }
 
-pub struct WebSockets<'a, WE> {
+pub struct FuturesWebSockets<'a, WE> {
     pub socket: Option<(WebSocketStream<MaybeTlsStream<TcpStream>>, Response)>,
     handler: Box<dyn FnMut(WE) -> Result<()> + 'a + Send>,
     conf: Config,
 }
 
-impl<'a, WE: serde::de::DeserializeOwned> WebSockets<'a, WE> {
+impl<'a, WE: serde::de::DeserializeOwned> FuturesWebSockets<'a, WE> {
     /// New websocket holder with default configuration
     /// # Examples
     /// see examples/binance_websockets.rs
-    pub fn new<Callback>(handler: Callback) -> WebSockets<'a, WE>
+    pub fn new<Callback>(handler: Callback) -> FuturesWebSockets<'a, WE>
     where
         Callback: FnMut(WE) -> Result<()> + 'a + Send,
     {
@@ -85,11 +78,11 @@ impl<'a, WE: serde::de::DeserializeOwned> WebSockets<'a, WE> {
     /// New websocket holder with provided configuration
     /// # Examples
     /// see examples/binance_websockets.rs
-    pub fn new_with_options<Callback>(handler: Callback, conf: Config) -> WebSockets<'a, WE>
+    pub fn new_with_options<Callback>(handler: Callback, conf: Config) -> FuturesWebSockets<'a, WE>
     where
         Callback: FnMut(WE) -> Result<()> + 'a + Send,
     {
-        WebSockets {
+        FuturesWebSockets {
             socket: None,
             handler: Box::new(handler),
             conf,
@@ -110,14 +103,6 @@ impl<'a, WE: serde::de::DeserializeOwned> WebSockets<'a, WE> {
 
     /// Connect to a websocket endpoint
     pub async fn connect(&mut self, endpoint: &str) -> Result<()> {
-        let wss: String = format!("{}/{}/{}", self.conf.ws_endpoint, WS_ENDPOINT, endpoint);
-        let url = Url::parse(&wss)?;
-
-        self.handle_connect(url).await
-    }
-
-    /// Connect to a futures websocket endpoint
-    pub async fn connect_futures(&mut self, endpoint: &str) -> Result<()> {
         let wss: String = format!("{}/{}/{}", self.conf.futures_ws_endpoint, WS_ENDPOINT, endpoint);
         let url = Url::parse(&wss)?;
 

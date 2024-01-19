@@ -1,4 +1,4 @@
-pub static DATA_REST_ENDPOINT: &str = "https://data.binance.com";
+pub static DATA_REST_ENDPOINT: &str = "https://api.binance.com";
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Config {

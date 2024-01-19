@@ -9,24 +9,22 @@ pub struct FuturesGeneral {
 }
 
 impl FuturesGeneral {
-    // Test connectivity
+    /// Test connectivity
     pub async fn ping(&self) -> Result<String> {
         self.client.get("/fapi/v1/ping", None).await?;
         Ok("pong".into())
     }
 
-    // Check server time
-    pub async fn get_server_time(&self) -> Result<ServerTime> {
-        self.client.get_p("/fapi/v1/time", None).await
-    }
+    /// Check server time
+    pub async fn get_server_time(&self) -> Result<ServerTime> { self.client.get_p("/fapi/v1/time", None).await }
 
-    // Obtain exchange information
-    // - Current exchange trading rules and symbol information
+    /// Obtain exchange information
+    /// - Current exchange trading rules and symbol information
     pub async fn exchange_info(&self) -> Result<ExchangeInformation> {
         self.client.get_p("/fapi/v1/exchangeInfo", None).await
     }
 
-    // Get Symbol information
+    /// Get Symbol information
     pub async fn get_symbol_info<S>(&self, symbol: S) -> Result<Symbol>
     where
         S: Into<String>,

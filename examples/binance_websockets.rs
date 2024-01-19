@@ -36,7 +36,8 @@ async fn main() {
         Box::pin(last_price(logger_tx.clone())),
         Box::pin(book_ticker(logger_tx.clone())),
         Box::pin(combined_orderbook(logger_tx.clone())),
-        Box::pin(custom_event_loop(logger_tx)),
+        Box::pin(custom_event_loop(logger_tx.clone())),
+        Box::pin(mark_price_websocket(logger_tx)),
     ];
 
     for stream in streams {
@@ -183,6 +184,35 @@ async fn kline_websocket(logger_tx: UnboundedSender<WebsocketEvent>) {
     });
 
     web_socket.connect(&kline).await.unwrap(); // check error
+    if let Err(e) = web_socket.event_loop(&keep_running).await {
+        println!("Error: {e}");
+    }
+    web_socket.disconnect().await.unwrap();
+    println!("disconnected");
+}
+
+#[allow(dead_code)]
+async fn mark_price_websocket(logger_tx: UnboundedSender<WebsocketEvent>) {
+    let keep_running = AtomicBool::new(true);
+    let mark_price = mark_price_stream("btcusdt", 1);
+    let mut web_socket: WebSockets<'_, WebsocketEvent> = WebSockets::new(|event: WebsocketEvent| {
+        logger_tx.send(event.clone()).unwrap();
+        if let WebsocketEvent::MarkPriceUpdate(mark_price_event) = event {
+            println!(
+                "Symbol: {}, mark price: {}",
+                mark_price_event.symbol, mark_price_event.mark_price
+            );
+        }
+
+        Ok(())
+    });
+
+    
+    
+    if let Err(e) = web_socket.connect_futures(&mark_price).await {
+        println!("Connection error: {e}");
+    }
+
     if let Err(e) = web_socket.event_loop(&keep_running).await {
         println!("Error: {e}");
     }
