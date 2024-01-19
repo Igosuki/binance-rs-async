@@ -1,10 +1,6 @@
+pub use crate::rest_model::{Asks, Bids, BookTickers, KlineSummaries, KlineSummary, OrderSide, OrderStatus, RateLimit,
+                            ServerTime, SymbolPrice, SymbolStatus, Tickers, TimeInForce};
 use serde::{Deserialize, Serialize};
-
-use crate::rest_model::{string_or_bool, string_or_float, string_or_float_opt, string_or_u64};
-pub use crate::rest_model::{
-    Asks, Bids, BookTickers, KlineSummaries, KlineSummary, OrderSide, OrderStatus, RateLimit, ServerTime, SymbolPrice,
-    SymbolStatus, Tickers, TimeInForce,
-};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -82,9 +78,7 @@ pub enum OrderType {
 
 /// By default, use market orders
 impl Default for OrderType {
-    fn default() -> Self {
-        Self::Market
-    }
+    fn default() -> Self { Self::Market }
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
@@ -578,15 +572,9 @@ pub struct ChangeLeverageResponse {
     pub symbol: String,
 }
 
-fn default_stop_price() -> f64 {
-    0.0
-}
-fn default_activation_price() -> f64 {
-    0.0
-}
-fn default_price_rate() -> f64 {
-    0.0
-}
+fn default_stop_price() -> f64 { 0.0 }
+fn default_activation_price() -> f64 { 0.0 }
+fn default_price_rate() -> f64 { 0.0 }
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]

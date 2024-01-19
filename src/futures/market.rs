@@ -1,9 +1,7 @@
 use crate::client::*;
 use crate::errors::*;
 use crate::futures::rest_model::*;
-use crate::rest_model::{
-    BookTickers, KlineSummaries, KlineSummary, PairAndWindowQuery, PairQuery, SymbolPrice, Tickers,
-};
+use crate::rest_model::{BookTickers, KlineSummaries, KlineSummary, PairAndWindowQuery, PairQuery, SymbolPrice, Tickers};
 use crate::util::*;
 use serde_json::Value;
 
@@ -18,7 +16,7 @@ pub struct FuturesMarket {
 }
 
 impl FuturesMarket {
-    // Order book (Default 100; max 1000)
+    /// Order book (Default 100; max 1000)
     pub async fn get_depth<S>(&self, symbol: S) -> Result<OrderBook>
     where
         S: Into<String>,
