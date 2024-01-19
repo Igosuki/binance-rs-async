@@ -653,12 +653,13 @@ pub struct LeverageBracket {
     pub notional_cap: u64,
     pub notional_floor: u64,
     pub maint_margin_ratio: f64,
-    pub cum: u64,
+    pub cum: f64,
 }
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SymbolBrackets {
     pub symbol: String,
+    pub notional_coef: Option<f64>,
     pub brackets: Vec<LeverageBracket>,
 }
