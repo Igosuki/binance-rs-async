@@ -466,7 +466,7 @@ impl FuturesMarket {
     }
 
     /// https://binance-docs.github.io/apidocs/futures/en/#notional-and-leverage-brackets-user_data
-    pub async fn get_notional_leverage_brackets<S>(&self, symbol: S) -> Result<SymbolBrackets>
+    pub async fn get_notional_leverage_brackets<S>(&self, symbol: S) -> Result<Vec<SymbolBrackets>>
     where
         S: Into<String>,
     {
