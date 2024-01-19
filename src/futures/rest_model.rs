@@ -60,6 +60,7 @@ pub enum ContractType {
     NextMonth,
     CurrentQuarter,
     NextQuarter,
+    PerpetualDelivering,
     #[serde(rename = "")]
     Empty,
 }
