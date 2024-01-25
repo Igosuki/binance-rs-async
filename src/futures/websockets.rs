@@ -58,17 +58,17 @@ pub fn diff_book_depth_stream(symbol: &str, update_speed: u16) -> String { forma
 
 fn combined_stream(streams: Vec<String>) -> String { streams.join("/") }
 
-pub struct FuturesWebSockets<'a, WE> {
+pub struct WebSockets<'a, WE> {
     pub socket: Option<(WebSocketStream<MaybeTlsStream<TcpStream>>, Response)>,
     handler: Box<dyn FnMut(WE) -> Result<()> + 'a + Send>,
     conf: Config,
 }
 
-impl<'a, WE: serde::de::DeserializeOwned> FuturesWebSockets<'a, WE> {
+impl<'a, WE: serde::de::DeserializeOwned> WebSockets<'a, WE> {
     /// New websocket holder with default configuration
     /// # Examples
     /// see examples/binance_websockets.rs
-    pub fn new<Callback>(handler: Callback) -> FuturesWebSockets<'a, WE>
+    pub fn new<Callback>(handler: Callback) -> WebSockets<'a, WE>
     where
         Callback: FnMut(WE) -> Result<()> + 'a + Send,
     {
@@ -78,11 +78,11 @@ impl<'a, WE: serde::de::DeserializeOwned> FuturesWebSockets<'a, WE> {
     /// New websocket holder with provided configuration
     /// # Examples
     /// see examples/binance_websockets.rs
-    pub fn new_with_options<Callback>(handler: Callback, conf: Config) -> FuturesWebSockets<'a, WE>
+    pub fn new_with_options<Callback>(handler: Callback, conf: Config) -> WebSockets<'a, WE>
     where
         Callback: FnMut(WE) -> Result<()> + 'a + Send,
     {
-        FuturesWebSockets {
+        WebSockets {
             socket: None,
             handler: Box::new(handler),
             conf,
