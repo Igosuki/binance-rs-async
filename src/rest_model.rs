@@ -1233,14 +1233,14 @@ pub enum OrderStatus {
     Filled,
     /// The order has been canceled by the user.
     Canceled,
-    /// (currently unused)
+    /// Currently unused
     PendingCancel,
     /// The order was not accepted by the engine and not processed.
     Rejected,
     /// The order was canceled according to the order type's rules (e.g. LIMIT FOK orders with no fill, LIMIT IOC or MARKET orders that partially fill) or by the exchange, (e.g. orders canceled during liquidation, orders canceled during maintenance)
     Expired,
-    /// Part of the order or all of the order's quantity has filled.
-    Trade,
+    /// The order was canceled by the exchange due to STP trigger. (e.g. an order with EXPIRE_TAKER will match with existing orders on the book with the same account or same tradeGroupId)
+    ExpiredInMatch,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
@@ -1993,7 +1993,7 @@ pub mod string_or_float {
 pub(crate) mod string_or_float_opt {
     use std::fmt;
 
-    use serde::{Deserialize, Deserializer, Serializer};
+    use serde::{Deserializer, Serializer};
 
     pub fn serialize<T, S>(value: &Option<T>, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2010,13 +2010,6 @@ pub(crate) mod string_or_float_opt {
     where
         D: Deserializer<'de>,
     {
-        #[derive(Deserialize)]
-        #[serde(untagged)]
-        enum StringOrFloat {
-            String(String),
-            Float(f64),
-        }
-
         Ok(Some(crate::rest_model::string_or_float::deserialize(deserializer)?))
     }
 }
