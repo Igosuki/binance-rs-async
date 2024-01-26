@@ -84,7 +84,7 @@ pub struct Position {
     pub position_side: PositionSide,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct OrderTradeUpdate {
     #[serde(rename = "E")]
     pub event_time: u64,
@@ -94,7 +94,7 @@ pub struct OrderTradeUpdate {
     pub order: Order,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct Order {
     #[serde(rename = "s")]
     pub symbol: String,
@@ -166,7 +166,7 @@ pub struct Order {
     pub good_till_date: u64
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum PriceMatch {
     /// No price match
@@ -189,7 +189,7 @@ pub enum PriceMatch {
     Queue20,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum SelfTradePreventionMode {
     /// No Self-Trade Prevention
