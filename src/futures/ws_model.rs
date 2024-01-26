@@ -1,5 +1,5 @@
 use crate::futures::rest_model::{MarginType, OrderType, PositionSide, WorkingType};
-use crate::rest_model::{string_or_float, string_or_float_opt, OrderSide, OrderStatus, TimeInForce};
+use crate::rest_model::{string_or_float, string_or_float_opt, ExecutionType, OrderSide, OrderStatus, TimeInForce};
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE", tag = "e")]
@@ -164,25 +164,6 @@ pub struct Order {
     pub price_match: PriceMatch,
     #[serde(rename = "gtd")]
     pub good_till_date: u64
-}
-
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
-pub enum ExecutionType {
-    /// The order has been accepted into the engine.
-    New,
-    /// The order has been canceled by the user.
-    Canceled,
-    /// (currently unused)
-    Replaced,
-    /// The order has been rejected and was not processed (This message appears only with Cancel Replace Orders wherein the new order placement is rejected but the request to cancel request succeeds.)
-    Rejected,
-    /// Part of the order or all of the order's quantity has filled.
-    Trade,
-    /// The order was canceled according to the order type's rules (e.g. LIMIT FOK orders with no fill, LIMIT IOC or MARKET orders that partially fill) or by the exchange, (e.g. orders canceled during liquidation, orders canceled during maintenance).
-    Expired,
-    /// The order has expired due to STP trigger.
-    TradePrevention,
 }
 
 #[derive(Debug, Deserialize)]
