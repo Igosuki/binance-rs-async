@@ -508,7 +508,7 @@ impl FuturesMarket {
         S: Into<String>,
     {
         self.client
-            .get_d("/fapi/v1/ticker/price", Some(PairQuery { symbol: symbol.into() }))
+            .get_d("/fapi/v2/ticker/price", Some(PairQuery { symbol: symbol.into() }))
             .await
     }
 
