@@ -2092,7 +2092,7 @@ pub mod string_or_u64_opt {
         }
 
         match StringOrU64::deserialize(deserializer)? {
-            StringOrU64::String(s) => s.parse().map_err(de::Error::custom).map(|v| Some(v)),
+            StringOrU64::String(s) => s.parse().map_err(de::Error::custom).map(Some),
             StringOrU64::U64(i) => Ok(Some(i)),
         }
     }
