@@ -95,7 +95,7 @@ impl FuturesAccount {
 
     /// Get currently open orders
     pub async fn get_open_orders(&self, symbol: impl Into<String>) -> Result<Vec<Order>> {
-        let payload = build_signed_request_p([("symbol", symbol.into())], self.recv_window)?;
+        let payload = build_signed_request_p(PairQuery{symbol: symbol.into()}, self.recv_window)?;
         self.client.get_signed("/fapi/v1/openOrders", &payload).await
     }
 
