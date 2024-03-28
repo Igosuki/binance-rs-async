@@ -39,7 +39,7 @@ thiserror = "1.0"
 url = "2.5"
 lazy_static = "1.4"
 tokio-tungstenite = "0.21"
-tokio = { version = "1.36", features = ["full"] }
+tokio = { version = "1.37", features = ["full"] }
 boolinator = "2.4"
 
 [dev-dependencies]
