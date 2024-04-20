@@ -11,14 +11,21 @@ env:
 
 jobs:
   build:
-
-    runs-on: ubuntu-latest
-
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        rust_channel:
+          - stable
+          - nightly
     steps:
-    - uses: actions/checkout@v4
-    - name: Lint
-      run: cargo clippy --all-features --all-targets -- -D warnings
-    - name: Build
-      run: cargo build --verbose
-    - name: Run tests
-      run: cargo test --verbose
+      - run: rustup --version
+        name: Check rustup
+      - uses: actions/checkout@v4
+      - run: rustup toolchain add --profile=minimal ${{ matrix.rust_channel }}
+        name: Install toolchain
+      - run: cargo clippy --all-features --all-targets -- -D warnings
+        name: Clippy check
+      - name: Build
+        run: cargo build --verbose
+      - name: Run tests
+        run: cargo test --verbose
