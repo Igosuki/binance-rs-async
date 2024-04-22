@@ -5,7 +5,7 @@ use super::rest_model::{AccountBalance, AccountInformation, CanceledOrder, Chang
 use crate::account::OrderCancellation;
 use crate::client::Client;
 use crate::errors::*;
-use crate::rest_model::{OrderSide, TimeInForce};
+use crate::rest_model::{OrderSide, TimeInForce, Success};
 use crate::rest_model::{PairAndWindowQuery, PairQuery};
 use crate::util::*;
 use serde::Serializer;
@@ -282,7 +282,7 @@ impl FuturesAccount {
         S: Into<String>,
     {
         self.client
-            .delete_signed_p(
+            .delete_signed_p::<Success, _>(
                 "/fapi/v1/allOpenOrders",
                 PairQuery { symbol: symbol.into() },
                 self.recv_window,
