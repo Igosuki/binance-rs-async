@@ -18,6 +18,9 @@ jobs:
           - stable
           - nightly
     steps:
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
       - run: rustup --version
         name: Check rustup
       - uses: actions/checkout@v4
@@ -25,6 +28,24 @@ jobs:
         name: Install toolchain
       - run: cargo clippy --all-features --all-targets -- -D warnings
         name: Clippy check
+      - name: Cargo cache
+        uses: swatinem/rust-cache@v2
+        with:
+          cache-on-failure: true
+      - name: Install SARIF tools
+        run: cargo install clippy-sarif sarif-fmt
+      - name: Run clippy
+        run: >
+          cargo clippy --all-features --all --message-format=json -- -D warnings
+          | clippy-sarif
+          | tee clippy-results.sarif
+          | sarif-fmt
+        continue-on-error: true
+      - name: Upload analysis results to GitHub
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: clippy-results.sarif
+          wait-for-processing: true
       - name: Build
         run: cargo build --verbose
       - name: Run tests
