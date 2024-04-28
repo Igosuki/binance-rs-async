@@ -422,7 +422,7 @@ impl FuturesMarket {
             end_time: end_time.into(),
             limit: limit.into(),
             pair: symbol.into(),
-            interval: Some(interval.into())
+            interval: Some(interval.into()),
         };
 
         let klines = self.client.get_d("/fapi/v1/indexPriceKlines", Some(query)).await?;

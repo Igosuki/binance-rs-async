@@ -207,8 +207,6 @@ async fn mark_price_websocket(logger_tx: UnboundedSender<WebsocketEvent>) {
         Ok(())
     });
 
-    
-    
     if let Err(e) = web_socket.connect_futures(&mark_price).await {
         println!("Connection error: {e}");
     }

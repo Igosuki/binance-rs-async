@@ -43,7 +43,7 @@ pub fn all_mini_ticker_stream() -> &'static str { "!miniTicker@arr" }
 pub fn mini_ticker_stream(symbol: &str) -> String { format!("{symbol}@miniTicker") }
 
 /// # Arguments
-/// 
+///
 /// * `symbol`: the market symbol
 /// * `update_speed`: 1 or 3
 pub fn mark_price_stream(symbol: &str, update_speed: u8) -> String { format!("{symbol}@markPrice@{update_speed}s") }
