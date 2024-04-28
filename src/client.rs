@@ -1,6 +1,5 @@
 use std::time::Duration;
 
-use boolinator::Boolinator;
 use hex::encode as hex_encode;
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue, CONTENT_TYPE, USER_AGENT};
 use reqwest::Response;
@@ -190,12 +189,14 @@ impl Client {
                 HeaderValue::from_str(&self.api_key)?,
             )),
             // Include content type if needed
-            content_type.as_option().map(|_| {
-                (
+            if content_type {
+                Some((
                     CONTENT_TYPE,
                     HeaderValue::from_static("application/x-www-form-urlencoded"),
-                )
-            }),
+                ))
+            } else {
+                None
+            },
         ])
         .flatten()
         .collect();
