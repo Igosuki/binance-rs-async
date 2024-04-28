@@ -163,7 +163,7 @@ pub struct Order {
     #[serde(rename = "pm")]
     pub price_match: PriceMatch,
     #[serde(rename = "gtd")]
-    pub good_till_date: u64
+    pub good_till_date: u64,
 }
 
 #[derive(Clone, Debug, Deserialize)]
