@@ -27,7 +27,7 @@ all_apis = ["futures_api", "margin_api", "savings_api", "wallet_api"]
 
 [dependencies]
 chrono = { version = "0.4", features = ["serde"] }
-futures = "0.3"
+futures = "0.3.30"
 hex = "0.4"
 reqwest = { version = "0.12", features = ["json"], default-features = false }
 ring = "0.17"
