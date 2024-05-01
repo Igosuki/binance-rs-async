@@ -45,5 +45,5 @@ boolinator = "2.4"
 [dev-dependencies]
 csv = "1.3"
 env_logger = "0.11"
-tracing = { version = "0.1", features = ["release_max_level_debug", "log"] }
+tracing = { version = "0.1.40", features = ["release_max_level_debug", "log"] }
 tokio-test = "0.4"
