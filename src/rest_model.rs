@@ -404,6 +404,21 @@ pub struct PriceStats {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct HistoricalTrade {
+    pub time: u64,
+    pub id: u64,
+    #[serde(with = "string_or_float")]
+    pub price: f64,
+    #[serde(rename = "qty", with = "string_or_float")]
+    pub quantity: f64,
+    #[serde(rename = "quoteQty", with = "string_or_float")]
+    pub quote_quantity: f64,
+    pub is_buyer_maker: bool,
+    pub is_best_match: bool,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct AggTrade {
     #[serde(rename = "T")]
     pub time: u64,
@@ -509,7 +524,9 @@ pub enum OrderSide {
 
 /// By default, buy
 impl Default for OrderSide {
-    fn default() -> Self { Self::Buy }
+    fn default() -> Self {
+        Self::Buy
+    }
 }
 
 /// The allowed values are:
@@ -524,7 +541,9 @@ pub enum CancelReplaceMode {
 
 /// By default, STOP_ON_FAILURE
 impl Default for CancelReplaceMode {
-    fn default() -> Self { Self::StopOnFailure }
+    fn default() -> Self {
+        Self::StopOnFailure
+    }
 }
 
 /// Order types, the following restrictions apply
@@ -551,7 +570,9 @@ pub enum OrderType {
 
 /// By default, use market orders
 impl Default for OrderType {
-    fn default() -> Self { Self::Market }
+    fn default() -> Self {
+        Self::Market
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

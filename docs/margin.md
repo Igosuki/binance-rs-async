@@ -1066,13 +1066,13 @@ Name | Type | Mandatory | Description
 symbol | STRING | YES |
 startTime |	LONG | NO	
 endTime | LONG | NO	
-fromId | LONG | NO | TradeId to fetch from. Default gets most recent trades.
+from_id | LONG | NO | TradeId to fetch from. Default gets most recent trades.
 limit |	INT | NO | Default 500; max 1000.
 recvWindow | LONG | NO
 timestamp | LONG | YES
 
 Notes:
-* If fromId is set, it will get orders >= that fromId. Otherwise most recent orders are returned.
+* If from_id is set, it will get orders >= that from_id. Otherwise most recent orders are returned.
 
 
 **Response:**

@@ -48,7 +48,9 @@ impl Wallet {
     /// let system_status = tokio_test::block_on(wallet.system_status());
     /// assert!(system_status.is_ok(), "{:?}", system_status);
     /// ```
-    pub async fn system_status(&self) -> Result<SystemStatus> { self.client.get_p(SAPI_V1_SYSTEM_STATUS, None).await }
+    pub async fn system_status(&self) -> Result<SystemStatus> {
+        self.client.get_p(SAPI_V1_SYSTEM_STATUS, None).await
+    }
 
     /// Get information of coins (available for deposit and withdraw) for user.
     /// # Examples

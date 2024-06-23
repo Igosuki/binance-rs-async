@@ -12,6 +12,7 @@ static API_V3_BOOK_TICKER: &str = "/api/v3/ticker/bookTicker";
 static API_V3_24H_TICKER: &str = "/api/v3/ticker/24hr";
 static API_V3_AGG_TRADES: &str = "/api/v3/aggTrades";
 static API_V3_KLINES: &str = "/api/v3/klines";
+static API_V3_OLD_TRADES: &str = "/api/v3/historicalTrades";
 
 #[derive(Clone)]
 pub struct Market {
@@ -75,7 +76,9 @@ impl Market {
     /// let prices = tokio_test::block_on(market.get_all_prices());
     /// assert!(prices.is_ok(), "{:?}", prices);
     /// ```
-    pub async fn get_all_prices(&self) -> Result<Prices> { self.client.get(API_V3_TICKER_PRICE, None).await }
+    pub async fn get_all_prices(&self) -> Result<Prices> {
+        self.client.get(API_V3_TICKER_PRICE, None).await
+    }
 
     /// Latest price for ONE symbol.
     /// # Examples
@@ -121,7 +124,9 @@ impl Market {
     /// let tickers = tokio_test::block_on(market.get_all_book_tickers());
     /// assert!(tickers.is_ok(), "{:?}", tickers);
     /// ```
-    pub async fn get_all_book_tickers(&self) -> Result<BookTickers> { self.client.get(API_V3_BOOK_TICKER, None).await }
+    pub async fn get_all_book_tickers(&self) -> Result<BookTickers> {
+        self.client.get(API_V3_BOOK_TICKER, None).await
+    }
 
     /// -> Best price/qty on the order book for ONE symbol
     /// # Examples
@@ -155,6 +160,38 @@ impl Market {
     {
         let request = self.symbol_request(symbol);
         self.client.get(API_V3_24H_TICKER, Some(&request)).await
+    }
+
+    /// Retrieve historical trades for a given symbol.
+    /// If from_id is omitted, most recent trades are returned.
+    /// ```rust
+    /// use binance::{api::*, market::*, config::*};
+    /// let conf = Config::default().set_rest_api_endpoint(DATA_REST_ENDPOINT);
+    /// let market: Market = Binance::new_with_env(&conf);
+    /// let trades = tokio_test::block_on(market.get_historical_trades("BNBETH", Some(10), None));
+    /// assert!(trades.is_ok(), "{:?}", trades);
+    /// ```
+    pub async fn get_historical_trades<S1, S2, S3>(
+        &self,
+        symbol: S1,
+        limit: S2,
+        from_id: S3,
+    ) -> Result<Vec<HistoricalTrade>>
+    where
+        S1: AsRef<str>,
+        S2: Into<Option<u64>>,
+        S3: Into<Option<u64>>,
+    {
+        let parameters = IntoIterator::into_iter([
+            Some(("symbol", symbol.as_ref().to_string())),
+            limit.into().map(|l| ("limit", l.to_string())),
+            from_id.into().map(|f| ("fromId", f.to_string())),
+        ])
+        .flatten();
+
+        let request = build_request(parameters);
+
+        self.client.get_p(API_V3_OLD_TRADES, Some(&request)).await
     }
 
     /// Get aggregated historical trades.

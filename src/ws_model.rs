@@ -1,5 +1,6 @@
-use crate::rest_model::{string_or_float, Asks, Bids, ExecutionType, OrderBook, OrderSide, OrderStatus, OrderType,
-                        TimeInForce};
+use crate::rest_model::{
+    string_or_float, Asks, Bids, ExecutionType, OrderBook, OrderSide, OrderStatus, OrderType, TimeInForce,
+};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "e")]

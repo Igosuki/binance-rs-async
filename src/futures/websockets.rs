@@ -23,23 +23,41 @@ pub static DEPTH_ORDERBOOK: &str = "depthUpdate";
 pub static PARTIAL_ORDERBOOK: &str = "lastUpdateId";
 pub static DAYTICKER: &str = "24hrTicker";
 
-pub fn all_ticker_stream() -> &'static str { "!ticker@arr" }
+pub fn all_ticker_stream() -> &'static str {
+    "!ticker@arr"
+}
 
-pub fn ticker_stream(symbol: &str) -> String { format!("{symbol}@ticker") }
+pub fn ticker_stream(symbol: &str) -> String {
+    format!("{symbol}@ticker")
+}
 
-pub fn agg_trade_stream(symbol: &str) -> String { format!("{symbol}@aggTrade") }
+pub fn agg_trade_stream(symbol: &str) -> String {
+    format!("{symbol}@aggTrade")
+}
 
-pub fn trade_stream(symbol: &str) -> String { format!("{symbol}@trade") }
+pub fn trade_stream(symbol: &str) -> String {
+    format!("{symbol}@trade")
+}
 
-pub fn kline_stream(symbol: &str, interval: &str) -> String { format!("{symbol}@kline_{interval}") }
+pub fn kline_stream(symbol: &str, interval: &str) -> String {
+    format!("{symbol}@kline_{interval}")
+}
 
-pub fn book_ticker_stream(symbol: &str) -> String { format!("{symbol}@bookTicker") }
+pub fn book_ticker_stream(symbol: &str) -> String {
+    format!("{symbol}@bookTicker")
+}
 
-pub fn all_book_ticker_stream() -> &'static str { "!bookTicker" }
+pub fn all_book_ticker_stream() -> &'static str {
+    "!bookTicker"
+}
 
-pub fn all_mini_ticker_stream() -> &'static str { "!miniTicker@arr" }
+pub fn all_mini_ticker_stream() -> &'static str {
+    "!miniTicker@arr"
+}
 
-pub fn mini_ticker_stream(symbol: &str) -> String { format!("{symbol}@miniTicker") }
+pub fn mini_ticker_stream(symbol: &str) -> String {
+    format!("{symbol}@miniTicker")
+}
 
 /// # Arguments
 ///
@@ -54,9 +72,13 @@ pub fn partial_book_depth_stream(symbol: &str, levels: u16, update_speed: u16) -
 ///
 /// * `symbol`: the market symbol
 /// * `update_speed`: 1000 or 100
-pub fn diff_book_depth_stream(symbol: &str, update_speed: u16) -> String { format!("{symbol}@depth@{update_speed}ms") }
+pub fn diff_book_depth_stream(symbol: &str, update_speed: u16) -> String {
+    format!("{symbol}@depth@{update_speed}ms")
+}
 
-fn combined_stream(streams: Vec<String>) -> String { streams.join("/") }
+fn combined_stream(streams: Vec<String>) -> String {
+    streams.join("/")
+}
 
 pub struct WebSockets<'a, WE> {
     pub socket: Option<(WebSocketStream<MaybeTlsStream<TcpStream>>, Response)>,
@@ -129,7 +151,9 @@ impl<'a, WE: serde::de::DeserializeOwned> WebSockets<'a, WE> {
         }
     }
 
-    pub fn socket(&self) -> &Option<(WebSocketStream<MaybeTlsStream<TcpStream>>, Response)> { &self.socket }
+    pub fn socket(&self) -> &Option<(WebSocketStream<MaybeTlsStream<TcpStream>>, Response)> {
+        &self.socket
+    }
 
     pub async fn event_loop(&mut self, running: &AtomicBool) -> Result<()> {
         while running.load(Ordering::Relaxed) {

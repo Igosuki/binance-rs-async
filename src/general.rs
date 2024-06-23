@@ -35,7 +35,9 @@ impl General {
     /// let server_time = tokio_test::block_on(general.get_server_time());
     /// assert!(server_time.is_ok(), "{:?}", server_time);
     /// ```
-    pub async fn get_server_time(&self) -> Result<ServerTime> { self.client.get("/api/v3/time", None).await }
+    pub async fn get_server_time(&self) -> Result<ServerTime> {
+        self.client.get("/api/v3/time", None).await
+    }
 
     /// Obtain exchange information (rate limits, symbol metadata etc)
     /// # Examples

@@ -1,7 +1,9 @@
 use std::collections::BTreeMap;
 
-use super::rest_model::{AccountBalance, AccountInformation, CanceledOrder, ChangeLeverageResponse, Order, OrderType,
-                        Position, PositionSide, Transaction, WorkingType};
+use super::rest_model::{
+    AccountBalance, AccountInformation, CanceledOrder, ChangeLeverageResponse, Order, OrderType, Position,
+    PositionSide, Transaction, WorkingType,
+};
 use crate::account::OrderCancellation;
 use crate::client::Client;
 use crate::errors::*;
