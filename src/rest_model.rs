@@ -1238,6 +1238,8 @@ pub enum ExecutionType {
     Expired,
     /// The order has expired due to STP trigger.
     TradePrevention,
+    /// Order modified
+    Amendment,
 }
 
 /// Status of an order, this can typically change over time
