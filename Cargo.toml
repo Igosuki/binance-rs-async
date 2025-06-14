@@ -37,7 +37,7 @@ serde_qs = "0.13"
 serde_repr = "0.1"
 thiserror = "1.0"
 url = "2.5"
-tokio-tungstenite = "0.21"
+tokio-tungstenite = "0.27"
 tokio = { version = "1.37", default-features = false, features = ["net", "sync"] }
 
 [dev-dependencies]
