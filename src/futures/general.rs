@@ -11,7 +11,7 @@ pub struct FuturesGeneral {
 impl FuturesGeneral {
     /// Test connectivity
     pub async fn ping(&self) -> Result<String> {
-        self.client.get("/fapi/v1/ping", None).await?;
+        self.client.get::<()>("/fapi/v1/ping", None).await?;
         Ok("pong".into())
     }
 
