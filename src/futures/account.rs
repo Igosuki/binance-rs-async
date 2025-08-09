@@ -267,7 +267,7 @@ impl FuturesAccount {
     /// Change the dual position side
     pub async fn change_position_mode(&self, dual_side_position: bool) -> Result<()> {
         self.client
-            .post_signed_p(
+            .post_signed_p::<(), _>(
                 "/fapi/v1/positionSide/dual",
                 ChangePositionModeRequest { dual_side_position },
                 self.recv_window,
@@ -282,7 +282,7 @@ impl FuturesAccount {
         S: Into<String>,
     {
         self.client
-            .delete_signed_p(
+            .delete_signed_p::<(), _>(
                 "/fapi/v1/allOpenOrders",
                 PairQuery { symbol: symbol.into() },
                 self.recv_window,
