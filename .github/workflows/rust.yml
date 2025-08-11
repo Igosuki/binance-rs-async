@@ -23,7 +23,7 @@ jobs:
           components: clippy
       - run: rustup --version
         name: Check rustup
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - run: rustup toolchain add --profile=minimal ${{ matrix.rust_channel }}
         name: Install toolchain
       - run: cargo clippy --all-features --all-targets -- -D warnings
