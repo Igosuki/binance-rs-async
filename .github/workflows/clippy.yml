@@ -13,7 +13,7 @@ jobs:
         with:
           components: clippy
       - run: rustup --version
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - run: rustup toolchain add --profile=minimal ${{ matrix.rust_channel }}
       - name: Cargo cache
         uses: swatinem/rust-cache@v2
