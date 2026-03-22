@@ -125,7 +125,7 @@ impl<'a, WE: serde::de::DeserializeOwned> WebSockets<'a, WE> {
     }
 
     async fn handle_connect(&mut self, url: Url) -> Result<()> {
-        match connect_async(url).await {
+        match connect_async(url.as_str()).await {
             Ok(answer) => {
                 self.socket = Some(answer);
                 Ok(())
