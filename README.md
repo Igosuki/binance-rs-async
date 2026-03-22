@@ -15,7 +15,7 @@ Add this to your Cargo.toml
 
 ```toml
 [dependencies]
-binance-rs-async = "1.3.3"
+binance-rs-async = "2.0.0-beta.1"
 ```
 
 ## Roadmap
@@ -25,6 +25,7 @@ binance-rs-async = "1.3.3"
 - 1.1.* Wallet API
 - 1.2.* to 1.3.* Continuous updates for wallet and margin APIs
 - 1.4.* Complete tested futures (m-coin and usd-m futures)
+- 2.0.0 Complete implementation of COIN-M Futures, Portfolio Margin, and Options APIs
 
 ## Breaking changes
 - 1.3.0 introduces optional fields for MarginOrderCancellationResult instead of definitely set fields
@@ -69,5 +70,5 @@ Simply create a pull request. Properly documented code and tests (using binance 
 
 ```shell
 # Example that runs the make-release-pr workflow 
-act -P ubuntu-latest=cimg/rust:1.66.1-node workflow_dispatch -j make-release-pr --eventpath release.json --secret-file=secrets
+act -P ubuntu-latest=cimg/rust:1.94.0-node workflow_dispatch -j make-release-pr --eventpath release.json --secret-file=secrets
 ```

@@ -9,3 +9,6 @@ precommit_venv
 
 release.json
 secrets
+
+.claude
+docs/superpowers
