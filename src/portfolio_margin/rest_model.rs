@@ -97,20 +97,17 @@ pub struct CmPosition {
     pub max_qty: f64,
 }
 
-#[derive(Debug, Deserialize, Serialize, Clone)]
+#[derive(Debug, Deserialize, Serialize, Clone, Default)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum OrderType {
     Limit,
+    #[default]
     Market,
     Stop,
     StopMarket,
     TakeProfit,
     TakeProfitMarket,
     TrailingStopMarket,
-}
-
-impl Default for OrderType {
-    fn default() -> Self { Self::Market }
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

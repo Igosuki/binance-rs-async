@@ -52,10 +52,10 @@
 //! # Details
 //!
 //! - Credentials are not enforced, you will get authentication errors if you don't provide
-//! credentials and they are required by an endpoint
+//!   credentials and they are required by an endpoint
 //!
 //! - Error codes are handled on a best effort basis as some are inconsistent and not even
-//! documented on Binance's side
+//!   documented on Binance's side
 //!
 //! - Errors are implemented using [![thiserror]](https://docs.rs/thiserror/1.0.25/thiserror/)
 //!

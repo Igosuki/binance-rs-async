@@ -306,8 +306,8 @@ impl Wallet {
         let transfer = UniversalTransfer {
             asset,
             amount,
-            from_symbol: from_symbol.map(Into::<String>::into),
-            to_symbol: to_symbol.map(Into::<String>::into),
+            from_symbol,
+            to_symbol,
             transfer_type,
         };
         self.client

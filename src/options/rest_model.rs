@@ -94,15 +94,12 @@ pub enum Filters {
     Others,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum OrderType {
+    #[default]
     Limit,
     Market,
-}
-
-impl Default for OrderType {
-    fn default() -> Self { Self::Limit }
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
