@@ -2,11 +2,25 @@ pub static DATA_REST_ENDPOINT: &str = "https://api.binance.com";
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Config {
+    /// Spot
     pub rest_api_endpoint: String,
     pub ws_endpoint: String,
 
+    /// USD-M Futures
     pub futures_rest_api_endpoint: String,
     pub futures_ws_endpoint: String,
+
+    /// COIN-M Futures
+    pub coin_futures_rest_api_endpoint: String,
+    pub coin_futures_ws_endpoint: String,
+
+    /// Portfolio Margin
+    pub portfolio_margin_rest_api_endpoint: String,
+    pub portfolio_margin_ws_endpoint: String,
+
+    /// Options
+    pub options_rest_api_endpoint: String,
+    pub options_ws_endpoint: String,
 
     pub recv_window: u64,
 
@@ -110,6 +124,36 @@ impl Config {
         self
     }
 
+    pub fn set_coin_futures_rest_api_endpoint<T: Into<String>>(mut self, endpoint: T) -> Self {
+        self.coin_futures_rest_api_endpoint = endpoint.into();
+        self
+    }
+
+    pub fn set_coin_futures_ws_endpoint<T: Into<String>>(mut self, endpoint: T) -> Self {
+        self.coin_futures_ws_endpoint = endpoint.into();
+        self
+    }
+
+    pub fn set_portfolio_margin_rest_api_endpoint<T: Into<String>>(mut self, endpoint: T) -> Self {
+        self.portfolio_margin_rest_api_endpoint = endpoint.into();
+        self
+    }
+
+    pub fn set_portfolio_margin_ws_endpoint<T: Into<String>>(mut self, endpoint: T) -> Self {
+        self.portfolio_margin_ws_endpoint = endpoint.into();
+        self
+    }
+
+    pub fn set_options_rest_api_endpoint<T: Into<String>>(mut self, endpoint: T) -> Self {
+        self.options_rest_api_endpoint = endpoint.into();
+        self
+    }
+
+    pub fn set_options_ws_endpoint<T: Into<String>>(mut self, endpoint: T) -> Self {
+        self.options_ws_endpoint = endpoint.into();
+        self
+    }
+
     /// Sets the 'receive window'. The receive window is the number of milliseconds after timestamp
     /// the request is valid for.
     ///
@@ -166,6 +210,15 @@ impl Default for Config {
 
             futures_rest_api_endpoint: "https://fapi.binance.com".into(),
             futures_ws_endpoint: "wss://fstream.binance.com".into(),
+
+            coin_futures_rest_api_endpoint: "https://dapi.binance.com".into(),
+            coin_futures_ws_endpoint: "wss://dstream.binance.com".into(),
+
+            portfolio_margin_rest_api_endpoint: "https://papi.binance.com".into(),
+            portfolio_margin_ws_endpoint: "wss://fstream.binance.com".into(),
+
+            options_rest_api_endpoint: "https://eapi.binance.com".into(),
+            options_ws_endpoint: "wss://nbstream.binance.com".into(),
 
             recv_window: 5000,
             binance_us_api: false,
