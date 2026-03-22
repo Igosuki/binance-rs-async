@@ -146,3 +146,111 @@ impl Binance for crate::wallet::Wallet {
         }
     }
 }
+
+#[cfg(feature = "coin_futures_api")]
+impl Binance for crate::coin_futures::general::CoinFuturesGeneral {
+    fn new_with_config(api_key: Option<String>, secret_key: Option<String>, config: &Config) -> Self {
+        Self {
+            client: Client::new(api_key, secret_key, config.coin_futures_rest_api_endpoint.clone(), config.timeout),
+        }
+    }
+}
+
+#[cfg(feature = "coin_futures_api")]
+impl Binance for crate::coin_futures::market::CoinFuturesMarket {
+    fn new_with_config(api_key: Option<String>, secret_key: Option<String>, config: &Config) -> Self {
+        Self {
+            client: Client::new(api_key, secret_key, config.coin_futures_rest_api_endpoint.clone(), config.timeout),
+            recv_window: config.recv_window,
+        }
+    }
+}
+
+#[cfg(feature = "coin_futures_api")]
+impl Binance for crate::coin_futures::account::CoinFuturesAccount {
+    fn new_with_config(api_key: Option<String>, secret_key: Option<String>, config: &Config) -> Self {
+        Self {
+            client: Client::new(api_key, secret_key, config.coin_futures_rest_api_endpoint.clone(), config.timeout),
+            recv_window: config.recv_window,
+        }
+    }
+}
+
+#[cfg(feature = "coin_futures_api")]
+impl Binance for crate::coin_futures::userstream::UserStream {
+    fn new_with_config(api_key: Option<String>, secret_key: Option<String>, config: &Config) -> Self {
+        Self {
+            client: Client::new(api_key, secret_key, config.coin_futures_rest_api_endpoint.clone(), config.timeout),
+            recv_window: config.recv_window,
+        }
+    }
+}
+
+#[cfg(feature = "portfolio_margin_api")]
+impl Binance for crate::portfolio_margin::general::PortfolioMarginGeneral {
+    fn new_with_config(api_key: Option<String>, secret_key: Option<String>, config: &Config) -> Self {
+        Self {
+            client: Client::new(api_key, secret_key, config.portfolio_margin_rest_api_endpoint.clone(), config.timeout),
+            recv_window: config.recv_window,
+        }
+    }
+}
+
+#[cfg(feature = "portfolio_margin_api")]
+impl Binance for crate::portfolio_margin::account::PortfolioMarginAccount {
+    fn new_with_config(api_key: Option<String>, secret_key: Option<String>, config: &Config) -> Self {
+        Self {
+            client: Client::new(api_key, secret_key, config.portfolio_margin_rest_api_endpoint.clone(), config.timeout),
+            recv_window: config.recv_window,
+        }
+    }
+}
+
+#[cfg(feature = "portfolio_margin_api")]
+impl Binance for crate::portfolio_margin::userstream::UserStream {
+    fn new_with_config(api_key: Option<String>, secret_key: Option<String>, config: &Config) -> Self {
+        Self {
+            client: Client::new(api_key, secret_key, config.portfolio_margin_rest_api_endpoint.clone(), config.timeout),
+            recv_window: config.recv_window,
+        }
+    }
+}
+
+#[cfg(feature = "options_api")]
+impl Binance for crate::options::general::OptionsGeneral {
+    fn new_with_config(api_key: Option<String>, secret_key: Option<String>, config: &Config) -> Self {
+        Self {
+            client: Client::new(api_key, secret_key, config.options_rest_api_endpoint.clone(), config.timeout),
+        }
+    }
+}
+
+#[cfg(feature = "options_api")]
+impl Binance for crate::options::market::OptionsMarket {
+    fn new_with_config(api_key: Option<String>, secret_key: Option<String>, config: &Config) -> Self {
+        Self {
+            client: Client::new(api_key, secret_key, config.options_rest_api_endpoint.clone(), config.timeout),
+            recv_window: config.recv_window,
+        }
+    }
+}
+
+#[cfg(feature = "options_api")]
+impl Binance for crate::options::account::OptionsAccount {
+    fn new_with_config(api_key: Option<String>, secret_key: Option<String>, config: &Config) -> Self {
+        Self {
+            client: Client::new(api_key, secret_key, config.options_rest_api_endpoint.clone(), config.timeout),
+            recv_window: config.recv_window,
+        }
+    }
+}
+
+#[cfg(feature = "options_api")]
+impl Binance for crate::options::userstream::UserStream {
+    fn new_with_config(api_key: Option<String>, secret_key: Option<String>, config: &Config) -> Self {
+        Self {
+            client: Client::new(api_key, secret_key, config.options_rest_api_endpoint.clone(), config.timeout),
+            recv_window: config.recv_window,
+        }
+    }
+}
