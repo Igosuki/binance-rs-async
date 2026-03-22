@@ -116,22 +116,35 @@ pub struct OrderBook {
 #[serde(rename_all = "camelCase")]
 pub struct OptionTicker {
     pub symbol: String,
+    #[serde(with = "string_or_float")]
     pub price_change: f64,
+    #[serde(with = "string_or_float")]
     pub price_change_percent: f64,
+    #[serde(with = "string_or_float")]
     pub last_price: f64,
+    #[serde(with = "string_or_float")]
     pub last_qty: f64,
+    #[serde(with = "string_or_float")]
     pub open: f64,
+    #[serde(with = "string_or_float")]
     pub high: f64,
+    #[serde(with = "string_or_float")]
     pub low: f64,
+    #[serde(with = "string_or_float")]
     pub volume: f64,
+    #[serde(with = "string_or_float")]
     pub amount: f64,
+    #[serde(with = "string_or_float")]
     pub bid_price: f64,
+    #[serde(with = "string_or_float")]
     pub ask_price: f64,
     pub open_time: u64,
     pub close_time: u64,
     pub first_trade_id: i64,
     pub trade_count: u64,
+    #[serde(with = "string_or_float")]
     pub strike_price: f64,
+    #[serde(with = "string_or_float")]
     pub exercise_price: f64,
 }
 
