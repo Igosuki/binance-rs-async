@@ -1,3 +1,8 @@
+# Maintenance Warning
+
+### Binance built their own Rust Library for the Binance API : [repo](https://github.com/binance/binance-connector-rust)
+### Consequently, this library is no longer maintained and will not receive updates, except libraries for compliance.
+
 # binance-rs-async
 
 Unofficial Rust Library for the [Binance API](https://github.com/binance-exchange/binance-official-api-docs)
